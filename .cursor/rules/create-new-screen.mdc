@@ -1,0 +1,14 @@
+---
+description: Creating new screen
+globs: src/app/**/*.tsx
+alwaysApply: false
+---
+
+# Guidelines for new screens
+- Use Expo-specific features if necessary
+- Use arrow function for components
+- Use Typescript interfaces to define props
+- Use Tailwind styling for TWRNC and Tailwind colors
+- You can use any iOS-specific design feature (this app is iOS only)
+- Use pre-existing components if necessary
+- Use Expo vector icons for icons
