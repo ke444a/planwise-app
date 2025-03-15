@@ -2,13 +2,48 @@ import { View, Text } from "react-native";
 import { router } from "expo-router";
 import tw from "twrnc";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import AuthButton from "../../components/AuthButton";
 import { SafeAreaView } from "react-native-safe-area-context";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { firebase, FirebaseAuthTypes } from "@react-native-firebase/auth";
+
 
 export default function Auth() {
-    const handleGoogleSignIn = () => {
+    const redirectToApp = () => {
         router.replace("/(app)");
+    };
+
+    const onAuth = async (userCreds: FirebaseAuthTypes.UserCredential) => {
+        if (userCreds.additionalUserInfo?.isNewUser) {
+            // createUser({
+            //     firebaseUid: userCreds.user.uid,
+            //     fullName: userCreds.user?.displayName || "",
+            //     email: userCreds.additionalUserInfo?.profile?.email || userCreds.user?.email || "",
+            //     avatarUrl: userCreds.user?.photoURL || "",
+            // },
+            // {
+            //     onError: (error) => {
+            //         setError({
+            //             code: "firebase-error",
+            //             message: "An error occurred while creating your account. Please try again.",
+            //             debug: "AuthScreen: onAuth: Error creating user.",
+            //             error
+            //         });
+            //         if (firebase.auth().currentUser) {
+            //             firebase.auth().currentUser?.delete();
+            //         }
+            //     },
+            //     onSuccess: async () => {
+            //         await analytics().logSignUp({
+            //             method: signUpMethod
+            //         });
+            //         await setUserId(userCreds.user.uid);
+            //         redirectToApp();
+            //     }
+            // });
+            redirectToApp();
+        } else {
+            redirectToApp();
+        }
     };
 
     return (
@@ -27,10 +62,8 @@ export default function Auth() {
                 </Text>
             </View>
             <View style={tw`w-full`}>
-                <AuthButton
-                    onPress={handleGoogleSignIn}
-                    icon={<AntDesign name="google" size={24} color="#1f2937" />}
-                    label="Google Sign-In"
+                <GoogleSignInButton 
+                    onAuth={onAuth}
                 />
             </View>
         </SafeAreaView>
