@@ -1,8 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { View, Text, FlatList } from "react-native";
 import tw from "twrnc";
-import { MorningTimeOptions } from "../const/TimeOptions";
-import { EveningTimeOptions } from "../const/TimeOptions";
 import Feather from "@expo/vector-icons/Feather";
 
 interface TimePickerProps {
@@ -16,15 +14,23 @@ const VISIBLE_ITEMS = 5;
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const PICKER_PADDING = PICKER_HEIGHT / 2 - ITEM_HEIGHT / 2;
 
-const TimePicker: React.FC<TimePickerProps> = ({ 
+const MORNING_TIME_SLOTS = [
+    "4:00", "4:15", "4:30", "4:45", "5:00", "5:15", "5:30", "5:45", "6:00", "6:15", "6:30", "6:45", "7:00", "7:15", "7:30", "7:45", "8:00", "8:15", "8:30", "8:45", "9:00", "9:15", "9:30", "9:45", "10:00", "10:15", "10:30", "10:45", "11:00"
+];
+
+const EVENING_TIME_SLOTS = [
+    "19:00", "19:15", "19:30", "19:45", "20:00", "20:15", "20:30", "20:45", "21:00", "21:15", "21:30", "21:45", "22:00", "22:15", "22:30", "22:45", "23:00", "23:15", "23:30", "23:45"
+];
+
+const TimePicker = ({ 
     onTimeSelected, 
     initialTime, 
     mode
-}) => {
+}: TimePickerProps) => {
+    const timeSlots = mode === "morning" ? MORNING_TIME_SLOTS : EVENING_TIME_SLOTS;
     const [selectedTime, setSelectedTime] = useState(initialTime);
     const flatListRef = useRef<FlatList>(null);
-    const timeOptions = mode === "morning" ? MorningTimeOptions : EveningTimeOptions;
-    const initialIndex = timeOptions.indexOf(initialTime);
+    const initialIndex = timeSlots.indexOf(initialTime);
 
     // Center the selected item when component mounts
     useEffect(() => {
@@ -44,7 +50,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
 
     const renderItem = ({ item, index }: { item: string; index: number }) => {
         const isSelected = item === selectedTime;
-        const selectedIndex = timeOptions.indexOf(selectedTime);
+        const selectedIndex = timeSlots.indexOf(selectedTime);
         const relativePosition = Math.abs(index - selectedIndex);
         
         // Calculate opacity based on distance from center
@@ -67,7 +73,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
                         !isSelected && tw`font-normal`,
                         { opacity }
                     ]}>
-                        {item}
+                        {item.length === 5 ? item : `0${item}`}
                     </Text>
                 </View>
             </View>
@@ -85,7 +91,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
             
             <FlatList
                 ref={flatListRef}
-                data={timeOptions}
+                data={timeSlots}
                 renderItem={renderItem}
                 keyExtractor={(item) => item}
                 showsVerticalScrollIndicator={false}
@@ -96,8 +102,8 @@ const TimePicker: React.FC<TimePickerProps> = ({
                 onMomentumScrollEnd={(event) => {
                     const offsetY = event.nativeEvent.contentOffset.y;
                     const index = Math.round((offsetY) / ITEM_HEIGHT);
-                    if (index >= 0 && index < timeOptions.length) {
-                        const time = timeOptions[index];
+                    if (index >= 0 && index < timeSlots.length) {
+                        const time = timeSlots[index];
                         setSelectedTime(time);
                         onTimeSelected?.(time);
                     }

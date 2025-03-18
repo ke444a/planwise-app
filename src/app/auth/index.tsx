@@ -5,42 +5,41 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { firebase, FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { useCreateUserMutation } from "@/api/users/createUser";
+import { useAppContext } from "@/context/AppContext";
 
+const AuthScreen = () => {
+    const { mutate: createUser } = useCreateUserMutation();
+    const { setError } = useAppContext();
 
-export default function Auth() {
     const redirectToApp = () => {
         router.replace("/(app)");
     };
 
     const onAuth = async (userCreds: FirebaseAuthTypes.UserCredential) => {
         if (userCreds.additionalUserInfo?.isNewUser) {
-            // createUser({
-            //     firebaseUid: userCreds.user.uid,
-            //     fullName: userCreds.user?.displayName || "",
-            //     email: userCreds.additionalUserInfo?.profile?.email || userCreds.user?.email || "",
-            //     avatarUrl: userCreds.user?.photoURL || "",
-            // },
-            // {
-            //     onError: (error) => {
-            //         setError({
-            //             code: "firebase-error",
-            //             message: "An error occurred while creating your account. Please try again.",
-            //             debug: "AuthScreen: onAuth: Error creating user.",
-            //             error
-            //         });
-            //         if (firebase.auth().currentUser) {
-            //             firebase.auth().currentUser?.delete();
-            //         }
-            //     },
-            //     onSuccess: async () => {
-            //         await analytics().logSignUp({
-            //             method: signUpMethod
-            //         });
-            //         await setUserId(userCreds.user.uid);
-            //         redirectToApp();
-            //     }
-            // });
-            redirectToApp();
+            const data = {
+                uid: userCreds.user.uid,
+                email: userCreds.user?.email || "",
+                fullName: userCreds.user?.displayName || "",
+                photoURL: userCreds.user?.photoURL || "",
+            };
+            createUser(data, {
+                onSuccess: () => {
+                    redirectToApp();
+                },
+                onError: (error) => {
+                    setError({
+                        code: "firebase-error",
+                        message: "Something went wrong while signing in with Google. Please try again.",
+                        debug: "AuthScreen: onAuth: Error creating user.",
+                        error
+                    });
+                    if (firebase.auth().currentUser) {
+                        firebase.auth().currentUser?.delete();
+                    }
+                }
+            });
         } else {
             redirectToApp();
         }
@@ -55,10 +54,10 @@ export default function Auth() {
                     size={80}
                 />
                 <Text style={tw`text-3xl font-bold text-center mb-3 max-w-[80%]`}>
-                        Plan Smarter, Live Better!
+                    Plan Smarter, Live Better!
                 </Text>
                 <Text style={tw`text-lg text-center max-w-[80%]`}>
-                        An easiest way to organize your day - powered by AI
+                    An easiest way to organize your day - powered by AI
                 </Text>
             </View>
             <View style={tw`w-full`}>
@@ -68,4 +67,6 @@ export default function Auth() {
             </View>
         </SafeAreaView>
     );
-}
+};
+
+export default AuthScreen;

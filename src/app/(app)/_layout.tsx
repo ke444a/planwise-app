@@ -1,10 +1,9 @@
 import { Redirect, Stack } from "expo-router";
-import { useAuth } from "@/context/AuthContext";
+import { useUserStore } from "@/config/userStore";
 
 export default function RootLayout() {
-    const { currentUser } = useAuth();
-
-    if (!currentUser) {
+    const { user } = useUserStore();
+    if (!user || !user.token) {
         return <Redirect href="/auth" />;
     }
 
@@ -12,6 +11,7 @@ export default function RootLayout() {
         <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+            <Stack.Screen name="ai-planner" options={{ headerShown: false }} />
         </Stack>
     );
 }

@@ -16,7 +16,10 @@ export default {
         ios: {
             supportsTablet: true,
             bundleIdentifier: "com.planwise.app",
-            googleServicesFile: process.env.GOOGLE_SERVICES_INFOPLIST ?? "./GoogleService-Info.plist"
+            googleServicesFile: process.env.GOOGLE_SERVICES_INFOPLIST ?? "./GoogleService-Info.plist",
+            infoPlist: {
+                "UIBackgroundModes": ["audio"]
+            }
         },
         android: {
             package: "com.planwise.app",
@@ -40,6 +43,12 @@ export default {
                     "ios": {
                         "useFrameworks": "static"
                     }
+                }
+            ],
+            [
+                "expo-audio",
+                {
+                    "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
                 }
             ]
         ],
