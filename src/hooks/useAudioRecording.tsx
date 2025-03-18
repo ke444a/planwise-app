@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
-import { RecordingPresets, useAudioRecorder, AudioModule, useAudioRecorderState } from "expo-audio";
+import { RecordingPresets, useAudioRecorder, AudioModule } from "expo-audio";
 import { useAppContext } from "@/context/AppContext";
 
 export const useAudioRecording = () => {
     const { setError } = useAppContext();
+    const [audioUriTimestamp, setAudioUriTimestamp] = useState<number | null>(null);
     const [audioUri, setAudioUri] = useState<string | null>(null);
     const [isRecording, setIsRecording] = useState(false);
+    const [recordingDuration, setRecordingDuration] = useState(0);
     const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
-    const { durationMillis } = useAudioRecorderState(audioRecorder);
 
     useEffect(() => {
         (async () => {
@@ -22,7 +23,7 @@ export const useAudioRecording = () => {
     const startRecording = async () => {
         try {
             await audioRecorder.prepareToRecordAsync();
-            audioRecorder.recordForDuration(60);
+            audioRecorder.recordForDuration(75);
             setIsRecording(true);
         } catch (error) {
             setError({
@@ -48,6 +49,7 @@ export const useAudioRecording = () => {
                 return null;
             }
             setAudioUri(audioUri);
+            setAudioUriTimestamp(Date.now());
         } catch (error) {
             setError({
                 message: "Failed to process your recording. Please try again.",
@@ -60,11 +62,19 @@ export const useAudioRecording = () => {
         }
     };
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setRecordingDuration(audioRecorder.currentTime);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [audioRecorder.currentTime]);
+
     return {
         isRecording,
         startRecording,
         stopRecording,
-        recordingDuration: durationMillis,
-        audioUri
+        recordingDuration,
+        audioUri,
+        audioUriTimestamp
     };
 };

@@ -49,7 +49,7 @@ const UserChatBox = ({ text }: UserChatBoxProps) => {
                 </TouchableOpacity>
             </View>
             <Animated.View style={[animatedStyle, { overflow: "hidden" }]}>
-                <Text style={tw`text-gray-950 text-base pt-4`}>{text}</Text>
+                <Text style={tw`text-gray-950 text-lg pt-4`}>{text}</Text>
             </Animated.View>
         </View>
     );

@@ -1,10 +1,12 @@
-import { View, TextInput, TouchableOpacity } from "react-native";
+import { View, TextInput, TouchableOpacity, Text, Platform, KeyboardAvoidingView, Keyboard } from "react-native";
 import tw from "twrnc";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAudioRecording } from "@/hooks/useAudioRecording";
 import { useAiTranscript } from "@/hooks/useAiTranscript";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import * as FileSystem from "expo-file-system";
+import { formatRecordingDuration } from "@/utils/formatRecordingDuration";
 
 interface ChatInputProps {
     onSendMessage: (_message: string) => void;
@@ -16,30 +18,37 @@ const ChatInput = ({
     const [inputText, setInputText] = useState("");
     const { transcribeUserSpeech } = useAiTranscript();
     const insets = useSafeAreaInsets();
+    const audioUriTimestampRef = useRef<number | null>(null);
     const { 
         isRecording, 
         startRecording, 
         stopRecording, 
         audioUri,
+        audioUriTimestamp,
         recordingDuration
     } = useAudioRecording();
 
     useEffect(() => {
-        if (!audioUri) return;
+        if (!audioUri || !audioUriTimestamp) return;
 
         (async () => {
-            const transcript = await transcribeUserSpeech(audioUri);
-            if (transcript) {
-                setInputText(prev => prev.length > 0 ? prev + " " + transcript : transcript);
+            if (audioUriTimestamp !== audioUriTimestampRef.current) {
+                audioUriTimestampRef.current = audioUriTimestamp;
+                const audioBase64 = await FileSystem.readAsStringAsync(audioUri, { encoding: FileSystem.EncodingType.Base64 });
+                const transcript = await transcribeUserSpeech(audioBase64);
+                if (transcript) {
+                    setInputText(prev => prev.length > 0 ? prev + " " + transcript : transcript);
+                }
             }
         })();
-    }, [audioUri, transcribeUserSpeech]);
+    }, [audioUri, audioUriTimestamp, transcribeUserSpeech]);
 
     const handleSend = () => {
         const trimmedInputText = inputText.trim();
         if (!trimmedInputText) return;
         onSendMessage(trimmedInputText);
         setInputText("");
+        Keyboard.dismiss();
     };
 
     const handleMicPress = () => {
@@ -50,11 +59,42 @@ const ChatInput = ({
         }
     };
 
+    const handleCancelRecording = () => {
+        stopRecording();
+    };
+
     const isInputActive = inputText.trim().length > 0;
 
+    const renderRecordingInterface = () => (
+        <View style={tw`flex-row items-center justify-between px-4 py-2`}>
+            <View style={tw`flex-row items-center gap-x-2`}>
+                <TouchableOpacity onPress={handleCancelRecording}>
+                    <MaterialCommunityIcons 
+                        name="close" 
+                        size={32}
+                        style={tw`text-white`}
+                    />
+                </TouchableOpacity>
+                <Text style={tw`text-white text-lg`}>
+                    {formatRecordingDuration(recordingDuration || 0)}
+                </Text>
+            </View>
+            <TouchableOpacity onPress={stopRecording}>
+                <MaterialCommunityIcons 
+                    name="check-circle" 
+                    size={32}
+                    style={tw`text-white`}
+                />
+            </TouchableOpacity>
+        </View>
+    );
+
     return (
-        <View style={[tw`bg-gray-500 px-4 py-2 rounded-t-[30px]`, { paddingBottom: insets.bottom + 4 }]}>
-            <View>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={40}
+        >
+            <View style={[tw`bg-gray-500 px-4 py-2 rounded-t-[30px]`, { paddingBottom: insets.bottom + 4 }]}>
                 <View style={tw`px-4 py-2 mb-2`}>
                     <TextInput
                         style={[
@@ -67,32 +107,34 @@ const ChatInput = ({
                         onChangeText={setInputText}
                         multiline
                         editable={!isRecording}
+                        // returnKeyType="send"
+                        enablesReturnKeyAutomatically={true}
                     />
                 </View>
-                
-                <View style={tw`flex-row justify-end px-4 gap-x-2`}>
-                    <TouchableOpacity onPress={handleMicPress}>
-                        <MaterialCommunityIcons 
-                            name={"microphone-outline"} 
-                            size={32}
-                            style={tw`text-white`}
-                        />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        onPress={handleSend}
-                        disabled={!isInputActive}
-                        style={tw.style(!isInputActive && "opacity-50")}
-                    >
-                        <MaterialCommunityIcons 
-                            name={isInputActive ? "arrow-up-circle" : "arrow-right-circle"} 
-                            size={32} 
-                            style={tw`text-white`} 
-                        />
-                    </TouchableOpacity>
-                </View>
+                {isRecording ? renderRecordingInterface() : (
+                    <View style={tw`flex-row justify-end px-4 gap-x-2`}>
+                        <TouchableOpacity onPress={handleMicPress}>
+                            <MaterialCommunityIcons 
+                                name={"microphone-outline"} 
+                                size={32}
+                                style={tw`text-white`}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={handleSend}
+                            disabled={!isInputActive}
+                            style={tw.style(!isInputActive && "opacity-50")}
+                        >
+                            <MaterialCommunityIcons 
+                                name={isInputActive ? "arrow-up-circle" : "arrow-right-circle"} 
+                                size={32} 
+                                style={tw`text-white`} 
+                            />
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 

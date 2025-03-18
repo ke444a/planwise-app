@@ -12,7 +12,7 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
     return (
         <ScrollView style={tw`flex-1 px-4`}>
             {messages.map((message, index) => (
-                <View key={index} style={tw`px-4`}>
+                <View key={index}>
                     {message.role === "user" ? (
                         <UserChatBox text={message.content} />
                     ) : (

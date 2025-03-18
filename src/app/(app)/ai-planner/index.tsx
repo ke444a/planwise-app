@@ -5,12 +5,12 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import AiCapabilityList from "@/features/ai-planner/AiCapabilityList";
 import ChatWindow from "@/features/ai-planner/ChatWindow";
-import { useAiChat } from "@/hooks/useAiChat";
+import { useAiChat, IChatMessage } from "@/hooks/useAiChat";
 import ChatInput from "@/features/ai-planner/ChatInput";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const AiPlannerScreen = () => {
-    const { messages, addMessage } = useAiChat();
+    const { messages, addMessage, generateSchedule } = useAiChat();
     const [isConversationActive, setIsConversationActive] = useState(false);
     const router = useRouter();
     const { date } = useLocalSearchParams();
@@ -25,9 +25,12 @@ const AiPlannerScreen = () => {
         });
     };
 
-    const handleSendMessage = (message: string) => {
-        addMessage({ role: "user", content: message, timestamp: Date.now() });
+    const handleSendMessage = async (message: string) => {
         setIsConversationActive(true);
+        const timestamp = Date.now();
+        const newUserMessage: IChatMessage = { role: "user", content: message, timestamp };
+        addMessage(newUserMessage);
+        await generateSchedule(message, timestamp + 1);
     };
 
     return (
@@ -37,7 +40,7 @@ const AiPlannerScreen = () => {
                 tw`flex-1 bg-white rounded-t-3xl`,
                 styles.scheduleContainerShadow
             ]}>
-                <View style={tw`flex-row justify-between items-center px-4 py-6 mb-6`}>
+                <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                     <View>
                         <Text style={tw`text-2xl font-semibold mb-1`}>Plan My Day</Text>
                         <Text style={tw`text-gray-500 font-medium text-lg`}>{formatDate(date as string)}</Text>
