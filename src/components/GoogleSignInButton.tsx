@@ -1,10 +1,10 @@
-import { ButtonWithIcon } from "./ButtonWithIcon";
-import { useAuth } from "@/context/AuthContext";
+import { ButtonWithIcon } from "./ui/ButtonWithIcon";
+import { useAuth } from "@/hooks/useAuth";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useEffect } from "react";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-
+import { useAppContext } from "@/context/AppContext";
 
 interface AuthButtonProps {
     onAuth: (_userCreds: FirebaseAuthTypes.UserCredential) => void;
@@ -12,6 +12,7 @@ interface AuthButtonProps {
 
 const GoogleSignInButton = ({ onAuth }: AuthButtonProps) => {
     const { signInWithGoogle } = useAuth();
+    const { setError } = useAppContext();
 
     useEffect(() => {
         GoogleSignin.configure({
@@ -27,15 +28,14 @@ const GoogleSignInButton = ({ onAuth }: AuthButtonProps) => {
             }
         } catch (error) {
             let errorTyped = error as FirebaseAuthTypes.NativeFirebaseAuthError;
-            console.log(errorTyped);
-            // if (errorTyped.code !== "-5") {
-            //     setError({
-            //         code: "firebase-error",
-            //         message: "Something went wrong while signing in with Google. Please try again.",
-            //         debug: "GoogleSignInButton: onSignInPress: Error signing in with Google.",
-            //         error
-            //     });
-            // }
+            if (errorTyped.code !== "-5") {
+                setError({
+                    code: "firebase-error",
+                    message: "Something went wrong while signing in with Google. Please try again.",
+                    debug: "GoogleSignInButton: onSignInPress: Error signing in with Google.",
+                    error
+                });
+            }
         }
     };
 

@@ -1,193 +1,144 @@
-import { useState, useRef, useEffect } from "react";
-import { SafeAreaView, Animated, Dimensions } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+import { Dimensions, View } from "react-native";
 import { router } from "expo-router";
 import tw from "twrnc";
-import StartTimeScreen from "../../../screens/onboarding/StartTimeScreen";
-import EndTimeScreen from "../../../screens/onboarding/EndTimeScreen";
-import DayStructureScreen from "../../../screens/onboarding/DayStructureScreen";
-import PriorityActivityScreen from "../../../screens/onboarding/PriorityActivityScreen";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, { 
+    useSharedValue, 
+    useAnimatedStyle, 
+    withTiming,
+    Easing
+} from "react-native-reanimated";
+import { StartTimeScreen, EndTimeScreen, DayStructureScreen, PriorityActivityScreen } from "@/features/onboarding";
+import { useUserStore } from "@/config/userStore";
+import { useUploadOnboardingInfoMutation } from "@/api/users/uploadOnboardingInfo";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAppContext } from "@/context/AppContext";
 
-const { width } = Dimensions.get("window");
-
-const saveToFirestore = async (collection: string, data: any) => {
-    console.log(`Saving to ${collection}:`, data);
-    // Simulate network delay but keep it short for smooth transitions
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return { success: true };
-};
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const OnboardingScreen = () => {
+    const insets = useSafeAreaInsets();
+    const { user } = useUserStore();
+    const { mutate: uploadOnboardingInfo } = useUploadOnboardingInfoMutation();
     const [currentStep, setCurrentStep] = useState(0);
     const [visibleStep, setVisibleStep] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
-    const [onboardingData, setOnboardingData] = useState({
-        startTime: "",
-        endTime: "",
-        dayStructure: "",
-        priorityActivities: [] as string[]
-    });
+    const [onboardingData, setOnboardingData] = useState<Partial<IOnboardingInfo>>({});
+    const { setError } = useAppContext();
 
-    // Animation values
-    const slideAnim = useRef(new Animated.Value(0)).current;
-    const opacityAnim = useRef(new Animated.Value(1)).current;
+    const slideAnim = useSharedValue(0);
+    const opacityAnim = useSharedValue(1);
 
-    // Handle step change with animation
-    useEffect(() => {
-        if (currentStep !== visibleStep && !isAnimating) {
-            setIsAnimating(true);
-            
-            // Fade out current screen
-            Animated.parallel([
-                Animated.timing(opacityAnim, {
-                    toValue: 0,
-                    duration: 200,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(slideAnim, {
-                    toValue: currentStep > visibleStep ? -width * 0.1 : width * 0.1,
-                    duration: 200,
-                    useNativeDriver: true,
-                })
-            ]).start(() => {
-                // Only update the visible step after the fade out is complete
-                setVisibleStep(currentStep);
-                
-                // Reset animation values
-                slideAnim.setValue(currentStep > visibleStep ? width * 0.1 : -width * 0.1);
-                
-                // Small delay before fade in to ensure component switch is complete
-                setTimeout(() => {
-                    // Fade in new screen
-                    Animated.parallel([
-                        Animated.timing(opacityAnim, {
-                            toValue: 1,
-                            duration: 200,
-                            useNativeDriver: true,
-                        }),
-                        Animated.timing(slideAnim, {
-                            toValue: 0,
-                            duration: 200,
-                            useNativeDriver: true,
-                        })
-                    ]).start(() => {
-                        setIsAnimating(false);
-                    });
-                }, 50); // Small delay to ensure component switch is complete
-            });
-        }
-    }, [currentStep, visibleStep, isAnimating, opacityAnim, slideAnim]);
-
-    // Save data for the current step and move to the next one
-    const handleStepComplete = async (data: any) => {
+    const animateToNextStep = useCallback((nextStep: number) => {
         if (isAnimating) return;
         
-        try {
-            // Update local state with the new data
-            const updatedData = { ...onboardingData, ...data };
-            setOnboardingData(updatedData);
-      
-            // Save the specific data to Firestore (in background)
-            const collectionName = getCollectionNameForStep(visibleStep);
-            saveToFirestore(collectionName, data).catch(error => 
-                console.error("Error saving to Firestore:", error)
+        setIsAnimating(true);
+        const direction = nextStep > visibleStep ? -1 : 1;
+        
+        // Animate out
+        opacityAnim.value = withTiming(0, { 
+            duration: 200,
+            easing: Easing.out(Easing.ease)
+        });
+        
+        slideAnim.value = withTiming(SCREEN_WIDTH * 0.1 * direction, { 
+            duration: 200,
+            easing: Easing.out(Easing.ease)
+        });
+        
+        // Use setTimeout instead of animation callbacks to avoid crashes
+        setTimeout(() => {
+            setVisibleStep(nextStep);
+            slideAnim.value = SCREEN_WIDTH * -0.1 * direction;
+            
+            // Small delay before animating in
+            setTimeout(() => {
+                opacityAnim.value = withTiming(1, { 
+                    duration: 200,
+                    easing: Easing.in(Easing.ease)
+                });
+                
+                slideAnim.value = withTiming(0, { 
+                    duration: 200,
+                    easing: Easing.in(Easing.ease)
+                });
+                
+                // Set animation complete after animation duration
+                setTimeout(() => {
+                    setIsAnimating(false);
+                }, 250);
+            }, 50);
+        }, 250);
+    }, [visibleStep, isAnimating, slideAnim, opacityAnim]);
+
+    useEffect(() => {
+        if (currentStep !== visibleStep && !isAnimating) {
+            animateToNextStep(currentStep);
+        }
+    }, [currentStep, visibleStep, animateToNextStep, isAnimating]);
+
+    const handleStepComplete = (data: any) => {
+        if (isAnimating) return;
+        
+        const dataTypeByStep = [
+            "startDayTime",
+            "endDayTime",
+            "dayStructure",
+            "priorityActivities"
+        ];
+
+        const dataType = dataTypeByStep[visibleStep];
+        const updatedData = { ...onboardingData, [dataType]: data };
+        setOnboardingData(updatedData);
+        
+        if (visibleStep < 3) {
+            setCurrentStep(visibleStep + 1);
+        } else {
+            if (!user?.uid) return;
+            if (!updatedData.startDayTime || !updatedData.endDayTime || !updatedData.dayStructure || !updatedData.priorityActivities) return;
+            uploadOnboardingInfo(
+                {
+                    uid: user?.uid,
+                    onboardingInfo: updatedData as IOnboardingInfo
+                },
+                {
+                    onSuccess: () => {
+                        router.replace("/(app)");
+                    },
+                    onError: (error) => {
+                        setError({
+                            message: "Something went wrong while uploading onboarding details. Please try again later.",
+                            debug: "OnboardingScreen: handleStepComplete: Error uploading onboarding info.",
+                            error: error
+                        });
+                    }
+                }
             );
-      
-            // Move to the next step or complete onboarding immediately
-            if (visibleStep < 3) {
-                setCurrentStep(visibleStep + 1);
-            } else {
-                // Complete onboarding
-                completeOnboarding(updatedData);
-            }
-        } catch (error) {
-            console.error("Error handling step completion:", error);
         }
     };
 
-    // Get the collection name based on the current step
-    const getCollectionNameForStep = (step: number): string => {
-        switch (step) {
-        case 0: return "userStartTimes";
-        case 1: return "userEndTimes";
-        case 2: return "userDayStructures";
-        case 3: return "userPriorityActivities";
-        default: return "userPreferences";
-        }
-    };
-
-    // Complete the onboarding process
-    const completeOnboarding = async (data: any) => {
-        try {
-            // Save the complete onboarding data
-            await saveToFirestore("userOnboarding", {
-                ...data,
-                completed: true,
-                completedAt: new Date().toISOString()
-            });
-      
-            router.replace("/(app)");
-        } catch (error) {
-            console.error("Error completing onboarding:", error);
-        }
-    };
-
-    // Handle the start time selection
-    const handleStartTimeSelected = (time: string) => {
-        handleStepComplete({ startTime: time });
-    };
-
-    // Handle the end time selection
-    const handleEndTimeSelected = (time: string) => {
-        handleStepComplete({ endTime: time });
-    };
-
-    // Handle the day structure selection
-    const handleDayStructureSelected = (structure: string) => {
-        handleStepComplete({ dayStructure: structure });
-    };
-
-    // Handle the priority activities selection
-    const handlePriorityActivitiesSelected = (activities: string[]) => {
-        handleStepComplete({ priorityActivities: activities });
-    };
-
-    // Render the current step
-    const renderStep = () => {
-        // Always render the visibleStep, which only changes after fade out is complete
-        switch (visibleStep) {
-        case 0:
-            return <StartTimeScreen onNextPress={handleStartTimeSelected} />;
-        case 1:
-            return <EndTimeScreen onNextPress={handleEndTimeSelected} />;
-        case 2:
-            return <DayStructureScreen onNextPress={handleDayStructureSelected} />;
-        case 3:
-            return <PriorityActivityScreen onNextPress={handlePriorityActivitiesSelected} />;
-        default:
-            return null;
-        }
-    };
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            opacity: opacityAnim.value,
+            transform: [{ translateX: slideAnim.value }]
+        };
+    });
 
     return (
-        <SafeAreaView style={tw`flex-1`}>
+        <View style={tw`flex-1`}>
             <LinearGradient
                 colors={["#F9F4F5", "#F3E8FF", "#F9F4F5"]}
                 locations={[0.3, 0.5, 0.7]}
                 style={tw`absolute w-full h-full`}
             />
-            <Animated.View 
-                style={[
-                    tw`flex-1`,
-                    {
-                        opacity: opacityAnim,
-                        transform: [{ translateX: slideAnim }]
-                    }
-                ]}
-            >
-                {renderStep()}
+            <Animated.View style={[tw`flex-1 px-6`, animatedStyle, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
+                {visibleStep === 0 && <StartTimeScreen onNextPress={handleStepComplete} />}
+                {visibleStep === 1 && <EndTimeScreen onNextPress={handleStepComplete} />}
+                {visibleStep === 2 && <DayStructureScreen onNextPress={handleStepComplete} />}
+                {visibleStep === 3 && <PriorityActivityScreen onNextPress={handleStepComplete} />}
             </Animated.View>
-        </SafeAreaView>
+        </View>
     );
 };
 
