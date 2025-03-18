@@ -23,6 +23,7 @@ const ChatInput = ({
         isRecording, 
         startRecording, 
         stopRecording, 
+        cancelRecording,
         audioUri,
         audioUriTimestamp,
         recordingDuration
@@ -58,17 +59,13 @@ const ChatInput = ({
             startRecording();
         }
     };
-
-    const handleCancelRecording = () => {
-        stopRecording();
-    };
-
+    
     const isInputActive = inputText.trim().length > 0;
 
     const renderRecordingInterface = () => (
-        <View style={tw`flex-row items-center justify-between px-4 py-2`}>
+        <View style={tw`flex-row items-center justify-between px-4`}>
             <View style={tw`flex-row items-center gap-x-2`}>
-                <TouchableOpacity onPress={handleCancelRecording}>
+                <TouchableOpacity onPress={cancelRecording}>
                     <MaterialCommunityIcons 
                         name="close" 
                         size={32}

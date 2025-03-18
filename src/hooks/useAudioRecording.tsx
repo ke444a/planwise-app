@@ -35,6 +35,20 @@ export const useAudioRecording = () => {
         }
     };
 
+    const cancelRecording = async () => {
+        try {
+            await audioRecorder.stop();
+            setIsRecording(false);
+        } catch (error) {
+            setError({
+                message: "Failed to cancel recording. Please try again.",
+                code: "recording-cancel-failed",
+                error
+            });
+            setIsRecording(false);
+        }
+    };
+
     const stopRecording = async () => {
         try {
             await audioRecorder.stop();
@@ -73,6 +87,7 @@ export const useAudioRecording = () => {
         isRecording,
         startRecording,
         stopRecording,
+        cancelRecording,
         recordingDuration,
         audioUri,
         audioUriTimestamp

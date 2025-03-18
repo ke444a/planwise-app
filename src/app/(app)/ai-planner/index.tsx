@@ -8,13 +8,30 @@ import ChatWindow from "@/features/ai-planner/ChatWindow";
 import { useAiChat, IChatMessage } from "@/hooks/useAiChat";
 import ChatInput from "@/features/ai-planner/ChatInput";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useUserStore } from "@/config/userStore";
+import { useGetUserQuery } from "@/api/users/getUser";
+import { IError } from "@/context/AppContext";
+import ErrorModal from "@/components/ui/ErrorModal";
+
 
 const AiPlannerScreen = () => {
-    const { messages, addMessage, generateSchedule } = useAiChat();
+    const { user } = useUserStore();
+    const { data: userData, isPending, error } = useGetUserQuery(user?.uid);
+    const { messages, addMessage, generateSchedule } = useAiChat(userData?.onboardingInfo);
     const [isConversationActive, setIsConversationActive] = useState(false);
     const router = useRouter();
     const { date } = useLocalSearchParams();
     const insets = useSafeAreaInsets();
+
+    if (isPending) {
+        return null;
+    }
+    if (error) {
+        const errorObj: IError = {
+            message: "Error retrieving user data. Please try again later."
+        };
+        return <ErrorModal error={errorObj} handleModalClose={() => {}} />;
+    }
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -25,12 +42,12 @@ const AiPlannerScreen = () => {
         });
     };
 
-    const handleSendMessage = async (message: string) => {
+    const handleSendMessage = (message: string) => {
         setIsConversationActive(true);
         const timestamp = Date.now();
         const newUserMessage: IChatMessage = { role: "user", content: message, timestamp };
         addMessage(newUserMessage);
-        await generateSchedule(message, timestamp + 1);
+        generateSchedule(message, timestamp + 1);
     };
 
     return (
@@ -45,9 +62,7 @@ const AiPlannerScreen = () => {
                         <Text style={tw`text-2xl font-semibold mb-1`}>Plan My Day</Text>
                         <Text style={tw`text-gray-500 font-medium text-lg`}>{formatDate(date as string)}</Text>
                     </View>
-                    <TouchableOpacity 
-                        onPress={() => router.back()} 
-                    >
+                    <TouchableOpacity onPress={() => router.back()}>
                         <AntDesign name="closecircle" size={32} style={tw`text-gray-500`} />
                     </TouchableOpacity>
                 </View>

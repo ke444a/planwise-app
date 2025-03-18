@@ -15,7 +15,10 @@ export const useAiTranscript = () => {
                 location: "europe-west1"
             });
             const model = getGenerativeModel(vertexai, {
-                model: "gemini-2.0-flash-001"
+                model: "gemini-2.0-flash-001",
+                generationConfig: {
+                    temperature: 0.3
+                }
             });
             const response = await model.generateContent([
                 prompt,

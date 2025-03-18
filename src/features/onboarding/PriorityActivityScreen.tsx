@@ -16,7 +16,7 @@ interface ActivityOptionProps {
 }
 
 interface PriorityActivityScreenProps {
-    onNextPress: (_activities: string[]) => void;
+    onNextPress: (_activities: ActivityType[]) => void;
 }
 
 const ActivityOption = ({ title, description, icon, selected, onToggle }: ActivityOptionProps) => {
@@ -40,9 +40,9 @@ const ActivityOption = ({ title, description, icon, selected, onToggle }: Activi
 };
 
 const PriorityActivityScreen: React.FC<PriorityActivityScreenProps> = ({ onNextPress }) => {
-    const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+    const [selectedActivities, setSelectedActivities] = useState<ActivityType[]>([]);
 
-    const toggleActivity = (activityId: string) => {
+    const toggleActivity = (activityId: ActivityType) => {
         setSelectedActivities(prev => {
             if (prev.includes(activityId)) {
                 return prev.filter(id => id !== activityId);
@@ -74,40 +74,40 @@ const PriorityActivityScreen: React.FC<PriorityActivityScreenProps> = ({ onNextP
                         title="Meetings"
                         description="Stay on top of calls and discussions"
                         icon={<Ionicons name="people" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("meetings")}
-                        onToggle={() => toggleActivity("meetings")}
+                        selected={selectedActivities.includes("collaborative_work")}
+                        onToggle={() => toggleActivity("collaborative_work")}
                     />
 
                     <ActivityOption 
                         title="Fitness"
                         description="Make time to move and stay active"
                         icon={<FontAwesome5 name="dumbbell" size={24} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("fitness")}
-                        onToggle={() => toggleActivity("fitness")}
+                        selected={selectedActivities.includes("health_fitness")}
+                        onToggle={() => toggleActivity("health_fitness")}
                     />
 
                     <ActivityOption 
                         title="Meals"
                         description="Fuel up with regular meal breaks"
                         icon={<Ionicons name="restaurant-outline" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("meals")}
-                        onToggle={() => toggleActivity("meals")}
+                        selected={selectedActivities.includes("food")}
+                        onToggle={() => toggleActivity("food")}
                     />
 
                     <ActivityOption 
                         title="Deep work"
                         description="Focus without distractions"
                         icon={<Feather name="target" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("deep_work")}
-                        onToggle={() => toggleActivity("deep_work")}
+                        selected={selectedActivities.includes("focus_work")}
+                        onToggle={() => toggleActivity("focus_work")}
                     />
 
                     <ActivityOption 
-                        title="University"
+                        title="Education"
                         description="Prioritize studying and learning"
                         icon={<Ionicons name="school-outline" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("university")}
-                        onToggle={() => toggleActivity("university")}
+                        selected={selectedActivities.includes("education")}
+                        onToggle={() => toggleActivity("education")}
                     />
 
                     <ActivityOption 
@@ -130,8 +130,8 @@ const PriorityActivityScreen: React.FC<PriorityActivityScreenProps> = ({ onNextP
                         title="Miscellaneous"
                         description="Other important activities"
                         icon={<Feather name="more-horizontal" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("miscellaneous")}
-                        onToggle={() => toggleActivity("miscellaneous")}
+                        selected={selectedActivities.includes("misc")}
+                        onToggle={() => toggleActivity("misc")}
                     />
                 </ScrollView>
             </View>

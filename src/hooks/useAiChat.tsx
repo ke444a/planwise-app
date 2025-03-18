@@ -2,6 +2,7 @@ import { useAppContext } from "@/context/AppContext";
 import { getApp } from "@react-native-firebase/app";
 import { getVertexAI, getGenerativeModel } from "@react-native-firebase/vertexai";
 import { useCallback, useState } from "react";
+import { SYSTEM_PROMPT, USER_PROMPT, SCHEDULE_SCHEMA } from "./useAiChat.prompt";
 
 export interface IChatMessage {
     role: "user" | "model";
@@ -9,7 +10,7 @@ export interface IChatMessage {
     timestamp: number;
 }
 
-export const useAiChat = () => {
+export const useAiChat = (userOnboardingInfo?: IOnboardingInfo | null) => {
     const [messages, setMessages] = useState<IChatMessage[]>([]);
     const { setError } = useAppContext();
 
@@ -23,16 +24,41 @@ export const useAiChat = () => {
 
     const generateSchedule = useCallback(async (userInput: string, timestamp: number) => {
         try {
+            if (!userOnboardingInfo) {
+                throw new Error("User onboarding info is required");
+            }
+
             const app = getApp();
             const vertexai = getVertexAI(app, {
                 location: "europe-west1"
             });
             const model = getGenerativeModel(vertexai, {
-                model: "gemini-2.0-flash-001"
-            });          
-            const prompt = "Briefly explain to user how they should schedule their day based on the activities they want to do. Here's what they said: " + userInput;
-            const response = await model.generateContentStream([prompt]);
-            
+                model: "gemini-2.0-flash-001",
+                systemInstruction: SYSTEM_PROMPT
+            });
+            // Exclude user's message that was sent a second ago (timestamp - 1) (if exists)
+            // Sort messages by timestamp
+            const history = messages
+                .filter(msg => msg.role !== "user" || msg.timestamp !== timestamp - 1)
+                .map(msg => ({
+                    role: msg.role,
+                    parts: [{ text: msg.content }]
+                }));
+            if (history.length === 0) {
+                history.push({
+                    role: "user",
+                    parts: [{ text: USER_PROMPT(userOnboardingInfo, userInput) }]
+                });
+            }
+            const chat = model.startChat({
+                history,
+                generationConfig: {
+                    temperature: 0.7,
+                    responseMimeType: "application/json",
+                    responseSchema: SCHEDULE_SCHEMA
+                }
+            });
+            const response = await chat.sendMessageStream([userInput]);
             let text = "";
             for await (const chunk of response.stream) {
                 text += chunk.text();
@@ -48,7 +74,7 @@ export const useAiChat = () => {
             });
             return "";
         }
-    }, [addMessage, setError]);
+    }, [addMessage, setError, messages, userOnboardingInfo]);
 
     return {
         messages,
