@@ -64,23 +64,26 @@ const getIsCurrentActivity = (startTime: string, endTime: string): boolean => {
 
 interface ActivityCardProps {
     activity: IActivity;
-    activityHeight: number;
+    iconHeight: number;
+    containerHeight: number;
 }
 
-const ActivityCard = ({ activity, activityHeight }: ActivityCardProps) => {
+
+const ActivityCard = ({ activity, iconHeight, containerHeight }: ActivityCardProps) => {
     const isCurrentActivity = getIsCurrentActivity(activity.startTime, activity.endTime);
     const checkmarkColor = getActivityCheckmarkColor(activity.isCompleted, activity.priority);
-    const iconHeight = activity.duration <= 30 ? 52 : activityHeight;
     
     return (
-        <View style={[tw`flex flex-row items-center w-full pr-4`, { height: activityHeight }]}>
-            <View 
-                style={[
-                    tw`w-[50px] rounded-full bg-slate-200 flex items-center justify-center`,
-                    { height: iconHeight }
-                ]}
-            >
-                {getIconComponent(activity.type, activity.priority)}
+        <View style={[tw`flex flex-row items-center w-full pr-4`, { minHeight: containerHeight }]}>
+            <View style={tw`relative`}>
+                <View 
+                    style={[
+                        tw`w-[50px] rounded-full bg-slate-200 flex items-center justify-center z-10`,
+                        { height: iconHeight }
+                    ]}
+                >
+                    {getIconComponent(activity.type, activity.priority)}
+                </View>
             </View>
             <View style={tw`ml-3 flex-1`}>
                 {isCurrentActivity ? (

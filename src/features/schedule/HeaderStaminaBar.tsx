@@ -8,7 +8,7 @@ interface StaminaBarProps {
 }
 
 const HeaderStaminaBar = ({ currentStamina, maxStamina }: StaminaBarProps) => {
-    const percentage = (currentStamina / maxStamina) * 100;
+    const percentage = Math.min((currentStamina / maxStamina) * 100, 100);
 
     return (
         <View style={[tw`flex-row items-center rounded-full py-1 bg-white w-full shrink relative`, styles.staminaBarShadow]}>

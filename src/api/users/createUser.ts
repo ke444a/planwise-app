@@ -11,6 +11,7 @@ const createUser = async (userCreds: IAuthUser) => {
         fullName: userCreds.fullName,
         photoURL: userCreds.photoURL,
         onboardingInfo: null,
+        maxStamina: 25,
         createdAt: new Date()
     });
 };

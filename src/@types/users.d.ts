@@ -3,6 +3,7 @@ interface IUser {
     fullName?: string | null;
     photoURL?: string | null;
     onboardingInfo: IOnboardingInfo | null;
+    maxStamina: number;
 }
 
 interface IOnboardingInfo {

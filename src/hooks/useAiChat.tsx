@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { SYSTEM_PROMPT, USER_PROMPT, SCHEDULE_SCHEMA } from "./useAiChat.prompt";
 
 export interface IChatMessage {
-    role: "user" | "model";
+    role: "user" | "model" | "schedule";
     content: string;
     timestamp: number;
 }
@@ -40,8 +40,9 @@ export const useAiChat = (userOnboardingInfo?: IOnboardingInfo | null) => {
             // Sort messages by timestamp
             const history = messages
                 .filter(msg => msg.role !== "user" || msg.timestamp !== timestamp - 1)
+                .filter(msg => msg.role !== "schedule")
                 .map(msg => ({
-                    role: msg.role,
+                    role: msg.role as "user" | "model",
                     parts: [{ text: msg.content }]
                 }));
             if (history.length === 0) {
@@ -64,7 +65,7 @@ export const useAiChat = (userOnboardingInfo?: IOnboardingInfo | null) => {
                 text += chunk.text();
             }
             addMessage({ role: "model", content: text, timestamp });
-            return text;
+            addMessage({ role: "schedule", content: JSON.stringify(JSON.parse(text).schedule), timestamp: timestamp + 1 });
         } catch (error) {
             console.error("Error generating schedule", error);
             setError({

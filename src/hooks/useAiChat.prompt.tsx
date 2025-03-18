@@ -38,7 +38,6 @@ Your goal is to analyze the user's input, their existing schedule, and preferenc
 - Tasks must be scheduled in multiples of 15 minutes (15, 30, 45, 60).
 - The schedule must respect the user's preferred start and end times.
 - Tasks must not overlap with existing scheduled activities.
-- Breaks should be inserted after high-effort tasks when possible.
 - Time gaps should be minimized to ensure an efficient flow.
 
 3. Stamina (Effort) Management
@@ -75,7 +74,7 @@ Each task must be assigned one of the following categories:
   - Night owl → Push deep work to later hours.  
   - Paced planner → Distribute workload evenly throughout the day.  
 - Ensure must-do tasks are scheduled first.  
-- Balance work and recovery by adding breaks appropriately.  
+- Balance work and recovery.
 </instructions>
 
 <output>
