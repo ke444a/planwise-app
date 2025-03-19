@@ -1,5 +1,5 @@
 import { ButtonWithIcon } from "./ui/ButtonWithIcon";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/context/AuthContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useEffect } from "react";
