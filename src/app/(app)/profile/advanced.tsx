@@ -77,7 +77,7 @@ const AdvancedScreen = () => {
         <View style={tw`flex-1 bg-purple-50`}>
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />
             <View style={[tw`flex-1 bg-zinc-100 rounded-t-3xl`, styles.containerShadow]}>
-                <View style={tw`p-6`}>
+                <View style={tw`px-4 py-6`}>
                     <View style={tw`flex-row justify-between items-center mb-8`}>
                         <View style={tw`w-1/3`}>
                             <TouchableOpacity 

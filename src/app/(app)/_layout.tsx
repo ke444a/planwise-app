@@ -13,6 +13,7 @@ export default function RootLayout() {
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen name="ai-planner" options={{ headerShown: false }} />
             <Stack.Screen name="profile" options={{ headerShown: false }} />
+            <Stack.Screen name="backlog" options={{ headerShown: false }} />
         </Stack>
     );
 }

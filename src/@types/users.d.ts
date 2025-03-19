@@ -10,5 +10,5 @@ interface IOnboardingInfo {
     startDayTime: string;
     endDayTime: string;
     dayStructure: "morning" | "night" | "mixed";
-    priorityActivities: string[];
+    priorityActivities: ActivityType[];
 }

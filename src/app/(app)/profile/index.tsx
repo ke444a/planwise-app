@@ -67,11 +67,11 @@ const ProfileScreen = () => {
         <View style={tw`flex-1 bg-purple-50`}>
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />
             <View style={[tw`flex-1 bg-zinc-100 rounded-t-3xl`, styles.containerShadow]}>
-                <View style={tw`p-6`}>
+                <View style={tw`px-4 py-6`}>
                     <View style={tw`flex-row items-center justify-between mb-8`}>
                         <Text style={tw`text-2xl font-semibold`}>Your Profile</Text>
                         <TouchableOpacity onPress={() => router.back()}>
-                            <AntDesign name="closecircle" size={32} style={tw`text-gray-500`} />
+                            <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
                         </TouchableOpacity>
                     </View>
                     <View style={tw`flex-row items-start mb-6`}>
