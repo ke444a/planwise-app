@@ -15,6 +15,7 @@ import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
 import { useCompleteActivityMutation } from "@/api/schedules/completeActivity";
 import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
 import { useAddItemToBacklogMutation } from "@/api/backlog/addItemToBacklog";
+import { useUncompleteActivityMutation } from "@/api/schedules/uncompleteActivity";
 
 const ScheduleScreen = () => {
     const { user } = useUserStore();
@@ -25,6 +26,7 @@ const ScheduleScreen = () => {
     const router = useRouter();
 
     const { mutate: completeActivity } = useCompleteActivityMutation();
+    const { mutate: uncompleteActivity } = useUncompleteActivityMutation();
     const { mutate: deleteActivity } = useDeleteActivityMutation();
     const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
 
@@ -80,11 +82,19 @@ const ScheduleScreen = () => {
 
     const handleActivityComplete = (activity: IActivity) => {
         if (!activity.id || !user?.uid) return;
-        completeActivity({
-            activityId: activity.id,
-            date: currentDate,
-            uid: user.uid
-        });
+        if (activity.isCompleted) {
+            uncompleteActivity({
+                activityId: activity.id,
+                date: currentDate,
+                uid: user.uid
+            });
+        } else {
+            completeActivity({
+                activityId: activity.id,
+                date: currentDate,
+                uid: user.uid
+            });
+        }
     };
 
     const handleActivityDelete = (activity: IActivity) => {

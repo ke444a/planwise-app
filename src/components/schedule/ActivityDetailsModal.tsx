@@ -2,11 +2,13 @@ import { View, Text, Modal, TouchableOpacity } from "react-native";
 import tw from "twrnc";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import { timeToMinutes } from "@/utils/timeToMinutes";
 import ActivityIcon from "../ui/ActivityIcon";
+import AntDesign from "@expo/vector-icons/AntDesign";
+
 
 interface ActivityDetailsModalProps {
     activity: IActivity;
@@ -111,8 +113,14 @@ const ActivityDetailsModal = ({
                                 style={tw`flex-1 py-3 bg-gray-100 rounded-xl items-center justify-center`}
                                 onPress={onComplete}
                             >
-                                <AntDesign name="checkcircle" size={20} style={tw`text-gray-950`} />
-                                <Text style={tw`text-gray-950 font-medium mt-1`}>Complete</Text>
+                                {activity.isCompleted ? (
+                                    <MaterialIcons name="remove-done" size={20} style={tw`text-gray-950`} />
+                                ) : (
+                                    <MaterialIcons name="check-circle" size={20} style={tw`text-gray-950`} />
+                                )}
+                                <Text style={tw`text-gray-950 font-medium mt-1`}>
+                                    {activity.isCompleted ? "Undo" : "Complete"}
+                                </Text>
                             </TouchableOpacity>
                         </View>
 

@@ -64,7 +64,7 @@ const NewItemModal = ({ visible, onClose, onSave }: NewItemModalProps) => {
                     {/* Content */}
                     <View style={tw`px-4 pt-6 flex-1`}>
                         <View>
-                            <Text style={tw`text-base font-medium text-gray-600 mb-2`}>What?</Text>
+                            <Text style={tw`text-xl font-medium text-gray-950 mb-2`}>What?</Text>
                             <TextInput
                                 style={tw`border-b border-gray-300 py-2 text-lg text-gray-900`}
                                 placeholder="Enter task title"
