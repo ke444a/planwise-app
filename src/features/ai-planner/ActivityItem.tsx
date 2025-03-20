@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import tw from "twrnc";
-import { Ionicons, MaterialCommunityIcons, FontAwesome6, FontAwesome5 } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import Animated, { 
     useAnimatedStyle, 
@@ -11,29 +12,11 @@ import Animated, {
     Easing,
     withSpring
 } from "react-native-reanimated";
+import { useAddItemToBacklogMutation } from "@/api/backlog/addItemToBacklog";
+import { useUserStore } from "@/config/userStore";
+import ActivityIcon from "@/components/ui/ActivityIcon";
+import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
 
-const getIconComponent = (activityType: ActivityType, activityPriority: ActivityPriority, iconSize: number = 24) => {
-    const iconColor: Record<ActivityPriority, string> = {
-        "must_do": "text-rose-400",
-        "get_it_done": "text-orange-400",
-        "nice_to_have": "text-blue-500",
-        "routine": "text-blue-500",
-    };
-
-    const iconComponent: Record<ActivityType, React.ReactNode> = {
-        "focus_work": <FontAwesome5 name="brain" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "collaborative_work": <Ionicons name="people" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "repetitive_tasks": <FontAwesome6 name="repeat" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "health_fitness": <MaterialCommunityIcons name="weight-lifter" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "food": <FontAwesome5 name="utensils" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "recreation": <MaterialCommunityIcons name="meditation" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "education": <FontAwesome5 name="book" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "life_maintenance": <FontAwesome6 name="screwdriver-wrench" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-        "misc": <MaterialCommunityIcons name="help" size={iconSize} style={tw`${iconColor[activityPriority]}`} />,
-    };
-
-    return iconComponent[activityType];
-};
 
 const getPriorityLabel = (priority: ActivityPriority) => {
     switch (priority) {
@@ -50,11 +33,15 @@ const getPriorityLabel = (priority: ActivityPriority) => {
 
 interface ActivityItemProps {
     activity: IActivity;
+    date: Date;
 }
 
-export const ActivityItem = ({ activity }: ActivityItemProps) => {
+export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
+    const { user } = useUserStore();
     const [showOptions, setShowOptions] = useState(false);
-    const [isRemoved, setIsRemoved] = useState(false);
+    const [status, setStatus] = useState<"idle" | "added" | "removed" | "backlog">("idle");
+    const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
+    const { mutate: addActivityToSchedule } = useAddActivityToScheduleMutation();
     const animation = useSharedValue(0);
     const pressAnimation = useSharedValue(1);
 
@@ -73,7 +60,7 @@ export const ActivityItem = ({ activity }: ActivityItemProps) => {
     };
 
     const handleToggleOptions = () => {
-        if (!isRemoved) {
+        if (status === "idle") {
             setShowOptions(!showOptions);
             animation.value = withTiming(showOptions ? 0 : 1, {
                 duration: 200,
@@ -110,11 +97,29 @@ export const ActivityItem = ({ activity }: ActivityItemProps) => {
     });
 
     const handleAdd = () => {
-        // To be implemented
+        if (!user?.uid) return;
+
+        addActivityToSchedule({
+            activity: activity,
+            date: date,
+            uid: user.uid
+        }, {
+            onSuccess: () => {
+                setStatus("added");
+                setShowOptions(false);
+                animation.value = withTiming(0, {
+                    duration: 200,
+                    easing: Easing.bezier(0.4, 0, 0.2, 1),
+                });
+            },
+            onError: (error) => {
+                console.error(error);
+            }
+        });
     };
 
     const handleRemove = () => {
-        setIsRemoved(true);
+        setStatus("removed");
         setShowOptions(false);
         animation.value = withTiming(0, {
             duration: 200,
@@ -123,7 +128,29 @@ export const ActivityItem = ({ activity }: ActivityItemProps) => {
     };
 
     const handleBacklog = () => {
-        // To be implemented
+        if (!user?.uid) return;
+
+        // eslint-disable-next-line no-unused-vars
+        const { id, ...rest } = activity;
+        addItemToBacklog({
+            item: {
+                ...rest,
+                itemType: "activity"
+            },
+            uid: user.uid
+        }, {
+            onSuccess: () => {
+                setStatus("backlog");
+                setShowOptions(false);
+                animation.value = withTiming(0, {
+                    duration: 200,
+                    easing: Easing.bezier(0.4, 0, 0.2, 1),
+                });
+            },
+            onError: (error) => {
+                console.error(error);
+            }
+        });
     };
 
     return (
@@ -137,20 +164,41 @@ export const ActivityItem = ({ activity }: ActivityItemProps) => {
                     <View style={[
                         tw`flex-row items-center bg-slate-200 rounded-xl p-3`, 
                         showOptions && tw`rounded-b-none`,
-                        isRemoved && tw`bg-slate-100`
+                        (status !== "idle") && tw`bg-slate-100`
                     ]}>
-                        {getIconComponent(activity.type, activity.priority, 32)}
+                        <ActivityIcon 
+                            activityType={activity.type} 
+                            activityPriority={activity.priority} 
+                            iconSize={32} 
+                        />
 
                         {/* Content */}
                         <View style={tw`flex-1 ml-4`}>
-                            <Text style={[
-                                tw`text-gray-950 font-semibold text-base mb-1`,
-                                isRemoved && tw`line-through text-gray-400`
-                            ]}>
-                                {activity.title}
-                            </Text>
+                            <View style={tw`flex-row items-center justify-between`}>
+                                <Text style={[
+                                    tw`text-gray-950 font-semibold text-base mb-1`,
+                                    status === "removed" && tw`line-through text-gray-600`,
+                                    status === "backlog" && tw`text-gray-600`
+                                ]}>
+                                    {activity.title}
+                                </Text>
+                                {status === "backlog" && (
+                                    <MaterialCommunityIcons 
+                                        name="clock-check-outline" 
+                                        size={20} 
+                                        style={tw`text-gray-600`} 
+                                    />
+                                )}
+                                {status === "added" && (
+                                    <MaterialCommunityIcons 
+                                        name="check-circle-outline" 
+                                        size={20} 
+                                        style={tw`text-gray-600`} 
+                                    />
+                                )}
+                            </View>
 
-                            {!isRemoved && (
+                            {status === "idle" && (
                                 <>
                                     <Text style={tw`text-gray-500 text-sm mb-1`}>
                                         {activity.startTime}-{activity.endTime} ({getActivityDurationLabel(activity.duration)})
@@ -197,13 +245,23 @@ export const ActivityItem = ({ activity }: ActivityItemProps) => {
 
                     <TouchableOpacity 
                         onPress={handleBacklog}
-                        style={tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`}
+                        disabled={status === "backlog"}
+                        style={[
+                            tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`,
+                            status === "backlog" && tw`opacity-50`
+                        ]}
                     >
-                        <MaterialCommunityIcons name="clock-outline" size={20} style={tw`text-gray-950 mr-1`} />
-                        <Text style={tw`text-gray-950 font-medium`}>Backlog</Text>
+                        <MaterialCommunityIcons 
+                            name="clock-outline"
+                            size={20} 
+                            style={tw`text-gray-950 mr-1`} 
+                        />
+                        <Text style={tw`text-gray-950 font-medium`}>
+                            Backlog
+                        </Text>
                     </TouchableOpacity>
                 </View>
             </Animated.View>
         </View>
     );
-}; 
+};

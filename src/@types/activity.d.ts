@@ -3,7 +3,7 @@ type ActivityType = "focus_work" | "collaborative_work" | "repetitive_tasks" | "
 
 
 interface IActivity {
-    id: string;
+    id?: string;
     title: string;
     startTime: string;
     endTime: string;

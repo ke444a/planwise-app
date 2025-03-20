@@ -1,34 +1,30 @@
-import { doc, 
-    getFirestore, 
-    collection, 
-    query, 
-    where, 
-    getDocs, 
-    setDoc, 
-    updateDoc
-} from "@react-native-firebase/firestore";
-import { useMutation } from "@tanstack/react-query";
+import { doc, getFirestore, getDoc, setDoc } from "@react-native-firebase/firestore";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const addActivityToSchedule = async (activity: IActivity, date: Date, uid: string) => {
     const db = getFirestore();
-    const schedulesCollection = collection(db, "schedules");
     const formattedDate = date.toISOString().split("T")[0];
+    const scheduleDocRef = doc(db, "schedules", uid, "dates", formattedDate); 
+    
+    const activityWithId = {
+        ...activity,
+        id: activity.id || Math.random().toString(36).slice(2, 12)
+    };
 
-    const q = query(schedulesCollection, where("date", "==", formattedDate), where("uid", "==", uid));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-        const newDocRef = doc(schedulesCollection);
-        await setDoc(newDocRef, {
+    const scheduleDoc = await getDoc(scheduleDocRef);
+    if (!scheduleDoc.exists) {
+        await setDoc(scheduleDocRef, {
             date: formattedDate,
-            uid: uid,
-            schedule: [activity]
+            activities: [activityWithId]
         });
     } else {
-        const docRef = querySnapshot.docs[0].ref;
-        const existingSchedule = querySnapshot.docs[0].data()?.schedule || [];
-        const updatedSchedule = [...existingSchedule, activity];
-        await updateDoc(docRef, { schedule: updatedSchedule });
+        const existingData = scheduleDoc.data();
+        const existingActivities = existingData?.activities || [];
+        
+        await setDoc(scheduleDocRef, {
+            date: formattedDate,
+            activities: [...existingActivities, activityWithId]
+        }, { merge: true });
     }
 };
 
@@ -39,7 +35,11 @@ type Data = {
 }
 
 export const useAddActivityToScheduleMutation = () => {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ activity, date, uid }: Data) => addActivityToSchedule(activity, date, uid),
+        onSuccess: (_data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, variables.uid] });
+        }
     });
 };
