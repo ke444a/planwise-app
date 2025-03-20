@@ -1,24 +1,27 @@
-import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
+import { getFirestore, collection, getDocs, query, orderBy } from "@react-native-firebase/firestore";
 import { useQuery } from "@tanstack/react-query";
 
 const getScheduleForDay = async (date: Date, uid: string): Promise<IActivity[]> => {
     const db = getFirestore();
     const formattedDate = date.toISOString().split("T")[0];
-    const scheduleDocRef = doc(db, "schedules", uid, "dates", formattedDate);
-    const scheduleDoc = await getDoc(scheduleDocRef);
+    const activityCollection = collection(db, "schedules", uid, formattedDate);
 
-    if (!scheduleDoc.exists) {
-        return [];
-    }
+    const q = query(activityCollection, orderBy("startTime"));
+    const querySnapshot = await getDocs(q);
+    
+    const activities: IActivity[] = [];
+    querySnapshot.forEach((doc) => {
+        activities.push({...doc.data(), id: doc.id} as IActivity);
+    });
 
-    const scheduleData = scheduleDoc.data();
-    return scheduleData?.activities || [];
+    return activities;
 };
 
 export const useGetScheduleForDayQuery = (date: Date, uid: string) => {
     return useQuery({
         queryKey: ["schedule", date, uid],
         queryFn: () => getScheduleForDay(date, uid),
+        // Sort activities by startTime
         select: (data) => {
             return data.sort((a, b) => {
                 const [aHours, aMinutes] = a.startTime.split(":").map(Number);

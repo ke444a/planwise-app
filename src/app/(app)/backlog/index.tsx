@@ -8,12 +8,62 @@ import { BacklogItem } from "@/components/backlog/BacklogItem";
 import { useUserStore } from "@/config/userStore";
 import { useGetBacklogItemsQuery } from "@/api/backlog/getBacklogItems";
 import { useAppContext } from "@/context/AppContext";
+import { useDeleteItemFromBacklogMutation } from "@/api/backlog/deleteItemFromBacklog";
+import { useCompleteBacklogItemMutation } from "@/api/backlog/completeBacklogItem";
+import { useUncompleteBacklogItemMutation } from "@/api/backlog/uncompleteBacklogItem";
+import { IBacklogItem } from "@/api/backlog/addItemToBacklog";
 
 const BacklogScreen = () => {
     const insets = useSafeAreaInsets();
     const { user } = useUserStore();
     const { setError } = useAppContext();
     const { data: backlogItems, isPending, isError } = useGetBacklogItemsQuery(user?.uid);
+    const { mutate: deleteItemFromBacklog } = useDeleteItemFromBacklogMutation();
+    const { mutate: completeBacklogItem } = useCompleteBacklogItemMutation();
+    const { mutate: uncompleteBacklogItem } = useUncompleteBacklogItemMutation();
+
+    const handleComplete = (item: IBacklogItem) => {
+        if (!user?.uid) return;
+        console.log("Completing backlog item:", item);
+
+        if (item.isCompleted) {
+            uncompleteBacklogItem({
+                itemId: item.id!,
+                uid: user.uid
+            });
+        } else {
+            completeBacklogItem({
+                itemId: item.id!,
+                uid: user.uid
+            }, {
+                onError: (error) => {
+                    console.error("Error completing backlog item:", error);
+                }
+            });
+        }
+    };
+
+    const handleDelete = (id: string) => {
+        if (!user?.uid) return;
+        console.log("Deleting backlog item:", id);
+        deleteItemFromBacklog(
+            { id, uid: user.uid },
+            {
+                onError: (error) => {
+                    console.error("Error deleting backlog item:", error);
+                }
+            }
+        );
+    };
+
+    const handleEdit = (id: string) => {
+        console.log("Edit backlog item:", id);
+        router.push(`/backlog/edit/${id}`);
+    };
+
+    const handleAddToSchedule = (id: string) => {
+        console.log("Add backlog item to schedule:", id);
+    };
 
     if (isError) {
         setError({
@@ -51,7 +101,14 @@ const BacklogScreen = () => {
                     contentContainerStyle={tw`pb-32`}
                 >
                     {backlogItems.length > 0 && backlogItems.map((item) => (
-                        <BacklogItem key={item.id} item={item} />
+                        <BacklogItem 
+                            key={item.id} 
+                            item={item}
+                            onComplete={handleComplete}
+                            onDelete={handleDelete}
+                            onEdit={handleEdit}
+                            onAddToSchedule={handleAddToSchedule}
+                        />
                     ))}
                 </ScrollView>}
             </View>

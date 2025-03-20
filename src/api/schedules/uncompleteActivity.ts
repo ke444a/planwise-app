@@ -1,33 +1,15 @@
-import { doc, getFirestore, getDoc, setDoc } from "@react-native-firebase/firestore";
+import { 
+    doc, 
+    getFirestore, 
+    updateDoc,
+} from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const uncompleteActivity = async (activityId: string, date: Date, uid: string) => {
     const db = getFirestore();
     const formattedDate = date.toISOString().split("T")[0];
-    const scheduleDocRef = doc(db, "schedules", uid, "dates", formattedDate);
-
-    const scheduleDoc = await getDoc(scheduleDocRef);
-    if (!scheduleDoc.exists) {
-        throw new Error("Schedule not found");
-    }
-
-    const existingData = scheduleDoc.data();
-    const existingActivities = existingData?.activities || [];
-    
-    const updatedActivities = existingActivities.map((activity: IActivity) => {
-        if (activity.id === activityId) {
-            return {
-                ...activity,
-                isCompleted: false
-            };
-        }
-        return activity;
-    });
-
-    await setDoc(scheduleDocRef, {
-        date: formattedDate,
-        activities: updatedActivities
-    }, { merge: true });
+    const activityDocRef = doc(db, "schedules", uid, formattedDate, activityId);
+    await updateDoc(activityDocRef, { isCompleted: false });
 };
 
 type Data = {
@@ -41,47 +23,30 @@ export const useUncompleteActivityMutation = () => {
     return useMutation({
         mutationFn: ({ activityId, date, uid }: Data) => uncompleteActivity(activityId, date, uid),
         onMutate: async (variables) => {
-            // Cancel outgoing refetches
-            await queryClient.cancelQueries({ 
-                queryKey: ["schedule", variables.date, variables.uid]
+            // Cancel any outgoing refetches
+            // (so they don't overwrite our optimistic update)
+            await queryClient.cancelQueries({ queryKey: ["schedule", variables.date, variables.uid] });
+
+            // Snapshot the previous value
+            const previousSchedule = queryClient.getQueryData<IActivity[]>(["schedule", variables.date, variables.uid]);
+
+            // Optimistically update to the new value
+            queryClient.setQueryData<IActivity[]>(["schedule", variables.date, variables.uid], (old) => {
+                return old?.map((activity) =>
+                    activity.id === variables.activityId ? { ...activity, isCompleted: false } : activity
+                ) ?? [];
             });
 
-            // Snapshot previous value
-            const previousSchedule = queryClient.getQueryData<IActivity[]>(
-                ["schedule", variables.date, variables.uid]
-            );
-
-            // Optimistically update schedule
-            queryClient.setQueryData<IActivity[]>(
-                ["schedule", variables.date, variables.uid],
-                (old) => {
-                    if (!old) return [];
-                    return old.map(activity => {
-                        if (activity.id === variables.activityId) {
-                            return {
-                                ...activity,
-                                isCompleted: false
-                            };
-                        }
-                        return activity;
-                    });
-                }
-            );
-
+            // Return a context object with the snapshotted value
             return { previousSchedule };
         },
-        onError: (_error, variables, context) => {
-            if (context?.previousSchedule) {
-                queryClient.setQueryData(
-                    ["schedule", variables.date, variables.uid],
-                    context.previousSchedule
-                );
-            }
+        // If the mutation fails, use the context returned from onMutate to roll back
+        onError: (_err, variables, context: any) => {
+            queryClient.setQueryData<IActivity[]>(["schedule", variables.date, variables.uid], context.previousSchedule);
         },
+        // Always refetch after error or success:
         onSettled: (_data, _error, variables) => {
-            queryClient.invalidateQueries({ 
-                queryKey: ["schedule", variables.date, variables.uid]
-            });
-        }
+            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, variables.uid] });
+        },
     });
 };

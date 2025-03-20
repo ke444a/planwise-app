@@ -19,8 +19,8 @@ const getBacklogItems = async (uid?: string | null) => {
     const items: IBacklogItem[] = [];
     querySnapshot.forEach(doc => {
         items.push({
+            ...doc.data(),
             id: doc.id,
-            ...doc.data()
         } as IBacklogItem);
     });
     return items;

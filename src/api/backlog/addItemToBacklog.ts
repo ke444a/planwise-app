@@ -13,6 +13,10 @@ export interface IBacklogDraft {
     duration: number;
     isCompleted: boolean;
     itemType: "draft";
+    subtasks: {
+        title: string;
+        isCompleted: boolean;
+    }[];
     createdAt?: any;
     updatedAt?: any;
 }

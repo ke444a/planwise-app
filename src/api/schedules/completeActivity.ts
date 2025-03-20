@@ -1,33 +1,11 @@
-import { doc, getFirestore, getDoc, setDoc } from "@react-native-firebase/firestore";
+import { doc, getFirestore, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const completeActivity = async (activityId: string, date: Date, uid: string) => {
     const db = getFirestore();
     const formattedDate = date.toISOString().split("T")[0];
-    const scheduleDocRef = doc(db, "schedules", uid, "dates", formattedDate);
-
-    const scheduleDoc = await getDoc(scheduleDocRef);
-    if (!scheduleDoc.exists) {
-        throw new Error("Schedule not found");
-    }
-
-    const existingData = scheduleDoc.data();
-    const existingActivities = existingData?.activities || [];
-    
-    const updatedActivities = existingActivities.map((activity: IActivity) => {
-        if (activity.id === activityId) {
-            return {
-                ...activity,
-                isCompleted: true
-            };
-        }
-        return activity;
-    });
-
-    await setDoc(scheduleDocRef, {
-        date: formattedDate,
-        activities: updatedActivities
-    }, { merge: true });
+    const activityDocRef = doc(db, "schedules", uid, formattedDate, activityId);
+    await updateDoc(activityDocRef, { isCompleted: true });
 };
 
 type Data = {
@@ -85,4 +63,3 @@ export const useCompleteActivityMutation = () => {
         }
     });
 };
-

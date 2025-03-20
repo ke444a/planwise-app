@@ -9,6 +9,8 @@ import { useUserStore } from "@/config/userStore";
 import { useAddItemToBacklogMutation } from "@/api/backlog/addItemToBacklog";
 import DurationSlider from "@/components/DurationSlider";
 import DurationPickerBottomSheet from "@/components/DurationPickerBottomSheet";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import SubtasksList from "@/components/SubtasksList";
 
 const DEFAULT_DURATION_OPTIONS = [
     { label: "15m", value: 15 },
@@ -36,6 +38,8 @@ const NewTaskScreen = () => {
     
     const [title, setTitle] = useState("");
     const [duration, setDuration] = useState(DEFAULT_DURATION_OPTIONS[0].value);
+    const [subtasks, setSubtasks] = useState<string[]>([]);
+    const [subtaskInput, setSubtaskInput] = useState("");
 
     const { initialHours, initialMinutes } = useMemo(() => ({
         initialHours: Math.floor(duration / 60),
@@ -51,6 +55,10 @@ const NewTaskScreen = () => {
                 duration,
                 itemType: "draft",
                 isCompleted: false,
+                subtasks: subtasks.map(task => ({
+                    title: task,
+                    isCompleted: false
+                })),
             },
             uid: user.uid
         }, {
@@ -67,12 +75,28 @@ const NewTaskScreen = () => {
     const handleDurationConfirm = (totalMinutes: number) => {
         setDuration(totalMinutes);
         
-        const newDurationOptions = DEFAULT_DURATION_OPTIONS;
+        const newDurationOptions = [...DEFAULT_DURATION_OPTIONS];
         const isNewOption = !newDurationOptions.some(opt => opt.value === totalMinutes);
         if (isNewOption) {
             newDurationOptions.push({ label: formatDuration(totalMinutes), value: totalMinutes });
+            newDurationOptions.sort((a, b) => a.value - b.value);
         }
         setDurationOptions(newDurationOptions);
+    };
+
+    const handleAddSubtask = () => {
+        if (subtaskInput.trim()) {
+            setSubtasks([...subtasks, subtaskInput.trim()]);
+            setSubtaskInput("");
+        }
+    };
+
+    const handleRemoveSubtask = (index: number) => {
+        setSubtasks(subtasks.filter((_, i) => i !== index));
+    };
+
+    const handleSubtaskSubmit = () => {
+        handleAddSubtask();
     };
 
     return (
@@ -89,39 +113,50 @@ const NewTaskScreen = () => {
 
                 {/* Content */}
                 <View style={tw`px-4 flex-1`}>
-                    <View style={tw`mb-16`}>
-                        <Text style={tw`text-2xl font-semibold text-gray-950 mb-2`}>What?</Text>
+                    <View style={tw`mb-10 flex-row items-center`}>
+                        <View style={tw`h-14 w-14 bg-slate-200 rounded-lg items-center justify-center mr-3`}>
+                            <MaterialCommunityIcons name="text-box-outline" size={30} style={tw`text-gray-600`} />
+                        </View>
                         <TextInput
-                            style={tw`border-b border-gray-300 py-2 text-xl text-gray-950`}
+                            style={tw`border-b border-gray-300 py-2 text-xl text-gray-950 flex-1`}
                             value={title}
                             onChangeText={setTitle}
                             autoFocus
+                            placeholder="What?"
                         />
                     </View>
 
-                    <View>
+                    <View style={tw`mb-10`}>
                         <View style={tw`flex-row items-center justify-between mb-4`}>
                             <Text style={tw`text-2xl font-semibold text-gray-950`}>How long?</Text>
                             <TouchableOpacity onPress={() => setIsDurationPickerVisible(true)}>
-                                <Text style={tw`text-purple-500 font-medium text-lg`}>Custom...</Text>
+                                <Text style={tw`text-gray-500 font-medium text-lg`}>More...</Text>
                             </TouchableOpacity>
                         </View>
                         <DurationSlider
                             options={durationOptions}
-                            initialValue={DEFAULT_DURATION_OPTIONS[0].value}
+                            value={duration}
                             onValueChange={setDuration}
                         />
                     </View>
+
+                    <SubtasksList
+                        subtasks={subtasks}
+                        subtaskInput={subtaskInput}
+                        onSubtaskInputChange={setSubtaskInput}
+                        onSubtaskSubmit={handleSubtaskSubmit}
+                        onSubtaskRemove={handleRemoveSubtask}
+                    />
                 </View>
 
                 {/* Footer */}
                 <View style={[tw`px-4`, { paddingBottom: insets.bottom }]}>
                     <ButtonWithIcon
-                        label="Add to backlog"
+                        label="Create"
                         onPress={handleSave}
                         iconPosition="left"
                         fullWidth
-                        icon={<Ionicons name="checkmark-done" size={24} style={tw`text-gray-950`} />}
+                        icon={<Ionicons name="checkmark" size={24} style={tw`text-gray-950`} />}
                         disabled={!title.trim()}
                     />
                 </View>

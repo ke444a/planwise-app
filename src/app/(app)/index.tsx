@@ -82,6 +82,7 @@ const ScheduleScreen = () => {
 
     const handleActivityComplete = (activity: IActivity) => {
         if (!activity.id || !user?.uid) return;
+        console.log("Completing activity:", activity);
         if (activity.isCompleted) {
             uncompleteActivity({
                 activityId: activity.id,

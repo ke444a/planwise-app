@@ -1,10 +1,13 @@
-import React, { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { View, TouchableOpacity, Dimensions } from "react-native";
 import Animated, {
     useAnimatedStyle,
     useSharedValue,
     withSpring,
     runOnJS,
+    useDerivedValue,
+    withTiming,
+    SharedValue
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import tw from "twrnc";
@@ -16,9 +19,43 @@ interface DurationOption {
 
 interface DurationSliderProps {
   options: DurationOption[];
-  initialValue?: number;
+  value?: number;
+  defaultValue?: number;
   onValueChange?: (_value: number) => void;
 }
+
+interface OptionProps {
+    option: DurationOption;
+    index: number;
+    selectedIndex: SharedValue<number>;
+    onPress: (_index: number) => void;
+}
+
+const Option = ({ option, index, selectedIndex, onPress }: OptionProps) => {
+    const isSelected = useDerivedValue(() => selectedIndex.value === index);
+    
+    const textStyle = useAnimatedStyle(() => {
+        return {
+            color: isSelected.value ? "#a855f7" : "#4b5563",
+        };
+    });
+
+    return (
+        <TouchableOpacity
+            style={tw`flex-1 items-center justify-center`}
+            onPress={() => onPress(index)}
+        >
+            <Animated.Text
+                style={[
+                    tw`text-base font-medium`,
+                    textStyle,
+                ]}
+            >
+                {option.label}
+            </Animated.Text>
+        </TouchableOpacity>
+    );
+};
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SPRING_CONFIG = {
@@ -27,26 +64,41 @@ const SPRING_CONFIG = {
     stiffness: 100,
 };
 
-const DurationSlider: React.FC<DurationSliderProps> = ({
+const DurationSlider = ({
     options,
-    initialValue,
+    value,
+    defaultValue,
     onValueChange,
-}) => {
+}: DurationSliderProps) => {
     const translateX = useSharedValue(0);
     const selectedIndex = useSharedValue(0);
     const contextX = useSharedValue(0);
+    const isControlled = value !== undefined;
 
-    useEffect(() => {
-        if (initialValue !== undefined) {
-            const index = options.findIndex(option => option.value === initialValue);
-            if (index !== -1) {
-                const containerWidth = SCREEN_WIDTH - 32;
-                const optionWidth = containerWidth / options.length;
-                translateX.value = index * optionWidth;
-                selectedIndex.value = index;
-            }
+    const updatePositionFromValue = useCallback((durationValue: number) => {
+        const index = options.findIndex(option => option.value === durationValue);
+        if (index !== -1) {
+            const containerWidth = SCREEN_WIDTH - 32;
+            const optionWidth = containerWidth / options.length;
+            translateX.value = withSpring(index * optionWidth, SPRING_CONFIG);
+            selectedIndex.value = withTiming(index);
         }
-    }, [initialValue, options, translateX, selectedIndex]);
+    }, [options, translateX, selectedIndex]);
+
+    // Handle controlled and uncontrolled initial values
+    useEffect(() => {
+        const initialValue = isControlled ? value : defaultValue;
+        if (initialValue !== undefined) {
+            updatePositionFromValue(initialValue);
+        }
+    });
+
+    // Handle controlled value updates
+    useEffect(() => {
+        if (isControlled && value !== undefined) {
+            updatePositionFromValue(value);
+        }
+    }, [value, isControlled, updatePositionFromValue]);
 
     const calculateNewIndex = useCallback((x: number) => {
         "worklet";
@@ -60,9 +112,9 @@ const DurationSlider: React.FC<DurationSliderProps> = ({
         const containerWidth = SCREEN_WIDTH - 32;
         const optionWidth = containerWidth / options.length;
         translateX.value = withSpring(index * optionWidth, SPRING_CONFIG);
-        selectedIndex.value = index;
+        selectedIndex.value = withTiming(index);
         onValueChange?.(options[index].value);
-    }, [options, onValueChange, selectedIndex, translateX]);
+    }, [options, onValueChange]);
 
     const gesture = Gesture.Pan()
         .onStart(() => {
@@ -85,10 +137,6 @@ const DurationSlider: React.FC<DurationSliderProps> = ({
         transform: [{ translateX: translateX.value }],
     }));
 
-    const handlePress = useCallback((index: number) => {
-        updateSelection(index);
-    }, [updateSelection]);
-
     return (
         <View style={tw`w-full`}>
             <GestureDetector gesture={gesture}>
@@ -102,20 +150,13 @@ const DurationSlider: React.FC<DurationSliderProps> = ({
                     />
                     <View style={tw`flex-row h-full`}>
                         {options.map((option, index) => (
-                            <TouchableOpacity
+                            <Option
                                 key={option.value}
-                                style={tw`flex-1 items-center justify-center`}
-                                onPress={() => handlePress(index)}
-                            >
-                                <Animated.Text
-                                    style={[
-                                        tw`text-base font-medium`,
-                                        selectedIndex.value === index ? tw`text-purple-500` : tw`text-gray-950`,
-                                    ]}
-                                >
-                                    {option.label}
-                                </Animated.Text>
-                            </TouchableOpacity>
+                                option={option}
+                                index={index}
+                                selectedIndex={selectedIndex}
+                                onPress={updateSelection}
+                            />
                         ))}
                     </View>
                 </View>

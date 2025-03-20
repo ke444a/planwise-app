@@ -1,47 +1,32 @@
 import { View, Text, Modal, TouchableOpacity } from "react-native";
 import tw from "twrnc";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
-import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
-import { timeToMinutes } from "@/utils/timeToMinutes";
-import ActivityIcon from "../ui/ActivityIcon";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
+import ActivityIcon from "../ui/ActivityIcon";
+import { IBacklogItem } from "@/api/backlog/addItemToBacklog";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-
-interface ActivityDetailsModalProps {
-    activity: IActivity;
+interface BacklogItemDetailsModalProps {
+    item: IBacklogItem;
     visible: boolean;
     onClose: () => void;
     onDelete: () => void;
     onEdit: () => void;
     onComplete: () => void;
-    onMoveToBacklog: () => void;
+    onAddToSchedule: () => void;
 }
 
-const getIsCurrentActivity = (startTime: string, endTime: string): boolean => {
-    const now = new Date();
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const currentTotalMinutes = currentHours * 60 + currentMinutes;
-    
-    const startTotalMinutes = timeToMinutes(startTime);
-    const endTotalMinutes = timeToMinutes(endTime);
-    return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes;
-};
-
-const ActivityDetailsModal = ({ 
-    activity,
+const BacklogItemDetailsModal = ({ 
+    item,
     visible,
     onClose,
     onDelete,
     onEdit,
     onComplete,
-    onMoveToBacklog
-}: ActivityDetailsModalProps) => {
-    const isCurrentActivity = getIsCurrentActivity(activity.startTime, activity.endTime);
-
+    onAddToSchedule
+}: BacklogItemDetailsModalProps) => {
     return (
         <Modal
             visible={visible}
@@ -53,16 +38,24 @@ const ActivityDetailsModal = ({
                 <View style={tw`bg-white rounded-3xl mx-4 mb-12 shadow-lg px-4`}>
                     <View style={tw`flex-row justify-between py-6 border-b border-gray-200`}>
                         <View style={tw`flex-row items-center gap-x-3`}>
-                            <ActivityIcon 
-                                activityType={activity.type}
-                                activityPriority={activity.priority}
-                                iconSize={50}
-                            />
+                            {item.itemType === "draft" ? (
+                                <MaterialCommunityIcons 
+                                    name="text-box-outline" 
+                                    size={50} 
+                                    style={tw`text-gray-600`} 
+                                />
+                            ) : (
+                                <ActivityIcon 
+                                    activityType={item.type}
+                                    activityPriority={item.priority}
+                                    iconSize={50}
+                                />
+                            )}
                             <View style={tw`flex-col`}> 
                                 <Text style={tw`text-gray-500 text-base`}>
-                                    {activity.startTime}-{activity.endTime} ({getActivityDurationLabel(activity.duration)})
+                                    {getActivityDurationLabel(item.duration)}
                                 </Text>
-                                <Text style={tw`text-2xl font-semibold`}>{activity.title}</Text>
+                                <Text style={tw`text-2xl font-semibold`}>{item.title}</Text>
                             </View>
                         </View>
                         <TouchableOpacity onPress={onClose}>
@@ -71,9 +64,9 @@ const ActivityDetailsModal = ({
                     </View>
 
                     {/* Subtasks */}
-                    {activity.subtasks && activity.subtasks.length > 0 && (
+                    {item.subtasks && item.subtasks.length > 0 && (
                         <View style={tw`border-b border-gray-200 py-5`}>
-                            {activity.subtasks.map((subtask, index) => (
+                            {item.subtasks.map((subtask, index) => (
                                 <View key={index} style={tw`flex-row items-center mb-2`}>
                                     <View style={tw`w-6 h-6 rounded-full border-2 border-gray-300 items-center justify-center mr-2`}>
                                         {subtask.isCompleted && (
@@ -113,36 +106,25 @@ const ActivityDetailsModal = ({
                                 style={tw`flex-1 py-3 bg-gray-100 rounded-xl items-center justify-center`}
                                 onPress={onComplete}
                             >
-                                {activity.isCompleted ? (
-                                    <MaterialIcons name="remove-done" size={20} style={tw`text-gray-950`} />
+                                {item.isCompleted ? (
+                                    <MaterialCommunityIcons name="close-circle" size={20} style={tw`text-gray-950`} />
                                 ) : (
-                                    <MaterialIcons name="check-circle" size={20} style={tw`text-gray-950`} />
+                                    <MaterialCommunityIcons name="check-circle" size={20} style={tw`text-gray-950`} />
                                 )}
                                 <Text style={tw`text-gray-950 font-medium mt-1`}>
-                                    {activity.isCompleted ? "Undo" : "Complete"}
+                                    {item.isCompleted ? "Undo" : "Complete"}
                                 </Text>
                             </TouchableOpacity>
                         </View>
 
-                        {/* Move to Backlog button */}
+                        {/* Add to Schedule button */}
                         <TouchableOpacity 
-                            style={tw`flex-row items-center justify-center py-3 bg-gray-100 rounded-xl mb-2`}
-                            onPress={onMoveToBacklog}
+                            style={tw`flex-row items-center justify-center py-3 bg-purple-200 rounded-xl`}
+                            onPress={onAddToSchedule}
                         >
-                            <Ionicons name="archive-outline" size={20} style={tw`text-gray-950 mr-2`} />
-                            <Text style={tw`text-gray-950 font-medium`}>Move to Backlog</Text>
+                            <MaterialCommunityIcons name="calendar-plus" size={20} style={tw`text-gray-950 mr-2`} />
+                            <Text style={tw`text-gray-950 font-medium`}>Add to Schedule</Text>
                         </TouchableOpacity>
-
-                        {/* Focus now button */}
-                        {!isCurrentActivity && (
-                            <TouchableOpacity 
-                                style={tw`flex-row items-center justify-center py-3 bg-red-200 rounded-xl`}
-                                onPress={onComplete}
-                            >
-                                <MaterialCommunityIcons name="timer-sand" size={20} style={tw`text-gray-950 mr-2`} />
-                                <Text style={tw`text-gray-950 font-medium`}>Focus now</Text>
-                            </TouchableOpacity>
-                        )}
                     </View>
                 </View>
             </View>
@@ -150,4 +132,4 @@ const ActivityDetailsModal = ({
     );
 };
 
-export default ActivityDetailsModal; 
+export default BacklogItemDetailsModal;

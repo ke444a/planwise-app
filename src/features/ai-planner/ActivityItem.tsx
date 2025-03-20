@@ -99,8 +99,10 @@ export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
     const handleAdd = () => {
         if (!user?.uid) return;
 
+        // eslint-disable-next-line no-unused-vars
+        const { id, ...rest } = activity;
         addActivityToSchedule({
-            activity: activity,
+            activity: rest,
             date: date,
             uid: user.uid
         }, {
