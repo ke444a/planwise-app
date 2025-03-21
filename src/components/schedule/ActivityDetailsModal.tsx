@@ -8,7 +8,9 @@ import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import { timeToMinutes } from "@/utils/timeToMinutes";
 import ActivityIcon from "../ui/ActivityIcon";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import { useRouter } from "expo-router";
+import { useUserStore } from "@/config/userStore";
+import { useTickActivitySubtaskMutation } from "@/api/schedules/tickActivitySubtask";
 
 interface ActivityDetailsModalProps {
     activity: IActivity;
@@ -40,7 +42,34 @@ const ActivityDetailsModal = ({
     onComplete,
     onMoveToBacklog
 }: ActivityDetailsModalProps) => {
+    const { user } = useUserStore();
+    const router = useRouter();
     const isCurrentActivity = getIsCurrentActivity(activity.startTime, activity.endTime);
+    const { mutate: tickSubtask } = useTickActivitySubtaskMutation();
+
+    const handleFocusNow = () => {
+        if (!user?.uid) return;
+        onClose();
+        router.push({
+            pathname: "/focus",
+            params: {
+                activityId: activity.id,
+                date: new Date().toISOString(),
+                uid: user.uid
+            }
+        });
+    };
+
+    const handleSubtaskPress = (subtaskId: string, isCompleted: boolean) => {
+        if (!user) return;
+        tickSubtask({
+            uid: user.uid,
+            date: new Date(),
+            activityId: activity.id!,
+            subtaskId: subtaskId,
+            isCompleted: !isCompleted,
+        });
+    };
 
     return (
         <Modal
@@ -73,8 +102,12 @@ const ActivityDetailsModal = ({
                     {/* Subtasks */}
                     {activity.subtasks && activity.subtasks.length > 0 && (
                         <View style={tw`border-b border-gray-200 py-5`}>
-                            {activity.subtasks.map((subtask, index) => (
-                                <View key={index} style={tw`flex-row items-center mb-2`}>
+                            {activity.subtasks.map((subtask) => (
+                                <TouchableOpacity 
+                                    key={subtask.id} 
+                                    style={tw`flex-row items-center mb-2`}
+                                    onPress={() => handleSubtaskPress(subtask.id, subtask.isCompleted)}
+                                >
                                     <View style={tw`w-6 h-6 rounded-full border-2 border-gray-300 items-center justify-center mr-2`}>
                                         {subtask.isCompleted && (
                                             <Ionicons name="checkmark" size={16} style={tw`text-gray-300`} />
@@ -86,7 +119,7 @@ const ActivityDetailsModal = ({
                                     ]}>
                                         {subtask.title}
                                     </Text>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     )}
@@ -134,10 +167,10 @@ const ActivityDetailsModal = ({
                         </TouchableOpacity>
 
                         {/* Focus now button */}
-                        {!isCurrentActivity && (
+                        {!activity.isCompleted && isCurrentActivity && (
                             <TouchableOpacity 
                                 style={tw`flex-row items-center justify-center py-3 bg-red-200 rounded-xl`}
-                                onPress={onComplete}
+                                onPress={handleFocusNow}
                             >
                                 <MaterialCommunityIcons name="timer-sand" size={20} style={tw`text-gray-950 mr-2`} />
                                 <Text style={tw`text-gray-950 font-medium`}>Focus now</Text>
@@ -150,4 +183,4 @@ const ActivityDetailsModal = ({
     );
 };
 
-export default ActivityDetailsModal; 
+export default ActivityDetailsModal;

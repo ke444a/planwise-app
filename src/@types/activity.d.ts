@@ -12,8 +12,11 @@ interface IActivity {
     priority: ActivityPriority;
     type: ActivityType;
     isCompleted: boolean;
-    subtasks: {
-        title: string;
-        isCompleted: boolean;
-    }[];
+    subtasks: ISubtask[];
+}
+
+interface ISubtask {
+    id: string;
+    title: string;
+    isCompleted: boolean;
 }

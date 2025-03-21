@@ -4,11 +4,11 @@ import tw from "twrnc";
 import Animated, { FadeInDown, LinearTransition } from "react-native-reanimated";
 
 interface SubtasksListProps {
-    subtasks: string[];
+    subtasks: ISubtask[];
     subtaskInput: string;
     onSubtaskInputChange: (_text: string) => void;
     onSubtaskSubmit: () => void;
-    onSubtaskRemove: (_index: number) => void;
+    onSubtaskRemove: (_id: string) => void;
 }
 
 const SubtasksList = ({
@@ -24,17 +24,17 @@ const SubtasksList = ({
             <View style={tw`gap-y-2`}>
                 {subtasks.map((subtask, index) => (
                     <Animated.View 
-                        key={index} 
+                        key={subtask.id} 
                         entering={FadeInDown.duration(300).delay(index * 100)}
                         layout={LinearTransition.springify()}
                         style={tw`flex-row items-center justify-between bg-slate-200 rounded-lg px-4 py-3`}
                     >
                         <View style={tw`flex-row items-center flex-1 gap-x-3`}>
                             <Ionicons name="list" size={20} style={tw`text-gray-950`} />
-                            <Text style={tw`text-gray-950 flex-1 text-lg`}>{subtask}</Text>
+                            <Text style={tw`text-gray-950 flex-1 text-lg`}>{subtask.title}</Text>
                         </View>
                         <Pressable 
-                            onPress={() => onSubtaskRemove(index)}
+                            onPress={() => onSubtaskRemove(subtask.id)}
                             hitSlop={8}
                         >
                             <Ionicons name="close" size={20} style={tw`text-gray-500`} />

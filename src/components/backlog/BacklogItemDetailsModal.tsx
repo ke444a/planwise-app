@@ -7,6 +7,8 @@ import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import ActivityIcon from "../ui/ActivityIcon";
 import { IBacklogItem } from "@/api/backlog/addItemToBacklog";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useUserStore } from "@/config/userStore";
+import { useTickBacklogItemSubtaskMutation } from "@/api/backlog/tickBacklogItemSubtask";
 
 interface BacklogItemDetailsModalProps {
     item: IBacklogItem;
@@ -27,6 +29,19 @@ const BacklogItemDetailsModal = ({
     onComplete,
     onAddToSchedule
 }: BacklogItemDetailsModalProps) => {
+    const { user } = useUserStore();
+    const { mutate: tickSubtask } = useTickBacklogItemSubtaskMutation();
+
+    const handleSubtaskPress = (subtaskId: string, isCompleted: boolean) => {
+        if (!user) return;
+        tickSubtask({
+            uid: user.uid,
+            itemId: item.id!,
+            subtaskId: subtaskId,
+            isCompleted: !isCompleted,
+        });
+    };
+
     return (
         <Modal
             visible={visible}
@@ -66,8 +81,12 @@ const BacklogItemDetailsModal = ({
                     {/* Subtasks */}
                     {item.subtasks && item.subtasks.length > 0 && (
                         <View style={tw`border-b border-gray-200 py-5`}>
-                            {item.subtasks.map((subtask, index) => (
-                                <View key={index} style={tw`flex-row items-center mb-2`}>
+                            {item.subtasks.map((subtask) => (
+                                <TouchableOpacity 
+                                    key={subtask.id} 
+                                    style={tw`flex-row items-center mb-2`}
+                                    onPress={() => handleSubtaskPress(subtask.id, subtask.isCompleted)}
+                                >
                                     <View style={tw`w-6 h-6 rounded-full border-2 border-gray-300 items-center justify-center mr-2`}>
                                         {subtask.isCompleted && (
                                             <Ionicons name="checkmark" size={16} style={tw`text-gray-300`} />
@@ -79,7 +98,7 @@ const BacklogItemDetailsModal = ({
                                     ]}>
                                         {subtask.title}
                                     </Text>
-                                </View>
+                                </TouchableOpacity>
                             ))}
                         </View>
                     )}

@@ -10,7 +10,6 @@ import { useGetBacklogItemsQuery } from "@/api/backlog/getBacklogItems";
 import { useAppContext } from "@/context/AppContext";
 import { useDeleteItemFromBacklogMutation } from "@/api/backlog/deleteItemFromBacklog";
 import { useCompleteBacklogItemMutation } from "@/api/backlog/completeBacklogItem";
-import { useUncompleteBacklogItemMutation } from "@/api/backlog/uncompleteBacklogItem";
 import { IBacklogItem } from "@/api/backlog/addItemToBacklog";
 
 const BacklogScreen = () => {
@@ -20,27 +19,15 @@ const BacklogScreen = () => {
     const { data: backlogItems, isPending, isError } = useGetBacklogItemsQuery(user?.uid);
     const { mutate: deleteItemFromBacklog } = useDeleteItemFromBacklogMutation();
     const { mutate: completeBacklogItem } = useCompleteBacklogItemMutation();
-    const { mutate: uncompleteBacklogItem } = useUncompleteBacklogItemMutation();
 
     const handleComplete = (item: IBacklogItem) => {
         if (!user?.uid) return;
         console.log("Completing backlog item:", item);
-
-        if (item.isCompleted) {
-            uncompleteBacklogItem({
-                itemId: item.id!,
-                uid: user.uid
-            });
-        } else {
-            completeBacklogItem({
-                itemId: item.id!,
-                uid: user.uid
-            }, {
-                onError: (error) => {
-                    console.error("Error completing backlog item:", error);
-                }
-            });
-        }
+        completeBacklogItem({
+            itemId: item.id!,
+            uid: user.uid,
+            isCompleted: !item.isCompleted
+        });
     };
 
     const handleDelete = (id: string) => {
@@ -62,7 +49,10 @@ const BacklogScreen = () => {
     };
 
     const handleAddToSchedule = (id: string) => {
-        console.log("Add backlog item to schedule:", id);
+        const item = backlogItems?.find(item => item.id === id);
+        if (!item || !user?.uid) return;
+
+        router.push(`/backlog/convert-to-activity/${id}`);
     };
 
     if (isError) {

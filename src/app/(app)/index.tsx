@@ -178,6 +178,7 @@ const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
     };
 
     const handleBacklogPress = () => {
+        // router.push("/add-activity?date=" + currentDate.toISOString());
         router.push("/backlog");
     };
 

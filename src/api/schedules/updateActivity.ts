@@ -1,28 +1,37 @@
-import { 
-    collection,
-    getFirestore, 
-    addDoc,
-} from "@react-native-firebase/firestore";
+import { getFirestore, doc, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const addActivityToSchedule = async (activity: IActivity, date: Date, uid: string) => {
-    const db = getFirestore();
-    const formattedDate = date.toISOString().split("T")[0];
-    const activityCollectionRef = collection(db, "schedules", uid, formattedDate);
-    const docRef = await addDoc(activityCollectionRef, activity);
-    return { ...activity, id: docRef.id };
-};
-
-type Data = {
+interface UpdateActivityParams {
     activity: IActivity;
     date: Date;
     uid: string;
 }
 
-export const useAddActivityToScheduleMutation = () => {
+const updateActivity = async ({ activity, date, uid }: UpdateActivityParams) => {
+    const db = getFirestore();
+    const formattedDate = date.toISOString().split("T")[0];
+    const activityDocRef = doc(db, "schedules", uid, formattedDate, activity.id!);
+
+    await updateDoc(activityDocRef, {
+        title: activity.title,
+        type: activity.type,
+        startTime: activity.startTime,
+        endTime: activity.endTime,
+        duration: activity.duration,
+        priority: activity.priority,
+        staminaCost: activity.staminaCost,
+        subtasks: activity.subtasks,
+        isCompleted: activity.isCompleted,
+    });
+
+    return activity;
+};
+
+export const useUpdateActivityMutation = () => {
     const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: ({ activity, date, uid }: Data) => addActivityToSchedule(activity, date, uid),
+        mutationFn: ({ activity, date, uid }: UpdateActivityParams) => updateActivity({ activity, date, uid }),
         onMutate: async ({ activity, date, uid }) => {
             const queryKey = ["schedule", date, uid];
             await queryClient.cancelQueries({ queryKey });
@@ -31,7 +40,7 @@ export const useAddActivityToScheduleMutation = () => {
 
             queryClient.setQueryData(queryKey, (old: IActivity[] | undefined) => {
                 if (old) {
-                    return [...old, activity];
+                    return old.map(item => item.id === activity.id ? activity : item);
                 }
                 return [activity];
             });

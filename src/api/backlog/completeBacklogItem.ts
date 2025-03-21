@@ -2,25 +2,25 @@ import { doc, getFirestore, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IBacklogItem } from "./addItemToBacklog";
 
-const completeBacklogItem = async (itemId: string, uid: string) => {
+const completeBacklogItem = async (itemId: string, uid: string, isCompleted: boolean) => {
     const db = getFirestore();
     const itemDocRef = doc(db, "backlog", uid, "items", itemId);
 
     await updateDoc(itemDocRef, {
-        isCompleted: true,
-        updatedAt: new Date()
+        isCompleted: isCompleted,
     });
 };
 
 type Data = {
     itemId: string;
     uid: string;
+    isCompleted: boolean;
 }
 
 export const useCompleteBacklogItemMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ itemId, uid }: Data) => completeBacklogItem(itemId, uid),
+        mutationFn: ({ itemId, uid, isCompleted }: Data) => completeBacklogItem(itemId, uid, isCompleted),
         onMutate: async (variables) => {
             // Cancel outgoing refetches
             await queryClient.cancelQueries({ 
@@ -41,8 +41,7 @@ export const useCompleteBacklogItemMutation = () => {
                         if (item.id === variables.itemId) {
                             return {
                                 ...item,
-                                isCompleted: true,
-                                updatedAt: new Date()
+                                isCompleted: variables.isCompleted,
                             };
                         }
                         return item;

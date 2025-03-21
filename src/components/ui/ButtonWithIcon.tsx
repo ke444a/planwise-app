@@ -148,7 +148,7 @@ export const ButtonWithIcon = ({
                     </View>
                 )}
                 <Text
-                    style={tw`font-bold text-lg tracking-wider`}
+                    style={tw`font-medium text-lg tracking-wider`}
                 >
                     {label}
                 </Text>
