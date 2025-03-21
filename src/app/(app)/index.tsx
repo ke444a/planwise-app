@@ -12,7 +12,10 @@ import { Redirect, useRouter } from "expo-router";
 import ErrorModal from "@/components/ui/ErrorModal";
 import { IError } from "@/context/AppContext";
 import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
-
+import { useCompleteActivityMutation } from "@/api/schedules/completeActivity";
+import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
+import { useAddItemToBacklogMutation } from "@/api/backlog/addItemToBacklog";
+import { useUncompleteActivityMutation } from "@/api/schedules/uncompleteActivity";
 
 const ScheduleScreen = () => {
     const { user } = useUserStore();
@@ -20,6 +23,12 @@ const ScheduleScreen = () => {
     const insets = useSafeAreaInsets();
     const [currentDate, setCurrentDate] = useState(new Date());
     const { data: scheduleData, isError: isScheduleError, isPending: isSchedulePending } = useGetScheduleForDayQuery(currentDate, user?.uid || "");
+    const router = useRouter();
+
+    const { mutate: completeActivity } = useCompleteActivityMutation();
+    const { mutate: uncompleteActivity } = useUncompleteActivityMutation();
+    const { mutate: deleteActivity } = useDeleteActivityMutation();
+    const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
 
     if (isPending || isSchedulePending) {
         return null;
@@ -71,6 +80,62 @@ const ScheduleScreen = () => {
         ]
         : [];
 
+    const handleActivityComplete = (activity: IActivity) => {
+        if (!activity.id || !user?.uid) return;
+        console.log("Completing activity:", activity);
+        if (activity.isCompleted) {
+            uncompleteActivity({
+                activityId: activity.id,
+                date: currentDate,
+                uid: user.uid
+            });
+        } else {
+            completeActivity({
+                activityId: activity.id,
+                date: currentDate,
+                uid: user.uid
+            });
+        }
+    };
+
+    const handleActivityDelete = (activity: IActivity) => {
+        if (!activity.id || !user?.uid) return;
+        deleteActivity({
+            activityId: activity.id,
+            date: currentDate,
+            uid: user.uid
+        });
+    };
+
+    const handleActivityEdit = (activity: IActivity) => {
+        router.push(`/edit-activity?id=${activity.id}&date=${currentDate.toISOString()}`);
+    };
+
+    const handleActivityMoveToBacklog = (activity: IActivity) => {
+        if (!user?.uid) return;
+        deleteActivity({
+            activityId: activity.id!,
+            date: currentDate,
+            uid: user.uid
+        });
+        addItemToBacklog({
+            item: {
+                id: activity.id!,
+                itemType: "activity",
+                title: activity.title,
+                duration: activity.duration,
+                type: activity.type,
+                priority: activity.priority,
+                isCompleted: false,
+                startTime: activity.startTime,
+                endTime: activity.endTime,
+                staminaCost: activity.staminaCost,
+                subtasks: activity.subtasks
+            },
+            uid: user.uid
+        });
+    };
+
     return (
         <View style={tw`flex-1 bg-purple-50`}>
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />            
@@ -91,6 +156,10 @@ const ScheduleScreen = () => {
                     activities={activitiesWithSpecials}
                     startDayHour={startDayHour}
                     endDayHour={endDayHour}
+                    onActivityComplete={handleActivityComplete}
+                    onActivityDelete={handleActivityDelete}
+                    onActivityEdit={handleActivityEdit}
+                    onActivityMoveToBacklog={handleActivityMoveToBacklog}
                 />
             </View>
         </View>
@@ -109,6 +178,7 @@ const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
     };
 
     const handleBacklogPress = () => {
+        // router.push("/add-activity?date=" + currentDate.toISOString());
         router.push("/backlog");
     };
 

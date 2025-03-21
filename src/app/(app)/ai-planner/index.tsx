@@ -66,7 +66,7 @@ const AiPlannerScreen = () => {
                         <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
                     </TouchableOpacity>
                 </View>
-                {isConversationActive ? <ChatWindow messages={messages} /> : <AiCapabilityList />}
+                {isConversationActive ? <ChatWindow messages={messages} date={new Date(date as string)} /> : <AiCapabilityList />}
                 <ChatInput onSendMessage={handleSendMessage} />
             </View>
         </View>

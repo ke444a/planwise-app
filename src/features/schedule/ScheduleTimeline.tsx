@@ -9,6 +9,10 @@ interface ScheduleTimelineProps {
     startDayHour: number;
     endDayHour: number;
     activities: IActivity[];
+    onActivityComplete?: (_activity: IActivity) => void;
+    onActivityDelete?: (_activity: IActivity) => void;
+    onActivityEdit?: (_activity: IActivity) => void;
+    onActivityMoveToBacklog?: (_activity: IActivity) => void;
 }
 
 const TOTAL_ACTIVITY_SIZE_BY_ROW = {
@@ -36,7 +40,11 @@ const getActivityRows = (activity: IActivity) => {
 const ScheduleTimeline = ({ 
     startDayHour, 
     endDayHour, 
-    activities 
+    activities,
+    onActivityComplete = () => {},
+    onActivityDelete = () => {},
+    onActivityEdit = () => {},
+    onActivityMoveToBacklog = () => {}
 }: ScheduleTimelineProps) => {
     const [currentTime, setCurrentTime] = useState(new Date());
     const scrollViewRef = useRef<ScrollView>(null);    
@@ -159,6 +167,10 @@ const ScheduleTimeline = ({
                                     activity={activity} 
                                     iconHeight={activityHeight}
                                     containerHeight={activityContainerHeight}
+                                    onActivityComplete={onActivityComplete}
+                                    onActivityDelete={onActivityDelete}
+                                    onActivityEdit={onActivityEdit}
+                                    onActivityMoveToBacklog={onActivityMoveToBacklog}
                                 />
                                 {index < activities.length - 1 && (
                                     <View style={{ height: getGapBetweenActivities(activity, activities[index + 1]) }} />

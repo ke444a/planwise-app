@@ -8,9 +8,10 @@ import { convertFromJsonToActivity } from "@/utils/convertFromJsonToActivity";
 
 interface ChatWindowProps {
     messages: IChatMessage[];
+    date: Date;
 }
 
-const ChatWindow = ({ messages }: ChatWindowProps) => {
+const ChatWindow = ({ messages, date }: ChatWindowProps) => {
     const renderMessage = (message: IChatMessage) => {
         switch (message.role) {
         case "user":
@@ -18,7 +19,7 @@ const ChatWindow = ({ messages }: ChatWindowProps) => {
         // case "model":
         //     return <ModelChatBox text={message.content} />;
         case "schedule":
-            return <ModelActivityBox activities={convertFromJsonToActivity(JSON.parse(message.content))} />;
+            return <ModelActivityBox activities={convertFromJsonToActivity(JSON.parse(message.content))} date={date} />;
         }
     };
     

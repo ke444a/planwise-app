@@ -3,7 +3,7 @@ type ActivityType = "focus_work" | "collaborative_work" | "repetitive_tasks" | "
 
 
 interface IActivity {
-    id: string;
+    id?: string;
     title: string;
     startTime: string;
     endTime: string;
@@ -12,8 +12,11 @@ interface IActivity {
     priority: ActivityPriority;
     type: ActivityType;
     isCompleted: boolean;
-    subtasks: {
-        title: string;
-        isCompleted: boolean;
-    }[];
+    subtasks: ISubtask[];
+}
+
+interface ISubtask {
+    id: string;
+    title: string;
+    isCompleted: boolean;
 }

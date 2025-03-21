@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,10 +5,11 @@ import { ActivityItem } from "./ActivityItem";
 
 interface Props {
     activities: IActivity[];
+    date: Date;
     onSaveAll?: () => void;
 }
 
-const ModelActivityBox = ({ activities, onSaveAll }: Props) => {
+const ModelActivityBox = ({ activities, date, onSaveAll }: Props) => {
     const totalStamina = activities.reduce((acc, activity) => acc + activity.staminaCost, 0);
     const totalTasks = activities.length;
 
@@ -46,6 +46,7 @@ const ModelActivityBox = ({ activities, onSaveAll }: Props) => {
                     <ActivityItem 
                         key={activity.id || index}
                         activity={activity}
+                        date={date}
                     />
                 ))}
             </View>
