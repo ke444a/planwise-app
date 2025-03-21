@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useEffect } from "react";
+import { LogBox } from "react-native";
 
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 // import auth from "@react-native-firebase/auth";
@@ -22,6 +24,15 @@ export default function RootLayout() {
     //     signOut();
     // }, []);
 
+    useEffect(() => {
+        const logMessage = "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation";
+        LogBox.ignoreLogs([logMessage]);
+
+        return () => {
+            LogBox.ignoreAllLogs();
+        };
+    }, []);
+    
     return (
         <GestureHandlerRootView>
             <AuthProvider>

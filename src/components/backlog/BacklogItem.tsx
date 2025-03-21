@@ -2,8 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
-import { IBacklogItem } from "@/api/backlog/addItemToBacklog";
-import ActivityIcon from "@/components/ui/ActivityIcon";
+import ActivityIcon from "@/components/activity/ActivityIcon";
 import { useState } from "react";
 import BacklogItemDetailsModal from "./BacklogItemDetailsModal";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -16,7 +15,7 @@ interface BacklogItemProps {
     onAddToSchedule: (_id: string) => void;
 }
 
-export const BacklogItem = ({ 
+const BacklogItem = ({ 
     item, 
     onComplete,
     onDelete,
@@ -25,19 +24,23 @@ export const BacklogItem = ({
 }: BacklogItemProps) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
-    const renderIcon = () => {
+    const renderIcon = (isCompleted: boolean) => {
         if (item.itemType === "draft") {
             return (
-                <MaterialCommunityIcons name="text-box-outline" size={24} style={tw`text-gray-600 mr-3`} />
+                <MaterialCommunityIcons 
+                    name="text-box-outline" 
+                    size={32} 
+                    style={tw`text-gray-600 mr-3 ${isCompleted ? "opacity-70" : ""}`} 
+                />
             );
         }
 
         return (
-            <View style={tw`mr-3`}>
+            <View style={tw`mr-3 ${isCompleted ? "opacity-70" : ""}`}>
                 <ActivityIcon 
                     activityType={item.type} 
                     activityPriority={item.priority} 
-                    iconSize={24} 
+                    iconSize={32} 
                 />
             </View>
         );
@@ -49,7 +52,7 @@ export const BacklogItem = ({
                 style={tw`flex-row items-center p-4 bg-white rounded-xl mb-3`}
                 onPress={() => setIsModalVisible(true)}
             >
-                {renderIcon()}
+                {renderIcon(item.isCompleted)}
                 <View style={tw`flex-1`}>
                     <Text style={[
                         tw`text-gray-950 text-lg font-medium max-w-[80%] shrink`,
@@ -66,13 +69,13 @@ export const BacklogItem = ({
                 <View>
                     <TouchableOpacity 
                         style={[
-                            tw`w-[30px] h-[30px] rounded-full items-center justify-center border-2`,
+                            tw`w-[24px] h-[24px] rounded-full items-center justify-center border-2`,
                             item.isCompleted ? tw`bg-purple-400 border-purple-400` : tw`border-gray-500`
                         ]}
                         onPress={() => onComplete(item)}
                     >
                         {item.isCompleted && (
-                            <Ionicons name="checkmark" size={24} color="white" />
+                            <Ionicons name="checkmark" size={20} style={tw`text-white`} />
                         )}
                     </TouchableOpacity>
                 </View>
@@ -102,3 +105,5 @@ export const BacklogItem = ({
         </>
     );
 };
+
+export default BacklogItem;

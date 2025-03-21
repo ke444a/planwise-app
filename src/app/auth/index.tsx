@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import tw from "twrnc";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import GoogleSignInButton from "@/components/GoogleSignInButton";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 import { firebase, FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { useCreateUserMutation } from "@/api/users/createUser";
 import { useAppContext } from "@/context/AppContext";

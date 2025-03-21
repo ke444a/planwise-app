@@ -1,23 +1,24 @@
 import { doc, getFirestore, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const completeActivity = async (activityId: string, date: Date, uid: string) => {
+const completeActivity = async (activityId: string, date: Date, uid: string, isCompleted: boolean) => {
     const db = getFirestore();
     const formattedDate = date.toISOString().split("T")[0];
     const activityDocRef = doc(db, "schedules", uid, formattedDate, activityId);
-    await updateDoc(activityDocRef, { isCompleted: true });
+    await updateDoc(activityDocRef, { isCompleted: isCompleted });
 };
 
 type Data = {
     activityId: string;
     date: Date;
     uid: string;
+    isCompleted: boolean;
 }
 
 export const useCompleteActivityMutation = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ activityId, date, uid }: Data) => completeActivity(activityId, date, uid),
+        mutationFn: ({ activityId, date, uid, isCompleted }: Data) => completeActivity(activityId, date, uid, isCompleted),
         onMutate: async (variables) => {
             // Cancel outgoing refetches
             await queryClient.cancelQueries({ 
@@ -38,7 +39,7 @@ export const useCompleteActivityMutation = () => {
                         if (activity.id === variables.activityId) {
                             return {
                                 ...activity,
-                                isCompleted: true
+                                isCompleted: variables.isCompleted
                             };
                         }
                         return activity;

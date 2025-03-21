@@ -9,8 +9,8 @@ import Animated, {
     withTiming,
     Easing
 } from "react-native-reanimated";
-import { StartTimeScreen, EndTimeScreen, DayStructureScreen, PriorityActivityScreen } from "@/features/onboarding";
-import { useUserStore } from "@/config/userStore";
+import { StartTimeScreen, EndTimeScreen, DayStructureScreen, PriorityActivityScreen } from "@/components/onboarding";
+import { useUserStore } from "@/libs/userStore";
 import { useUploadOnboardingInfoMutation } from "@/api/users/uploadOnboardingInfo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppContext } from "@/context/AppContext";

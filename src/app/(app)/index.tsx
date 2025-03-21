@@ -3,10 +3,10 @@ import { useState } from "react";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import tw from "twrnc";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import HeaderStaminaBar from "@/features/schedule/HeaderStaminaBar";
-import HeaderDateNavigation from "@/features/schedule/HeaderDateNavigation";
-import ScheduleTimeline from "@/features/schedule/ScheduleTimeline";
-import { useUserStore } from "@/config/userStore";
+import HeaderStaminaBar from "@/components/schedule/HeaderStaminaBar";
+import HeaderDateNavigation from "@/components/schedule/HeaderDateNavigation";
+import ScheduleTimeline from "@/components/schedule/ScheduleTimeline";
+import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
 import { Redirect, useRouter } from "expo-router";
 import ErrorModal from "@/components/ui/ErrorModal";
@@ -14,8 +14,8 @@ import { IError } from "@/context/AppContext";
 import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
 import { useCompleteActivityMutation } from "@/api/schedules/completeActivity";
 import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
-import { useAddItemToBacklogMutation } from "@/api/backlog/addItemToBacklog";
-import { useUncompleteActivityMutation } from "@/api/schedules/uncompleteActivity";
+import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const ScheduleScreen = () => {
     const { user } = useUserStore();
@@ -26,7 +26,6 @@ const ScheduleScreen = () => {
     const router = useRouter();
 
     const { mutate: completeActivity } = useCompleteActivityMutation();
-    const { mutate: uncompleteActivity } = useUncompleteActivityMutation();
     const { mutate: deleteActivity } = useDeleteActivityMutation();
     const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
 
@@ -82,20 +81,12 @@ const ScheduleScreen = () => {
 
     const handleActivityComplete = (activity: IActivity) => {
         if (!activity.id || !user?.uid) return;
-        console.log("Completing activity:", activity);
-        if (activity.isCompleted) {
-            uncompleteActivity({
-                activityId: activity.id,
-                date: currentDate,
-                uid: user.uid
-            });
-        } else {
-            completeActivity({
-                activityId: activity.id,
-                date: currentDate,
-                uid: user.uid
-            });
-        }
+        completeActivity({
+            activityId: activity.id,
+            date: currentDate,
+            uid: user.uid,
+            isCompleted: !activity.isCompleted
+        });
     };
 
     const handleActivityDelete = (activity: IActivity) => {
@@ -108,7 +99,7 @@ const ScheduleScreen = () => {
     };
 
     const handleActivityEdit = (activity: IActivity) => {
-        router.push(`/edit-activity?id=${activity.id}&date=${currentDate.toISOString()}`);
+        router.push(`/activity/edit?id=${activity.id}&date=${currentDate.toISOString()}`);
     };
 
     const handleActivityMoveToBacklog = (activity: IActivity) => {
@@ -162,6 +153,17 @@ const ScheduleScreen = () => {
                     onActivityMoveToBacklog={handleActivityMoveToBacklog}
                 />
             </View>
+            <TouchableOpacity
+                style={[
+                    tw`absolute bottom-14 right-6 w-16 h-16 bg-purple-400 rounded-full items-center justify-center`,
+                    styles.floatingButton
+                ]}
+                onPress={() => {
+                    router.push("/activity/add");
+                }}
+            >
+                <MaterialCommunityIcons name="plus" size={35} style={tw`text-white`} />
+            </TouchableOpacity>
         </View>
     );
 };
@@ -178,7 +180,6 @@ const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
     };
 
     const handleBacklogPress = () => {
-        // router.push("/add-activity?date=" + currentDate.toISOString());
         router.push("/backlog");
     };
 
@@ -203,6 +204,13 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: -2 },
         shadowOpacity: 0.1,
         shadowRadius: 4
+    },
+    floatingButton: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     }
 });
 
