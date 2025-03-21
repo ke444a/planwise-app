@@ -18,6 +18,6 @@ export const useGetActivityFromScheduleQuery = (activityId: string, date: Date, 
     return useQuery({
         queryKey: ["schedule", date, uid, activityId],
         queryFn: () => getActivityFromSchedule(activityId, date, uid),
-        enabled: !!activityId, // Only run the query if activityId is not null/undefined
+        enabled: !!activityId,
     });
 };

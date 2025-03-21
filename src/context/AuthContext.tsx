@@ -1,4 +1,4 @@
-import { useUserStore } from "@/config/userStore";
+import { useUserStore } from "@/libs/userStore";
 import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useContext, useEffect, useState, createContext, ReactNode, useCallback } from "react";

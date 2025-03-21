@@ -1,21 +1,21 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router, Redirect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useUserStore } from "@/config/userStore";
+import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
 import { useUpdateUserPreferencesMutation } from "@/api/users/updateUserPreferences";
 import { useAppContext } from "@/context/AppContext";
 import { ReactNode, useState } from "react";
 import { convertActivityTypeToStr } from "@/utils/convertActivityTypeToStr";
 import { convertDayStructureToStr } from "@/utils/convertDayStructureToStr";
-import TimePickerBottomSheet from "@/components/TimePickerBottomSheet";
-import StaminaPickerBottomSheet from "@/components/StaminaPickerBottomSheet";
-import DayStructurePickerBottomSheet from "@/components/DayStructurePickerBottomSheet";
-import PriorityPickerBottomSheet from "@/components/PriorityPickerBottomSheet";
+import TimePickerBottomSheet from "@/components/profile/TimePickerBottomSheet";
+import StaminaPickerBottomSheet from "@/components/profile/StaminaPickerBottomSheet";
+import DayStructurePickerBottomSheet from "@/components/profile/DayTypePickerBottomSheet";
+import PriorityPickerBottomSheet from "@/components/profile/PriorityPickerBottomSheet";
+import ScreenWrapper from "@/components/ui/ScreenWrapper";
 
 interface IPreferenceRow {
     icon: ReactNode;
@@ -39,7 +39,6 @@ const PreferenceRow = ({ icon, label, value, onPress }: IPreferenceRow) => (
 );
 
 const PreferencesScreen = () => {
-    const insets = useSafeAreaInsets();
     const { user } = useUserStore();
     const { setError } = useAppContext();
     const { data: userData, isPending, isError } = useGetUserQuery(user?.uid);
@@ -188,7 +187,7 @@ const PreferencesScreen = () => {
             onPress: () => setStaminaPickerVisible(true)
         },
         {
-            icon: <MaterialIcons name="priority-high" size={22} style={tw`text-gray-600`} />,
+            icon: <MaterialIcons name="task" size={22} style={tw`text-gray-600`} />,
             label: "Priorities",
             value: priorityActivities.length > 2 ? 
                 priorityActivities.slice(0, 2).join(", ") + "..." :
@@ -196,7 +195,7 @@ const PreferencesScreen = () => {
             onPress: () => setPriorityPickerVisible(true)
         },
         {
-            icon: <Ionicons name="time-outline" size={22} style={tw`text-gray-600`} />,
+            icon: <MaterialCommunityIcons name="account-clock" size={22} style={tw`text-gray-600`} />,
             label: "Day structure",
             value: dayStructure,
             onPress: () => setDayStructurePickerVisible(true)
@@ -204,27 +203,24 @@ const PreferencesScreen = () => {
     ];
 
     return (
-        <View style={tw`flex-1 bg-purple-50`}>
-            <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />
-            <View style={[tw`flex-1 bg-zinc-100 rounded-t-3xl`, styles.containerShadow]}>
-                <View style={tw`px-4 py-6`}>
-                    <View style={tw`flex-row justify-between items-center mb-8`}>
-                        <View style={tw`w-1/3`}>
-                            <TouchableOpacity 
-                                onPress={() => router.back()}
-                                style={tw`mr-4`}
-                            >
-                                <Ionicons name="chevron-back" size={24} style={tw`text-gray-950`} />
-                            </TouchableOpacity>
-                        </View>
-                        <Text style={tw`text-2xl font-semibold`}>Preferences</Text>
-                        <View style={tw`w-1/3`} />
+        <ScreenWrapper>
+            <View style={tw`px-4 py-6`}>
+                <View style={tw`flex-row justify-between items-center mb-8`}>
+                    <View style={tw`w-1/3`}>
+                        <TouchableOpacity 
+                            onPress={() => router.back()}
+                            style={tw`mr-4`}
+                        >
+                            <Ionicons name="chevron-back" size={24} style={tw`text-gray-950`} />
+                        </TouchableOpacity>
                     </View>
-
-                    {preferences.map((pref, index) => (
-                        <PreferenceRow key={index} {...pref} />
-                    ))}
+                    <Text style={tw`text-2xl font-semibold`}>Preferences</Text>
+                    <View style={tw`w-1/3`} />
                 </View>
+
+                {preferences.map((pref, index) => (
+                    <PreferenceRow key={index} {...pref} />
+                ))}
             </View>
 
             <TimePickerBottomSheet
@@ -233,7 +229,6 @@ const PreferencesScreen = () => {
                     setTimePickerVisible(false);
                     setSelectedTimeType(null);
                 }}
-                title={selectedTimeType === "start" ? "Start time" : "End time"}
                 initialTime={selectedTimeType === "start" ? 
                     userData.onboardingInfo.startDayTime : 
                     userData.onboardingInfo.endDayTime
@@ -264,17 +259,8 @@ const PreferencesScreen = () => {
                 initialValues={userData.onboardingInfo.priorityActivities}
                 onValuesSelected={handlePriorityActivitiesSelected}
             />
-        </View>
+        </ScreenWrapper>
     );
 };
-
-const styles = StyleSheet.create({
-    containerShadow: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
-});
 
 export default PreferencesScreen;
