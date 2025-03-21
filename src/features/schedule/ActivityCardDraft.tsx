@@ -31,9 +31,9 @@
 // const getPriorityLabel = (priority: ActivityPriority) => {
 //     switch (priority) {
 //     case "must_do":
-//         return "🔥 Must Do Now";
+//         return "🔥 Must Do";
 //     case "get_it_done":
-//         return "⚡️ Get It Done";
+//         return "⚡️ Just Do It";
 //     case "nice_to_have":
 //         return "💙 Nice to Do";
 //     }

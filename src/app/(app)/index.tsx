@@ -104,15 +104,23 @@ const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
         router.push(`/ai-planner?date=${currentDate.toISOString()}`);
     };
 
+    const handleProfilePress = () => {
+        router.push("/profile");
+    };
+
+    const handleBacklogPress = () => {
+        router.push("/backlog");
+    };
+
     return (
         <View style={tw`flex-row ml-4`}>
-            <TouchableOpacity style={tw`mr-4`}>
+            <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress}>
                 <FontAwesome name="inbox" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
             <TouchableOpacity style={tw`mr-4`} onPress={handleAiPlannerPress}>
                 <Ionicons name="sparkles" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleProfilePress}>
                 <Ionicons name="settings-sharp" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
         </View>

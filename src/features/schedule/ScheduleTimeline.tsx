@@ -98,7 +98,7 @@ const ScheduleTimeline = ({
                 }
             }, 500);
         }
-    }, [currentTime, startDayHour, endDayHour, activities]);
+    });
     
     const getGapBetweenActivities = (activity1: IActivity, activity2: IActivity) => {
         const activity1EndMinutes = timeToMinutes(activity1.endTime);

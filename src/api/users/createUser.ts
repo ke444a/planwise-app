@@ -1,4 +1,4 @@
-import { IAuthUser } from "@/hooks/useAuth";
+import { IAuthUser } from "@/context/AuthContext";
 import { getFirestore, doc, setDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
