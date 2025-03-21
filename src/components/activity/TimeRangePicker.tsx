@@ -4,7 +4,7 @@ import tw from "twrnc";
 
 interface TimeRangePickerProps {
     onTimeSelected?: (_time: { start: string; end: string }) => void;
-    initialTime?: string;
+    initialTime: string;
     durationMinutes: number;
 }
 
@@ -39,7 +39,7 @@ const addMinutesToTime = (time: string, minutes: number): string => {
 
 const TimeRangePicker = ({ 
     onTimeSelected, 
-    initialTime = "09:00",
+    initialTime,
     durationMinutes
 }: TimeRangePickerProps) => {
     const [selectedTime, setSelectedTime] = useState(initialTime);
@@ -49,14 +49,29 @@ const TimeRangePicker = ({
     // Calculate end time based on selected time and duration
     const endTime = addMinutesToTime(selectedTime, durationMinutes);
 
+    // Update selectedTime when initialTime changes
     useEffect(() => {
-        setTimeout(() => {
+        if (initialTime && TIME_SLOTS.includes(initialTime)) {
+            setSelectedTime(initialTime);
+            const index = TIME_SLOTS.indexOf(initialTime);
             flatListRef.current?.scrollToOffset({
-                offset: initialIndex * ITEM_HEIGHT,
-                animated: false
+                offset: index * ITEM_HEIGHT,
+                animated: true
             });
-        }, 100);
-    }, [initialIndex]);
+        }
+    }, [initialTime]);
+
+    // Initial scroll setup - only if we have a valid initial time
+    useEffect(() => {
+        if (initialIndex !== -1) {
+            setTimeout(() => {
+                flatListRef.current?.scrollToOffset({
+                    offset: initialIndex * ITEM_HEIGHT,
+                    animated: false
+                });
+            }, 100);
+        }
+    }, []); // Run only once on mount
 
     const getItemLayout = (_: any, index: number) => ({
         length: ITEM_HEIGHT,

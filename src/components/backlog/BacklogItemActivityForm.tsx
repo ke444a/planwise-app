@@ -37,30 +37,33 @@ export const BacklogItemActivityForm = ({
 }: ActivityDetailsFormProps) => {
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
     const [subtaskInput, setSubtaskInput] = useState("");
-    const [activityDetails, setActivityDetails] = useState<Omit<IActivity, "isCompleted" | "id">>({
-        title: "",
-        type: "misc",
-        startTime: "09:00",
-        endTime: "09:15",
-        duration: 15,
-        priority: "must_do",
-        staminaCost: 0,
-        subtasks: [],
+    const [activityDetails, setActivityDetails] = useState<Omit<IActivity, "isCompleted" | "id">>(() => {
+        const isActivity = initialData?.itemType === "activity";
+        return {
+            title: initialData?.title || "",
+            type: isActivity && initialData.type ? initialData.type : "misc",
+            startTime: isActivity && initialData.startTime ? initialData.startTime : "12:00",
+            endTime: isActivity && initialData.endTime ? initialData.endTime : "12:15",
+            duration: initialData?.duration || 15,
+            priority: isActivity && initialData.priority ? initialData.priority : "must_do",
+            staminaCost: isActivity && typeof initialData.staminaCost === "number" ? initialData.staminaCost : 0,
+            subtasks: initialData?.subtasks || [],
+        };
     });
 
     useEffect(() => {
         if (initialData) {
             setActivityDetails(prev => ({
                 ...prev,
-                title: initialData.title || "",
-                duration: initialData.duration || 15,
-                subtasks: initialData.subtasks || [],
+                title: initialData.title || prev.title,
+                duration: initialData.duration || prev.duration,
+                subtasks: initialData.subtasks || prev.subtasks,
                 ...(initialData.itemType === "activity" ? {
-                    type: initialData.type,
-                    priority: initialData.priority,
-                    staminaCost: initialData.staminaCost,
-                    startTime: initialData.startTime,
-                    endTime: initialData.endTime,
+                    type: initialData.type || prev.type,
+                    priority: initialData.priority || prev.priority,
+                    staminaCost: typeof initialData.staminaCost === "number" ? initialData.staminaCost : prev.staminaCost,
+                    startTime: initialData.startTime || prev.startTime,
+                    endTime: initialData.endTime || prev.endTime,
                 } : {}),
             }));
         }

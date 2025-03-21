@@ -35,29 +35,29 @@ export const ActivityForm = ({
 }: ActivityFormProps) => {
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
     const [subtaskInput, setSubtaskInput] = useState("");
-    const [activityDetails, setActivityDetails] = useState<Omit<IActivity, "isCompleted" | "id">>({
-        title: "",
-        type: "misc",
-        startTime: "09:00",
-        endTime: "09:15",
-        duration: 15,
-        priority: "must_do",
-        staminaCost: 0,
-        subtasks: [],
-    });
+    const [activityDetails, setActivityDetails] = useState<Omit<IActivity, "isCompleted" | "id">>(() => ({
+        title: initialData?.title || "",
+        type: initialData?.type || "misc",
+        startTime: initialData?.startTime || "12:00",
+        endTime: initialData?.endTime || "12:15",
+        duration: initialData?.duration || 15,
+        priority: initialData?.priority || "must_do",
+        staminaCost: initialData?.staminaCost || 0,
+        subtasks: initialData?.subtasks || [],
+    }));
 
     useEffect(() => {
         if (initialData) {
             setActivityDetails(prev => ({
                 ...prev,
-                title: initialData.title || "",
-                type: initialData.type || "misc",
-                startTime: initialData.startTime || "09:00",
-                endTime: initialData.endTime || "09:15",
-                duration: initialData.duration || 15,
-                priority: initialData.priority || "must_do",
-                staminaCost: initialData.staminaCost || 0,
-                subtasks: initialData.subtasks || [],
+                title: initialData.title || prev.title,
+                type: initialData.type || prev.type,
+                startTime: initialData.startTime || prev.startTime,
+                endTime: initialData.endTime || prev.endTime,
+                duration: initialData.duration || prev.duration,
+                priority: initialData.priority || prev.priority,
+                staminaCost: initialData.staminaCost || prev.staminaCost,
+                subtasks: initialData.subtasks || prev.subtasks,
             }));
         }
     }, [initialData]);
