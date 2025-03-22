@@ -32,10 +32,11 @@ const ActivityTypeAndTitlePicker = ({
             </TouchableOpacity>
             <View style={tw`flex-1`}>
                 <TextInput
-                    style={tw`border-b border-gray-300 text-xl text-gray-950 mb-3 py-1`}
+                    style={tw`border-b border-gray-300 text-xl text-gray-950 mb-3 py-1a`}
                     value={title}
                     onChangeText={onTitleChange}
                     placeholder="What?"
+                    placeholderTextColor="#4b5563"
                 />
                 <Text style={tw`text-gray-500 text-sm font-medium`}>{ACTIVITY_TYPE_TO_STR[type]}</Text>
             </View>

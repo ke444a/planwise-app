@@ -13,6 +13,7 @@ import {
 } from "@/components/activity";
 import { createNewSubtask } from "@/utils/createNewSubtask";
 import { ButtonWithIcon } from "../ui/ButtonWithIcon";
+import { addMinutesToTime } from "@/utils/addMinutesToTime";
 
 interface ActivityDetailsFormProps {
     initialData: Partial<IBacklogItem>;
@@ -132,7 +133,14 @@ export const BacklogItemActivityForm = ({
 
                 <DurationSection
                     duration={activityDetails.duration}
-                    onDurationChange={(value) => setActivityDetails(prev => ({ ...prev, duration: value }))}
+                    onDurationChange={(value) => {
+                        const newEndTime = addMinutesToTime(activityDetails.startTime, value);
+                        setActivityDetails(prev => ({ 
+                            ...prev, 
+                            duration: value,
+                            endTime: newEndTime
+                        }));
+                    }}
                 />
 
                 <View>

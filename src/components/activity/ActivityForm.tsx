@@ -13,6 +13,7 @@ import {
 } from "@/components/activity";
 import { createNewSubtask } from "@/utils/createNewSubtask";
 import { ButtonWithIcon } from "@/components/ui/ButtonWithIcon";
+import { addMinutesToTime } from "@/utils/addMinutesToTime";
 
 interface ActivityFormProps {
     initialData?: Partial<IActivity>;
@@ -123,7 +124,14 @@ export const ActivityForm = ({
 
                 <DurationSection
                     duration={activityDetails.duration}
-                    onDurationChange={(value) => setActivityDetails(prev => ({ ...prev, duration: value }))}
+                    onDurationChange={(value) => {
+                        const newEndTime = addMinutesToTime(activityDetails.startTime, value);
+                        setActivityDetails(prev => ({ 
+                            ...prev, 
+                            duration: value,
+                            endTime: newEndTime
+                        }));
+                    }}
                 />
 
                 <View>

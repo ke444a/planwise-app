@@ -16,6 +16,7 @@ import { useCompleteActivityMutation } from "@/api/schedules/completeActivity";
 import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
 import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 
 const ScheduleScreen = () => {
@@ -104,7 +105,7 @@ const ScheduleScreen = () => {
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />            
             <View style={tw`flex-row items-center justify-between px-4`}>
                 <HeaderStaminaBar currentStamina={currentStamina} maxStamina={userData.maxStamina} />
-                <ScheduleButtonsPanel currentDate={currentDate} />
+                <ScheduleButtonsPanel />
             </View>
             
             <HeaderDateNavigation 
@@ -131,18 +132,18 @@ const ScheduleScreen = () => {
                     styles.floatingButton
                 ]}
                 onPress={() => {
-                    router.push("/activity/add");
+                    router.push(`/ai-planner?date=${currentDate.toISOString()}`);
                 }}
             >
-                <MaterialCommunityIcons name="plus" size={35} style={tw`text-white`} />
+                <MaterialCommunityIcons name="robot" size={35} style={tw`text-white`} />
             </TouchableOpacity>
         </View>
     );
 };
 
-const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
-    const handleAiPlannerPress = () => {
-        router.push(`/ai-planner?date=${currentDate.toISOString()}`);
+const ScheduleButtonsPanel = () => {
+    const handleCreateActivityPress = () => {
+        router.push("/activity/add");
     };
 
     const handleProfilePress = () => {
@@ -155,11 +156,11 @@ const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
 
     return (
         <View style={tw`flex-row ml-4`}>
+            <TouchableOpacity style={tw`mr-4`} onPress={handleCreateActivityPress}>
+                <AntDesign name="pluscircle" size={24} style={tw`text-gray-950`} />
+            </TouchableOpacity>
             <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress}>
                 <FontAwesome name="inbox" size={24} style={tw`text-gray-950`} />
-            </TouchableOpacity>
-            <TouchableOpacity style={tw`mr-4`} onPress={handleAiPlannerPress}>
-                <Ionicons name="sparkles" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleProfilePress}>
                 <Ionicons name="settings-sharp" size={24} style={tw`text-gray-950`} />

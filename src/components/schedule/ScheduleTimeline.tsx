@@ -120,7 +120,7 @@ const ScheduleTimeline = ({
     const getElapsedTimePosition = () => {
         const now = new Date();
         const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
+        const currentMinute = now.getMinutes() + 30;
         
         // If current time is not within day hours, return null
         if (currentHour < startDayHour || currentHour > endDayHour) {
