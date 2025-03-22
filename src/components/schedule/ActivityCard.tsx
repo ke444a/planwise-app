@@ -37,6 +37,23 @@ const getIsCurrentActivity = (startTime: string, endTime: string): boolean => {
     return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes;
 };
 
+const getActivityProgress = (startTime: string, endTime: string): number => {
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTotalMinutes = currentHours * 60 + currentMinutes;
+    
+    const startTotalMinutes = timeToMinutes(startTime);
+    const endTotalMinutes = timeToMinutes(endTime);
+    
+    if (currentTotalMinutes < startTotalMinutes) return 0;
+    if (currentTotalMinutes >= endTotalMinutes) return 100;
+    
+    const totalDuration = endTotalMinutes - startTotalMinutes;
+    const elapsed = currentTotalMinutes - startTotalMinutes;
+    return (elapsed / totalDuration) * 100;
+};
+
 interface ActivityCardProps {
     activity: IActivity;
     iconHeight: number;
@@ -45,6 +62,7 @@ interface ActivityCardProps {
     onActivityDelete: (_activity: IActivity) => void;
     onActivityEdit: (_activity: IActivity) => void;
     onActivityMoveToBacklog: (_activity: IActivity) => void;
+    isPast?: boolean;
 }
 
 const ActivityCard = ({ 
@@ -54,10 +72,12 @@ const ActivityCard = ({
     onActivityComplete,
     onActivityDelete,
     onActivityEdit,
-    onActivityMoveToBacklog
+    onActivityMoveToBacklog,
+    isPast = false
 }: ActivityCardProps) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const isCurrentActivity = getIsCurrentActivity(activity.startTime, activity.endTime);
+    const activityProgress = isCurrentActivity ? getActivityProgress(activity.startTime, activity.endTime) : 0;
     const checkmarkColor = getActivityCheckmarkColor(activity.isCompleted, activity.priority);
     
     return (
@@ -68,16 +88,41 @@ const ActivityCard = ({
                     onPress={() => setIsModalVisible(true)}
                 >
                     <View style={tw`relative`}>
+                        {/* Icon background with progress indicator */}
                         <View 
                             style={[
-                                tw`w-[50px] rounded-full bg-slate-200 flex items-center justify-center z-10`,
+                                tw`w-[50px] rounded-full items-center justify-center z-10 overflow-hidden`,
                                 { height: iconHeight }
                             ]}
                         >
-                            <ActivityIcon 
-                                activityType={activity.type} 
-                                activityPriority={activity.priority} 
-                            />
+                            {/* Background color layer */}
+                            <View style={[
+                                tw`absolute inset-0 bg-slate-200`,
+                            ]} />
+                            
+                            {/* Progress fill for current activity */}
+                            {isCurrentActivity && (
+                                <View 
+                                    style={[
+                                        tw`absolute bg-purple-200 left-0 top-0 right-0`,
+                                        { height: `${activityProgress}%` }
+                                    ]}
+                                />
+                            )}
+                            
+                            {/* Past activity fill */}
+                            {isPast && (
+                                <View style={tw`absolute inset-0 bg-purple-200`} />
+                            )}
+                            
+                            {/* Icon centered on top */}
+                            <View style={tw`z-10`}>
+                                <ActivityIcon 
+                                    activityType={activity.type} 
+                                    activityPriority={activity.priority} 
+                                    color={isPast ? "text-white" : undefined}
+                                />
+                            </View>
                         </View>
                     </View>
                     <View style={tw`ml-3 flex-1`}>
@@ -101,22 +146,22 @@ const ActivityCard = ({
                         </Text>
                         
                         {/* Bottom row with stamina, priority, and subtasks */}
-                        <View style={tw`flex-row flex-wrap gap-2 max-w-[200px] items-center`}>
-                            <View style={tw`flex-row items-center rounded-full p-1 border border-gray-500`}>
-                                <Text style={tw`text-gray-500 font-medium mr-1`}>{activity.staminaCost}</Text>
-                                <Ionicons name="flash" size={16} style={tw`text-gray-500`} />
-                            </View>
-                            {activity.priority !== "routine" && (
-                                <View style={tw`rounded-full p-1 border border-gray-500`}>
-                                    <Text style={tw`font-medium text-gray-500`}>{getPriorityLabel(activity.priority)}</Text>
-                                </View>
-                            )}
+                        <View style={tw`flex-row flex-wrap gap-2 max-w-[220px] items-center`}>
                             {activity.subtasks && activity.subtasks.length > 0 && (
-                                <View style={tw`flex-row items-center border border-gray-500 rounded-full p-1`}>
+                                <View style={tw`flex-row items-center p-1`}>
                                     <Text style={tw`text-gray-500 font-medium`}>
                                         {activity.subtasks.filter(task => task.isCompleted).length}/{activity.subtasks.length}
                                     </Text>
                                     <Ionicons name="checkbox" size={16} style={tw`ml-1 text-gray-500`} />
+                                </View>
+                            )}
+                            <View style={tw`flex-row items-center p-1`}>
+                                <Text style={tw`text-gray-500 font-medium mr-1`}>{activity.staminaCost}</Text>
+                                <Ionicons name="flash" size={16} style={tw`text-gray-500`} />
+                            </View>
+                            {activity.priority !== "routine" && (
+                                <View style={tw`p-1`}>
+                                    <Text style={tw`font-medium text-gray-500`}>{getPriorityLabel(activity.priority)}</Text>
                                 </View>
                             )}
                         </View>

@@ -54,7 +54,7 @@ export const PRIORITY_OPTIONS: IPriorityOption[] = [
     {
         value: "get_it_done",
         label: "Get It Done",
-        emoji: "⚡️"
+        emoji: "💪"
     },
     {
         value: "nice_to_have",

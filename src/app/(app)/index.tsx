@@ -8,7 +8,7 @@ import HeaderDateNavigation from "@/components/schedule/HeaderDateNavigation";
 import ScheduleTimeline from "@/components/schedule/ScheduleTimeline";
 import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
-import { Redirect, useRouter } from "expo-router";
+import { Redirect, router, useRouter } from "expo-router";
 import ErrorModal from "@/components/ui/ErrorModal";
 import { IError } from "@/context/AppContext";
 import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
@@ -16,6 +16,7 @@ import { useCompleteActivityMutation } from "@/api/schedules/completeActivity";
 import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
 import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
 
 const ScheduleScreen = () => {
     const { user } = useUserStore();
@@ -49,35 +50,6 @@ const ScheduleScreen = () => {
     const startDayHour = parseInt(userData.onboardingInfo.startDayTime.split(":")[0]);
     const endDayHour = parseInt(userData.onboardingInfo.endDayTime.split(":")[0]);
     const currentStamina = scheduleData.reduce((acc, activity) => acc + activity.staminaCost, 0);
-    const activitiesWithSpecials = scheduleData.length > 0 
-        ? [
-            {
-                id: "day_start",
-                title: "Wake Up",
-                startTime: userData.onboardingInfo.startDayTime,
-                endTime: userData.onboardingInfo.startDayTime,
-                duration: 0,
-                staminaCost: 0,
-                type: "life_maintenance" as const,
-                priority: "routine" as const,
-                isCompleted: false,
-                subtasks: []
-            },
-            ...scheduleData,
-            {
-                id: "day_end",
-                title: "Wind Down",
-                startTime: userData.onboardingInfo.endDayTime,
-                endTime: userData.onboardingInfo.endDayTime,
-                duration: 0,
-                staminaCost: 0,
-                type: "life_maintenance" as const,
-                priority: "routine" as const,
-                isCompleted: false,
-                subtasks: []
-            }
-        ]
-        : [];
 
     const handleActivityComplete = (activity: IActivity) => {
         if (!activity.id || !user?.uid) return;
@@ -144,7 +116,7 @@ const ScheduleScreen = () => {
                 styles.scheduleContainerShadow
             ]}>
                 <ScheduleTimeline 
-                    activities={activitiesWithSpecials}
+                    activities={scheduleData}
                     startDayHour={startDayHour}
                     endDayHour={endDayHour}
                     onActivityComplete={handleActivityComplete}
@@ -169,8 +141,6 @@ const ScheduleScreen = () => {
 };
 
 const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
-    const router = useRouter();
-
     const handleAiPlannerPress = () => {
         router.push(`/ai-planner?date=${currentDate.toISOString()}`);
     };
