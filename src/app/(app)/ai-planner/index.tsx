@@ -3,15 +3,22 @@ import tw from "twrnc";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import AiCapabilityList from "@/components/ai-planner/AiCapabilityList";
-import ChatWindow from "@/components/ai-planner/ChatWindow";
 import { useAiChat, IChatMessage } from "@/hooks/useAiChat";
-import ChatInput from "@/components/ai-planner/ChatInput";
 import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
 import { IError } from "@/context/AppContext";
 import ErrorModal from "@/components/ui/ErrorModal";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
+import { AiCapabilityList, ChatInput, ChatWindow } from "@/components/ai-chat";
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+};
 
 const AiPlannerScreen = () => {
     const { user } = useUserStore();
@@ -29,15 +36,6 @@ const AiPlannerScreen = () => {
         };
         return <ErrorModal error={errorObj} handleModalClose={() => {}} />;
     }
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        });
-    };
 
     const handleSendMessage = (message: string) => {
         setIsConversationActive(true);
@@ -58,7 +56,9 @@ const AiPlannerScreen = () => {
                     <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
                 </TouchableOpacity>
             </View>
-            {isConversationActive ? <ChatWindow messages={messages} date={new Date(date as string)} /> : <AiCapabilityList />}
+            {isConversationActive ? 
+                <ChatWindow messages={messages} date={new Date(date as string)} /> : 
+                <AiCapabilityList />}
             <ChatInput onSendMessage={handleSendMessage} />
         </ScreenWrapper>
     );

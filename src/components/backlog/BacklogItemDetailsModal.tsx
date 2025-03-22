@@ -64,7 +64,7 @@ const BacklogItemDetailsModal = ({
                             <Text style={tw`text-gray-500 text-base`}>
                                 {getActivityDurationLabel(item.duration)}
                             </Text>
-                            <Text style={tw`text-2xl font-semibold text-gray-950`}>{item.title}</Text>
+                            <Text style={tw`text-2xl font-semibold text-gray-950 max-w-[250px] shrink`}>{item.title}</Text>
                         </View>
                     </View>
                     <TouchableOpacity onPress={onClose}>

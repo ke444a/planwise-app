@@ -68,7 +68,7 @@ const ProfileScreen = () => {
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
                 <View style={tw`flex-row items-center justify-between mb-8`}>
-                    <Text style={tw`text-2xl font-semibold`}>Your Profile</Text>
+                    <Text style={tw`text-2xl font-semibold`}>My Profile</Text>
                     <TouchableOpacity onPress={() => router.back()}>
                         <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
                     </TouchableOpacity>

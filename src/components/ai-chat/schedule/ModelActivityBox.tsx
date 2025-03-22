@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
-import { ActivityItem } from "./ActivityItem";
+import { ActivityItem } from "./GeneratedActivityItem";
 
 interface Props {
     activities: IActivity[];

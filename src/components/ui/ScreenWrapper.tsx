@@ -13,7 +13,7 @@ const ScreenWrapper = ({ children }: ScreenWrapperProps) => {
         <View style={tw`flex-1 bg-purple-50`}>
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />
             <View style={[
-                tw`flex-1 bg-white rounded-t-3xl`,
+                tw`flex-1 bg-zinc-100 rounded-t-3xl`,
                 styles.containerShadow
             ]}>
                 {children}

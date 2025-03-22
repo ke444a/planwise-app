@@ -25,7 +25,7 @@ export const useAiTranscript = () => {
                 { inlineData: { mimeType: "audio/mp4", data: audioUriBase64 } }
             ]);
             const transcript = response.response.text();
-            return transcript;
+            return transcript.trim();
         } catch (error) {
             console.error("Error transcribing user speech", error);
             setError({

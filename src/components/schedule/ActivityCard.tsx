@@ -7,12 +7,7 @@ import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import { useState } from "react";
 import ActivityDetailsModal from "@/components/schedule/ActivityDetailsModal";
 import ActivityIcon from "../activity/ActivityIcon";
-import { PRIORITY_OPTIONS } from "@/libs/constants";
-
-const getPriorityLabel = (priority: ActivityPriority) => {
-    const priorityOption = PRIORITY_OPTIONS.find(p => p.value === priority);
-    return priorityOption ? `${priorityOption.emoji} ${priorityOption.label}` : "";
-};
+import { getPriorityLabel } from "@/utils/getPriorityLabel";
 
 const getActivityCheckmarkColor = (isCompleted: boolean, priority: ActivityPriority) => {
     switch (priority) {

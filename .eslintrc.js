@@ -5,7 +5,24 @@ module.exports = {
     rules: {
         "semi": ["error", "always"],
         "quotes": ["error", "double"],
-        "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-        "indent": ["error", 4]
+        "no-unused-vars": ["error", { 
+            argsIgnorePattern: "^_",
+            varsIgnorePattern: "^_",
+            caughtErrors: "all",
+            caughtErrorsIgnorePattern: "^_"
+        }],
+        "indent": ["error", 4],
+        "@typescript-eslint/no-unused-vars": [
+            "error",
+            {
+                "args": "all",
+                "argsIgnorePattern": "^_",
+                "caughtErrors": "all",
+                "caughtErrorsIgnorePattern": "^_",
+                "destructuredArrayIgnorePattern": "^_",
+                "varsIgnorePattern": "^_",
+                "ignoreRestSiblings": true
+            }
+        ]
     },
 };

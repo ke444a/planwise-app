@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { View, Text, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import tw from "twrnc";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -16,20 +16,7 @@ import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import { useUserStore } from "@/libs/userStore";
 import ActivityIcon from "@/components/activity/ActivityIcon";
 import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
-
-
-const getPriorityLabel = (priority: ActivityPriority) => {
-    switch (priority) {
-    case "must_do":
-        return "🔥 Must Do";
-    case "get_it_done":
-        return "⚡️ Get It Done";
-    case "nice_to_have":
-        return "💙 Nice to Do";
-    case "routine":
-        return "🔄 Routine";
-    }
-};
+import { getPriorityLabel } from "@/utils/getPriorityLabel";
 
 interface ActivityItemProps {
     activity: IActivity;

@@ -1,4 +1,4 @@
-import { View, TextInput } from "react-native";
+import { View, TextInput, Text, ScrollView } from "react-native";
 import tw from "twrnc";
 import { useState, useEffect } from "react";
 import { ButtonWithIcon } from "@/components/ui/ButtonWithIcon";
@@ -65,8 +65,8 @@ export const BacklogItemDraftForm = ({
 
     return (
         <>
-            <View style={tw`px-4 flex-1`}>
-                <View style={tw`mb-10 flex-row items-center`}>
+            <ScrollView style={tw`px-4 flex-1`} contentContainerStyle={tw`gap-y-10`} showsVerticalScrollIndicator={false}>
+                <View style={tw`flex-row items-center`}>
                     <View style={tw`h-14 w-14 bg-slate-200 rounded-lg items-center justify-center mr-3`}>
                         <MaterialCommunityIcons name="text-box-outline" size={30} style={tw`text-gray-600`} />
                     </View>
@@ -75,6 +75,7 @@ export const BacklogItemDraftForm = ({
                         value={draftDetails.title}
                         onChangeText={(text) => setDraftDetails(prev => ({ ...prev, title: text }))}
                         placeholder="What?"
+                        placeholderTextColor="#4b5563"
                     />
                 </View>
 
@@ -82,17 +83,19 @@ export const BacklogItemDraftForm = ({
                     duration={draftDetails.duration}
                     onDurationChange={(value) => setDraftDetails(prev => ({ ...prev, duration: value }))}
                 />
+                <View>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>Any Subtasks?</Text>
+                    <SubtasksList
+                        subtasks={draftDetails.subtasks}
+                        subtaskInput={subtaskInput}
+                        onSubtaskInputChange={setSubtaskInput}
+                        onSubtaskSubmit={handleSubtaskSubmit}
+                        onSubtaskRemove={handleSubtaskRemove}
+                    />
+                </View>
+            </ScrollView>
 
-                <SubtasksList
-                    subtasks={draftDetails.subtasks}
-                    subtaskInput={subtaskInput}
-                    onSubtaskInputChange={setSubtaskInput}
-                    onSubtaskSubmit={handleSubtaskSubmit}
-                    onSubtaskRemove={handleSubtaskRemove}
-                />
-            </View>
-
-            <View style={tw`px-4`}>
+            <View style={tw`px-4 mt-6 mb-12`}>
                 <ButtonWithIcon
                     label={submitButtonLabel}
                     onPress={onSubmit}

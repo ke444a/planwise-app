@@ -4,12 +4,6 @@ import { getVertexAI, getGenerativeModel } from "@react-native-firebase/vertexai
 import { useCallback, useState } from "react";
 import { SYSTEM_PROMPT, USER_PROMPT, SCHEDULE_SCHEMA } from "./useAiChat.prompt";
 
-export interface IChatMessage {
-    role: "user" | "model" | "schedule";
-    content: string;
-    timestamp: number;
-}
-
 export const useAiChat = (userOnboardingInfo?: IOnboardingInfo | null) => {
     const [messages, setMessages] = useState<IChatMessage[]>([]);
     const { setError } = useAppContext();
