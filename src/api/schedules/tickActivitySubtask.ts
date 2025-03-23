@@ -3,7 +3,8 @@ import {
     serverTimestamp,
     doc,
     getFirestore,
-    updateDoc
+    updateDoc,
+    getDoc
 } from "@react-native-firebase/firestore";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 
@@ -20,11 +21,11 @@ const tickActivitySubtask = async (
     const activityDocRef = doc(db, "schedules", uid, dateString, activityId);
 
     // Get the current activity data
-    const activityDoc = await activityDocRef.get();
-    if (!activityDoc.exists) {
+    const activityDocSnap = await getDoc(activityDocRef);
+    if (!activityDocSnap.exists) {
         throw new Error("Activity not found");
     }
-    const activityData = activityDoc.data();
+    const activityData = activityDocSnap.data();
     // Update the subtask
     const updatedSubtasks = activityData?.subtasks.map((subtask: ISubtask) => {
         if (subtask.id === subtaskId) {
