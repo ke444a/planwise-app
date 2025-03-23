@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HeaderStaminaBar from "@/components/schedule/HeaderStaminaBar";
 import HeaderDateNavigation from "@/components/schedule/HeaderDateNavigation";
 import ScheduleTimeline from "@/components/schedule/ScheduleTimeline";
-import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
 import { Redirect, router, useRouter } from "expo-router";
 import ErrorModal from "@/components/ui/ErrorModal";
@@ -20,11 +19,10 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 
 const ScheduleScreen = () => {
-    const { user } = useUserStore();
-    const { data: userData, isPending, isError } = useGetUserQuery(user?.uid);
+    const { data: userData, isPending, isError } = useGetUserQuery();
     const insets = useSafeAreaInsets();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const { data: scheduleData, isError: isScheduleError, isPending: isSchedulePending } = useGetScheduleForDayQuery(currentDate, user?.uid || "");
+    const { data: scheduleData, isError: isScheduleError, isPending: isSchedulePending } = useGetScheduleForDayQuery(currentDate);
     const router = useRouter();
 
     const { mutate: completeActivity } = useCompleteActivityMutation();
@@ -95,8 +93,7 @@ const ScheduleScreen = () => {
                 endTime: activity.endTime,
                 staminaCost: activity.staminaCost,
                 subtasks: activity.subtasks
-            },
-            uid: user.uid
+            }
         });
     };
 
@@ -132,7 +129,14 @@ const ScheduleScreen = () => {
                     styles.floatingButton
                 ]}
                 onPress={() => {
-                    router.push(`/ai-planner?date=${currentDate.toISOString()}`);
+                    router.push({
+                        pathname: "/ai-planner",
+                        params: {
+                            date: currentDate.toISOString(),
+                            currentStamina: currentStamina,
+                            maxStamina: userData.maxStamina
+                        }
+                    });
                 }}
             >
                 <MaterialCommunityIcons name="robot" size={35} style={tw`text-white`} />

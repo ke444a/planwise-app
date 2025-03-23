@@ -1,5 +1,6 @@
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 const getBacklogItem = async (itemId: string, uid: string): Promise<IBacklogItem | undefined> => {
     const db = getFirestore();
@@ -12,10 +13,14 @@ const getBacklogItem = async (itemId: string, uid: string): Promise<IBacklogItem
     return undefined;
 };
 
-export const useGetBacklogItemQuery = (itemId: string, uid: string) => {
+export const useGetBacklogItemQuery = (itemId: string) => {
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not authenticated");
+    }
     return useQuery({
-        queryKey: ["backlog", "item", itemId, uid],
-        queryFn: () => getBacklogItem(itemId, uid),
-        enabled: !!itemId && !!uid,
+        queryKey: ["backlog", "item", itemId, authUser.uid],
+        queryFn: () => getBacklogItem(itemId, authUser.uid),
+        enabled: !!itemId,
     });
 }; 

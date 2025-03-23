@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { 
     collection,
     getFirestore, 
@@ -16,15 +17,17 @@ const addActivityToSchedule = async (activity: IActivity, date: Date, uid: strin
 type Data = {
     activity: IActivity;
     date: Date;
-    uid: string;
 }
 
 export const useAddActivityToScheduleMutation = () => {
+    const { authUser } = useAuth();
+    if (!authUser) throw new Error("User not found");
     const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: ({ activity, date, uid }: Data) => addActivityToSchedule(activity, date, uid),
-        onMutate: async ({ activity, date, uid }) => {
-            const queryKey = ["schedule", date, uid];
+        mutationFn: ({ activity, date }: Data) => addActivityToSchedule(activity, date, authUser.uid),
+        onMutate: async ({ activity, date }) => {
+            const queryKey = ["schedule", date, authUser.uid];
             await queryClient.cancelQueries({ queryKey });
 
             const previousActivities = queryClient.getQueryData<IActivity[]>(queryKey) ?? [];
@@ -36,7 +39,7 @@ export const useAddActivityToScheduleMutation = () => {
                 return [activity];
             });
 
-            return { previousActivities, queryKey, uid, date };
+            return { previousActivities, queryKey, date };
         },
         onError: (_err, _variables, context) => {
             if (context) {
@@ -44,7 +47,7 @@ export const useAddActivityToScheduleMutation = () => {
             }
         },
         onSettled: (_data, _error, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, variables.uid] });
+            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, authUser.uid] });
         },
     });
 };

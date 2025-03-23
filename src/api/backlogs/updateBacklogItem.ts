@@ -1,12 +1,8 @@
 import { getFirestore, doc, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
-interface UpdateBacklogItemParams {
-    item: IBacklogItem;
-    uid: string;
-}
-
-const updateBacklogItem = async ({ item, uid }: UpdateBacklogItemParams) => {
+const updateBacklogItem = async (item: IBacklogItem, uid: string) => {
     const db = getFirestore();
     const backlogItemRef = doc(db, "backlog", uid, "items", item.id!);
 
@@ -29,12 +25,16 @@ const updateBacklogItem = async ({ item, uid }: UpdateBacklogItemParams) => {
 };
 
 export const useUpdateBacklogItemMutation = () => {
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not authenticated");
+    }
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: updateBacklogItem,
-        onMutate: async ({ item, uid }) => {
-            const queryKey = ["backlog", uid];
+        mutationFn: (item: IBacklogItem) => updateBacklogItem(item, authUser.uid),
+        onMutate: async (item) => {
+            const queryKey = ["backlog", authUser.uid];
             await queryClient.cancelQueries({ queryKey });
 
             const previousItems = queryClient.getQueryData<IBacklogItem[]>(queryKey) ?? [];
@@ -48,13 +48,13 @@ export const useUpdateBacklogItemMutation = () => {
 
             return { previousItems, queryKey };
         },
-        onError: (_err, _variables, context) => {
+        onError: (_err, _, context) => {
             if (context) {
                 queryClient.setQueryData(context.queryKey, context.previousItems);
             }
         },
-        onSettled: (_data, _error, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["backlog", variables.uid] });
+        onSettled: (_data, _error) => {
+            queryClient.invalidateQueries({ queryKey: ["backlog", authUser.uid] });
         },
     });
 }; 

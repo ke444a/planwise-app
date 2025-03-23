@@ -1,5 +1,7 @@
 import { getFirestore, collection, getDocs, query, orderBy } from "@react-native-firebase/firestore";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+
 
 const getScheduleForDay = async (date: Date, uid: string): Promise<IActivity[]> => {
     const db = getFirestore();
@@ -17,10 +19,15 @@ const getScheduleForDay = async (date: Date, uid: string): Promise<IActivity[]> 
     return activities;
 };
 
-export const useGetScheduleForDayQuery = (date: Date, uid: string) => {
+export const useGetScheduleForDayQuery = (date: Date) => {
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not authenticated");
+    }
+    
     return useQuery({
-        queryKey: ["schedule", date, uid],
-        queryFn: () => getScheduleForDay(date, uid),
+        queryKey: ["schedule", date, authUser.uid],
+        queryFn: () => getScheduleForDay(date, authUser.uid),
         // Sort activities by startTime
         select: (data) => {
             return data.sort((a, b) => {

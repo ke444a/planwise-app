@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { 
     serverTimestamp,
     doc,
@@ -40,7 +41,6 @@ const tickActivitySubtask = async (
 };
 
 type TickActivitySubtaskData = {
-    uid: string;
     date: Date;
     activityId: string;
     subtaskId: string;
@@ -48,20 +48,24 @@ type TickActivitySubtaskData = {
 }
 
 export const useTickActivitySubtaskMutation = () => {
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not authenticated");
+    }
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ uid, date, activityId, subtaskId, isCompleted }: TickActivitySubtaskData) => 
-            tickActivitySubtask(uid, date, activityId, subtaskId, isCompleted),
+        mutationFn: ({ date, activityId, subtaskId, isCompleted }: TickActivitySubtaskData) => 
+            tickActivitySubtask(authUser.uid, date, activityId, subtaskId, isCompleted),
         onMutate: async (variables) => {
             // Cancel any outgoing refetches
-            await queryClient.cancelQueries({ queryKey: ["schedule", variables.date, variables.uid] });
+            await queryClient.cancelQueries({ queryKey: ["schedule", variables.date, authUser.uid] });
 
             // Snapshot the previous value
-            const previousItems = queryClient.getQueryData<IActivity[]>(["schedule", variables.date, variables.uid]);
+            const previousItems = queryClient.getQueryData<IActivity[]>(["schedule", variables.date, authUser.uid]);
 
             // Optimistically update to the new value
-            queryClient.setQueryData<IActivity[]>(["schedule", variables.date, variables.uid], (old) => {
+            queryClient.setQueryData<IActivity[]>(["schedule", variables.date, authUser.uid], (old) => {
                 if (!old) return [];
 
                 return old.map(activity => {
@@ -84,10 +88,10 @@ export const useTickActivitySubtaskMutation = () => {
         },
         onError: (_error, variables, context) => {
             // If the mutation fails, roll back to the previous value
-            queryClient.setQueryData<IActivity[]>(["schedule", variables.date, variables.uid], context?.previousItems);
+            queryClient.setQueryData<IActivity[]>(["schedule", variables.date, authUser.uid], context?.previousItems);
         },
         onSettled: (_data, _error, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, variables.uid] });
+            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, authUser.uid] });
         },
     });
 };

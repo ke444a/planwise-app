@@ -1,146 +1,37 @@
-import { useState } from "react";
 import { View, Text, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import tw from "twrnc";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
-import Animated, { 
-    useAnimatedStyle, 
-    withTiming, 
-    useSharedValue,
-    interpolate,
-    Easing,
-    withSpring
-} from "react-native-reanimated";
-import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
-import { useUserStore } from "@/libs/userStore";
+import Animated from "react-native-reanimated";
 import ActivityIcon from "@/components/activity/ActivityIcon";
-import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
 import { getPriorityLabel } from "@/utils/getPriorityLabel";
+import { useGeneratedItemAnimations } from "@/hooks/useGeneratedItemAnimations";
 
 interface ActivityItemProps {
     activity: IActivity;
-    date: Date;
+    status: "idle" | "added" | "removed" | "backlog";
+    onAddToSchedule: () => void;
+    onRemove: () => void;
+    onAddToBacklog: () => void;
 }
 
-export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
-    const { user } = useUserStore();
-    const [showOptions, setShowOptions] = useState(false);
-    const [status, setStatus] = useState<"idle" | "added" | "removed" | "backlog">("idle");
-    const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
-    const { mutate: addActivityToSchedule } = useAddActivityToScheduleMutation();
-    const animation = useSharedValue(0);
-    const pressAnimation = useSharedValue(1);
-
-    const handlePressIn = () => {
-        pressAnimation.value = withSpring(0.97, {
-            damping: 15,
-            stiffness: 400,
-        });
-    };
-
-    const handlePressOut = () => {
-        pressAnimation.value = withSpring(1, {
-            damping: 15,
-            stiffness: 400,
-        });
-    };
-
-    const handleToggleOptions = () => {
-        if (status === "idle") {
-            setShowOptions(!showOptions);
-            animation.value = withTiming(showOptions ? 0 : 1, {
-                duration: 200,
-                easing: Easing.bezier(0.4, 0, 0.2, 1),
-            });
-        }
-    };
-
-    const pressStyle = useAnimatedStyle(() => {
-        return {
-            transform: [
-                { scale: pressAnimation.value },
-                { translateY: interpolate(pressAnimation.value, [0.97, 1], [1, 0]) }
-            ]
-        };
-    });
-
-    const optionsStyle = useAnimatedStyle(() => {
-        return {
-            opacity: animation.value,
-            height: interpolate(
-                animation.value,
-                [0, 1],
-                [0, 60],
-            ),
-            transform: [{
-                translateY: interpolate(
-                    animation.value,
-                    [0, 1],
-                    [-20, 0],
-                ),
-            }],
-        };
-    });
-
-    const handleAdd = () => {
-        if (!user?.uid) return;
-
-        // eslint-disable-next-line no-unused-vars
-        const { id, ...rest } = activity;
-        addActivityToSchedule({
-            activity: rest,
-            date: date,
-            uid: user.uid
-        }, {
-            onSuccess: () => {
-                setStatus("added");
-                setShowOptions(false);
-                animation.value = withTiming(0, {
-                    duration: 200,
-                    easing: Easing.bezier(0.4, 0, 0.2, 1),
-                });
-            },
-            onError: (error) => {
-                console.error(error);
-            }
-        });
-    };
-
-    const handleRemove = () => {
-        setStatus("removed");
-        setShowOptions(false);
-        animation.value = withTiming(0, {
-            duration: 200,
-            easing: Easing.bezier(0.4, 0, 0.2, 1),
-        });
-    };
-
-    const handleBacklog = () => {
-        if (!user?.uid) return;
-
-        // eslint-disable-next-line no-unused-vars
-        const { id, ...rest } = activity;
-        addItemToBacklog({
-            item: {
-                ...rest,
-                itemType: "activity"
-            },
-            uid: user.uid
-        }, {
-            onSuccess: () => {
-                setStatus("backlog");
-                setShowOptions(false);
-                animation.value = withTiming(0, {
-                    duration: 200,
-                    easing: Easing.bezier(0.4, 0, 0.2, 1),
-                });
-            },
-            onError: (error) => {
-                console.error(error);
-            }
-        });
-    };
+export const GeneratedActivityItem = ({ 
+    activity, 
+    status, 
+    onAddToSchedule, 
+    onRemove, 
+    onAddToBacklog 
+}: ActivityItemProps) => {
+    const { 
+        showOptions,
+        handlePressIn,
+        handlePressOut,
+        handleToggleOptions,
+        pressStyle,
+        optionsStyle,
+        contentStyle,
+    } = useGeneratedItemAnimations(status);
 
     return (
         <View>
@@ -151,18 +42,19 @@ export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
             >
                 <Animated.View style={[pressStyle]}>
                     <View style={[
-                        tw`flex-row items-center bg-slate-200 rounded-xl p-3`, 
-                        showOptions && tw`rounded-b-none`,
-                        (status !== "idle") && tw`bg-slate-100`
+                        tw`flex-row items-center bg-white rounded-xl p-3`, 
+                        showOptions && tw`rounded-b-none`
                     ]}>
-                        <ActivityIcon 
-                            activityType={activity.type} 
-                            activityPriority={activity.priority} 
-                            iconSize={32} 
-                        />
+                        <Animated.View style={contentStyle}>
+                            <ActivityIcon 
+                                activityType={activity.type} 
+                                activityPriority={activity.priority} 
+                                iconSize={32} 
+                            />
+                        </Animated.View>
 
                         {/* Content */}
-                        <View style={tw`flex-1 ml-4`}>
+                        <Animated.View style={[tw`flex-1 ml-4`, contentStyle]}>
                             <View style={tw`flex-row items-center justify-between`}>
                                 <Text style={[
                                     tw`text-gray-950 font-semibold text-base mb-1`,
@@ -194,13 +86,13 @@ export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
                                     </Text>
 
                                     {/* Bottom row with stamina and priority */}
-                                    <View style={tw`flex-row flex-wrap gap-2 items-center`}>
-                                        <View style={tw`flex-row items-center rounded-full p-1 border border-gray-500`}>
+                                    <View style={tw`flex-row flex-wrap gap-3 items-center`}>
+                                        <View style={tw`flex-row items-center`}>
                                             <Text style={tw`text-gray-500 font-medium mr-1 text-sm`}>{activity.staminaCost}</Text>
                                             <Ionicons name="flash" size={14} style={tw`text-gray-500`} />
                                         </View>
                                         {activity.priority !== "routine" && (
-                                            <View style={tw`rounded-full p-1 border border-gray-500`}>
+                                            <View>
                                                 <Text style={tw`font-medium text-gray-500 text-sm`}>
                                                     {getPriorityLabel(activity.priority)}
                                                 </Text>
@@ -209,15 +101,15 @@ export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
                                     </View>
                                 </>
                             )}
-                        </View>
+                        </Animated.View>
                     </View>
                 </Animated.View>
             </TouchableWithoutFeedback>
 
             <Animated.View style={[tw`overflow-hidden`, optionsStyle]}>
-                <View style={tw`flex-row justify-between p-2 bg-gray-400 rounded-b-xl`}>
+                <View style={tw`flex-row justify-between p-2 bg-purple-200 rounded-b-xl`}>
                     <TouchableOpacity 
-                        onPress={handleAdd}
+                        onPress={onAddToSchedule}
                         style={tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`}
                     >
                         <Ionicons name="add" size={20} style={tw`text-gray-950 mr-1`} />
@@ -225,7 +117,7 @@ export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity 
-                        onPress={handleRemove}
+                        onPress={onRemove}
                         style={tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`}
                     >
                         <Ionicons name="close" size={20} style={tw`text-gray-950 mr-1`} />
@@ -233,7 +125,7 @@ export const ActivityItem = ({ activity, date }: ActivityItemProps) => {
                     </TouchableOpacity>
 
                     <TouchableOpacity 
-                        onPress={handleBacklog}
+                        onPress={onAddToBacklog}
                         disabled={status === "backlog"}
                         style={[
                             tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`,
