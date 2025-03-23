@@ -5,7 +5,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
-import { timeToMinutes } from "@/utils/timeToMinutes";
+import { checkIsCurrentActivity } from "@/utils/checkIsCurrentActivity";
 import ActivityIcon from "../activity/ActivityIcon";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
@@ -24,16 +24,7 @@ interface ActivityDetailsModalProps {
     activityDate: Date;
 }
 
-const getIsCurrentActivity = (startTime: string, endTime: string): boolean => {
-    const now = new Date();
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const currentTotalMinutes = currentHours * 60 + currentMinutes;
-    
-    const startTotalMinutes = timeToMinutes(startTime);
-    const endTotalMinutes = timeToMinutes(endTime);
-    return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes;
-};
+
 
 const ActivityDetailsModal = ({ 
     activity,
@@ -47,7 +38,7 @@ const ActivityDetailsModal = ({
 }: ActivityDetailsModalProps) => {
     const { user } = useUserStore();
     const router = useRouter();
-    const isCurrentActivity = getIsCurrentActivity(activity.startTime, activity.endTime);
+    const isCurrentActivity = checkIsCurrentActivity(activity.startTime, activity.endTime, activityDate);
     const { mutate: tickSubtask } = useTickActivitySubtaskMutation();
 
     const handleFocusNow = () => {

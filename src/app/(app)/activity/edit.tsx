@@ -39,7 +39,6 @@ const EditActivityScreen = () => {
     useEffect(() => {
         if (activity) {
             const { id: _id, isCompleted: _isCompleted, ...details } = activity;
-            console.log("details", details);
             setActivityDetails(details);
         }
     }, [activity]);

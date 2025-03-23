@@ -1,38 +1,188 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { View, ScrollView, Dimensions } from "react-native";
 import tw from "twrnc";
 import ActivityCard from "./ActivityCard";
 import { timeToMinutes } from "@/utils/timeToMinutes";
 
 interface ScheduleTimelineProps {
-    startDayHour: number;
-    endDayHour: number;
-    activities: IActivity[];
-    scheduleDate: Date;
-    onActivityComplete?: (_activity: IActivity) => void;
-    onActivityDelete?: (_activity: IActivity) => void;
-    onActivityEdit?: (_activity: IActivity) => void;
-    onActivityMoveToBacklog?: (_activity: IActivity) => void;
+  startDayHour: number;
+  endDayHour: number;
+  activities: IActivity[];
+  scheduleDate: Date;
+  onActivityComplete?: (_activity: IActivity) => void;
+  onActivityDelete?: (_activity: IActivity) => void;
+  onActivityEdit?: (_activity: IActivity) => void;
+  onActivityMoveToBacklog?: (_activity: IActivity) => void;
 }
 
-const TOTAL_ACTIVITY_SIZE_BY_ROW = {
-    3: 90,
-    4: 120,
-    5: 150
-};
+// Constants
+const ACTIVITY_CARD_HEIGHT = 90;
 const PIXELS_PER_DURATION_MIN = 1.5;
 const PIXELS_PER_GAP_MIN = 0.9;
 const DEFAULT_ACTIVITY_GAP = 16;
 const MAX_ACTIVITY_GAP = 200;
 const MIN_ACTIVITY_ICON_HEIGHT = 52;
 
-const getActivityRows = (activity: IActivity) => {
-    let rows = 3;
-    if (activity.title.length >= 25) {
-        rows += 1;
-    }
-    return rows;
+// Calculate the display height for an activity’s icon
+const getActivityHeight = (activity: IActivity) => {
+    // Start with a minimum, and add some proportional height for durations > 15 min
+    return Math.max(
+        MIN_ACTIVITY_ICON_HEIGHT + (activity.duration - 15) * PIXELS_PER_DURATION_MIN,
+        MIN_ACTIVITY_ICON_HEIGHT
+    );
 };
+
+// Calculate the display gap (in pixels) between two activities
+const getGapBetweenActivities = (activity1: IActivity, activity2: IActivity) => {
+    const activity1EndMinutes = timeToMinutes(activity1.endTime);
+    const activity2StartMinutes = timeToMinutes(activity2.startTime);
+    const minutesBetween = activity2StartMinutes - activity1EndMinutes;
+
+    // If they're almost back-to-back (<= 15 minutes), use default gap
+    if (minutesBetween <= 15) {
+        return DEFAULT_ACTIVITY_GAP;
+    }
+    // Otherwise, scale but clamp to MAX_ACTIVITY_GAP
+    return Math.min(minutesBetween * PIXELS_PER_GAP_MIN, MAX_ACTIVITY_GAP);
+};
+
+// Identify if an activity is in the past
+const isActivityInPast = (activity: IActivity) => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+    const activityEndMinutes = timeToMinutes(activity.endTime);
+    return currentTimeInMinutes > activityEndMinutes;
+};
+
+interface TimelineSegment {
+  type: "activity" | "gap";
+  startMin: number;      // start time in minutes from midnight
+  endMin: number;        // end time in minutes from midnight
+  displayStart: number;  // starting pixel offset on the timeline
+  displayEnd: number;    // ending pixel offset on the timeline
+  activity?: IActivity;  // present if type = "activity"
+}
+
+/**
+ * Build an array of segments (activities and gaps), each with a time range and a display range.
+ * Large gaps get collapsed to a smaller or maximum height. Activities get a height
+ * based on duration.
+ */
+function buildSegments(activities: IActivity[]): TimelineSegment[] {
+    if (!activities || activities.length === 0) {
+        return [];
+    }
+
+    // Sort activities by startTime if not already
+    const sorted = [...activities].sort((a, b) =>
+        timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
+    );
+
+    const segments: TimelineSegment[] = [];
+    let currentDisplayOffset = 0;
+
+    for (let i = 0; i < sorted.length; i++) {
+        const act = sorted[i];
+        const startMin = timeToMinutes(act.startTime);
+        const endMin = timeToMinutes(act.endTime);
+        const activityHeight = getActivityHeight(act);
+
+        // Create the activity segment
+        const activitySegment: TimelineSegment = {
+            type: "activity",
+            startMin,
+            endMin,
+            displayStart: currentDisplayOffset,
+            displayEnd: currentDisplayOffset + activityHeight,
+            activity: act
+        };
+        segments.push(activitySegment);
+
+        // Move the display offset
+        currentDisplayOffset += activityHeight;
+
+        // If there is a next activity, create a gap segment
+        if (i < sorted.length - 1) {
+            const nextAct = sorted[i + 1];
+            const gapStartMin = endMin;
+            const gapEndMin = timeToMinutes(nextAct.startTime);
+
+            // Only create a gap if the next activity starts after this one ends
+            if (gapEndMin >= gapStartMin) {
+                const gapHeight = getGapBetweenActivities(act, nextAct);
+                const gapSegment: TimelineSegment = {
+                    type: "gap",
+                    startMin: gapStartMin,
+                    endMin: gapEndMin,
+                    displayStart: currentDisplayOffset,
+                    displayEnd: currentDisplayOffset + gapHeight
+                };
+                segments.push(gapSegment);
+
+                // Advance the display offset
+                currentDisplayOffset += gapHeight;
+            }
+        }
+    }
+
+    return segments;
+}
+
+/**
+ * Given the segments array, find where the current time falls
+ * and interpolate the display position (pixel offset).
+ */
+function getElapsedTimePosition(
+    segments: TimelineSegment[],
+    startDayHour: number,
+    endDayHour: number
+): number | null {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+
+    // If out of the schedule’s range, return null
+    if (currentHour < startDayHour || currentHour >= endDayHour) {
+        return null;
+    }
+    if (!segments.length) {
+        return null;
+    }
+
+    // Check if before the first segment
+    if (currentTimeInMinutes < segments[0].startMin) {
+        return 0;
+    }
+
+    // Check if after the last segment
+    const lastSegment = segments[segments.length - 1];
+    if (currentTimeInMinutes >= lastSegment.endMin) {
+        return lastSegment.displayEnd;
+    }
+
+    // Otherwise, find the segment that contains the current time
+    for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        if (currentTimeInMinutes >= seg.startMin && currentTimeInMinutes < seg.endMin) {
+            // Interpolate within this segment
+            const segDuration = seg.endMin - seg.startMin;
+            const segDisplaySize = seg.displayEnd - seg.displayStart;
+            const elapsedInSegment = currentTimeInMinutes - seg.startMin;
+
+            // fraction of the way through this segment’s time range
+            const fraction = segDuration > 0 ? elapsedInSegment / segDuration : 0;
+
+            return seg.displayStart + fraction * segDisplaySize;
+        }
+    }
+
+    // Fallback if none matched (should not happen if everything is correct):
+    return null;
+}
 
 const ScheduleTimeline = ({
     startDayHour,
@@ -45,28 +195,37 @@ const ScheduleTimeline = ({
     onActivityMoveToBacklog = () => {}
 }: ScheduleTimelineProps) => {
     const [currentTime, setCurrentTime] = useState(new Date());
-    const scrollViewRef = useRef<ScrollView>(null);    
+    const scrollViewRef = useRef<ScrollView>(null);
+
+    // Update currentTime every 30s
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTime(new Date());
         }, 30000);
-    
         return () => clearInterval(interval);
     }, []);
 
-    const getActivityHeight = (activity: IActivity) => {
-        return Math.max(MIN_ACTIVITY_ICON_HEIGHT + (activity.duration - 15) * PIXELS_PER_DURATION_MIN, MIN_ACTIVITY_ICON_HEIGHT);
-    };
-    
+    // Build the segments for this schedule
+    const segments = useMemo(() => buildSegments(activities), [activities]);
+
+    // Compute the elapsed time line position
+    const elapsedPosition = useMemo(() => {
+        return getElapsedTimePosition(segments, startDayHour, endDayHour);
+    }, [segments, startDayHour, endDayHour, currentTime]);
+
+    // Scroll to the closest activity whenever currentTime changes (if desired)
     useEffect(() => {
-        const currentHour = currentTime.getHours();
-        const currentMinute = currentTime.getMinutes();
-        const currentTimeInMinutes = currentHour * 60 + currentMinute;
-        
-        if (scrollViewRef.current && currentHour >= startDayHour && currentHour <= endDayHour) {
+        if (
+            scrollViewRef.current &&
+      currentTime.getHours() >= startDayHour &&
+      currentTime.getHours() <= endDayHour &&
+      activities.length > 0
+        ) {
+            // Find the closest activity to the current time
+            const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
             let closestActivityIndex = 0;
             let minTimeDiff = Infinity;
-            
+
             activities.forEach((activity, index) => {
                 const activityStartMinutes = timeToMinutes(activity.startTime);
                 const timeDiff = Math.abs(activityStartMinutes - currentTimeInMinutes);
@@ -75,128 +234,34 @@ const ScheduleTimeline = ({
                     closestActivityIndex = index;
                 }
             });
-            
+
+            // After a short delay, scroll to that activity
             setTimeout(() => {
-                if (scrollViewRef.current && activities.length > 0) {
+                if (scrollViewRef.current && segments.length > 0) {
                     const screenHeight = Dimensions.get("window").height;
                     let scrollPosition = 0;
-                    
-                    // If we found a close activity, scroll to it
-                    if (closestActivityIndex < activities.length) {
-                        // Calculate approximate position
-                        for (let i = 0; i < closestActivityIndex; i++) {
-                            const activity = activities[i];
-                            scrollPosition += getActivityHeight(activity);
-                            
-                            // Add gap between activities
-                            if (i < activities.length - 1) {
-                                const nextActivity = activities[i + 1];
-                                const gap = getGapBetweenActivities(activity, nextActivity);
-                                scrollPosition += gap;
-                            }
-                        }
-                        
-                        // Adjust to show activity in the upper third of screen
+
+                    // Find which segment corresponds to the “closest” activity
+                    const closestAct = activities[closestActivityIndex];
+                    const segIndex = segments.findIndex(
+                        (s) => s.type === "activity" && s.activity === closestAct
+                    );
+
+                    if (segIndex >= 0) {
+                        // Sum the display height of all segments before that
+                        scrollPosition = segments[segIndex].displayStart;
+                        // Adjust so the activity is near the upper third of the screen
                         scrollPosition = Math.max(0, scrollPosition - screenHeight / 3);
                     }
-                    
+
                     scrollViewRef.current.scrollTo({ y: scrollPosition, animated: true });
                 }
             }, 500);
         }
-    });
-    
-    const getGapBetweenActivities = (activity1: IActivity, activity2: IActivity) => {
-        const activity1EndMinutes = timeToMinutes(activity1.endTime);
-        const activity2StartMinutes = timeToMinutes(activity2.startTime);
-        const minutesBetween = activity2StartMinutes - activity1EndMinutes;
-        
-        // If activities are back-to-back with 15 minutes between them, use the default gap
-        if (minutesBetween <= 15) {
-            return DEFAULT_ACTIVITY_GAP;
-        }
-        return Math.min(minutesBetween * PIXELS_PER_GAP_MIN, MAX_ACTIVITY_GAP);
-    };
-    
-    // Calculate the elapsed timeline percentage
-    const getElapsedTimePosition = () => {
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes() + 30;
-        
-        // If current time is not within day hours, return null
-        if (currentHour < startDayHour || currentHour > endDayHour) {
-            return null;
-        }
-        
-        // Find the position where current time falls
-        let elapsedHeight = 0;
-        let currentActivityFound = false;
-        const currentTimeInMinutes = currentHour * 60 + currentMinute;
-        
-        for (let i = 0; i < activities.length; i++) {
-            const activity = activities[i];
-            const activityStartMinutes = timeToMinutes(activity.startTime);
-            const activityEndMinutes = timeToMinutes(activity.endTime);
-            
-            // If current time is before this activity starts
-            if (currentTimeInMinutes < activityStartMinutes) {
-                break;
-            }
-            
-            // If current time is during this activity
-            if (currentTimeInMinutes >= activityStartMinutes && currentTimeInMinutes < activityEndMinutes) {
-                // Add full height for activities that have started
-                elapsedHeight += MIN_ACTIVITY_ICON_HEIGHT / 2; // At least position at the middle of icon
-                currentActivityFound = true;
-                break;
-            }
-            
-            // Add this activity's full height for past activities
-            elapsedHeight += getActivityHeight(activity);
-            
-            // Add gap after this activity if not the last one
-            if (i < activities.length - 1) {
-                elapsedHeight += getGapBetweenActivities(activity, activities[i + 1]);
-            }
-        }
-        
-        // If no current activity was found but there are activities,
-        // and we're within the day hours, position at the first activity
-        if (!currentActivityFound && activities.length > 0 && 
-            currentHour >= startDayHour && currentHour <= endDayHour) {
-            const firstActivity = activities[0];
-            const firstActivityStartMinutes = timeToMinutes(firstActivity.startTime);
-            
-            // If current time is before the first activity, position at start
-            if (currentTimeInMinutes < firstActivityStartMinutes) {
-                return 0;
-            }
-            
-            // If we're past all activities, position at the end of the last one
-            if (currentTimeInMinutes >= timeToMinutes(activities[activities.length-1].endTime)) {
-                return elapsedHeight;
-            }
-        }
-        
-        return elapsedHeight;
-    };
-    
-    const elapsedPosition = getElapsedTimePosition();
-    
-    // Check if activity is in the past
-    const isActivityInPast = (activity: IActivity) => {
-        const now = new Date();
-        const currentHour = now.getHours();
-        const currentMinute = now.getMinutes();
-        const currentTimeInMinutes = currentHour * 60 + currentMinute;
-        
-        const activityEndMinutes = timeToMinutes(activity.endTime);
-        return currentTimeInMinutes > activityEndMinutes;
-    };
-    
+    }, [currentTime, activities, segments, startDayHour, endDayHour]);
+
     return (
-        <ScrollView 
+        <ScrollView
             ref={scrollViewRef}
             style={tw`flex-1`}
             contentContainerStyle={tw`px-4 py-8`}
@@ -206,56 +271,66 @@ const ScheduleTimeline = ({
                 {/* Activities column with timeline */}
                 <View style={tw`flex-1`}>
                     {/* Background gray timeline line */}
-                    <View 
+                    <View
                         style={[
                             tw`absolute bg-gray-300`,
-                            { 
+                            {
                                 width: 2,
                                 left: 25,
                                 top: 0,
                                 bottom: 0
                             }
-                        ]} 
+                        ]}
                     />
-                    
-                    {/* Red elapsed timeline line with current time */}
+
+                    {/* Purple elapsed timeline line */}
                     {elapsedPosition !== null && (
-                        <View 
+                        <View
                             style={[
                                 tw`absolute bg-purple-400`,
-                                { 
+                                {
                                     width: 2,
                                     left: 25,
                                     top: 0,
                                     height: elapsedPosition
                                 }
-                            ]} 
+                            ]}
                         />
                     )}
-                    
-                    {activities.map((activity, index) => {
-                        const activityHeight = getActivityHeight(activity);
-                        const activityContainerHeight = TOTAL_ACTIVITY_SIZE_BY_ROW[getActivityRows(activity) as 3 | 4 | 5];
-                        const isPastActivity = isActivityInPast(activity);
 
-                        return (
-                            <View key={index}>                                
-                                <ActivityCard
-                                    activity={activity} 
-                                    iconHeight={activityHeight}
-                                    containerHeight={activityContainerHeight}
-                                    activityDate={scheduleDate}
-                                    onActivityComplete={onActivityComplete}
-                                    onActivityDelete={onActivityDelete}
-                                    onActivityEdit={onActivityEdit}
-                                    onActivityMoveToBacklog={onActivityMoveToBacklog}
-                                    isPast={isPastActivity}
+                    {/* Render each segment (activities and gaps) */}
+                    {segments.map((segment, index) => {
+                        if (segment.type === "activity" && segment.activity) {
+                            // For an activity segment, show the card
+                            const activity = segment.activity;
+                            const isPastActivity = isActivityInPast(activity);
+                            const iconHeight = getActivityHeight(activity);
+
+                            return (
+                                <View key={`activity-${index}`}>
+                                    <ActivityCard
+                                        activity={activity}
+                                        iconHeight={iconHeight}
+                                        containerHeight={ACTIVITY_CARD_HEIGHT}
+                                        activityDate={scheduleDate}
+                                        onActivityComplete={onActivityComplete}
+                                        onActivityDelete={onActivityDelete}
+                                        onActivityEdit={onActivityEdit}
+                                        onActivityMoveToBacklog={onActivityMoveToBacklog}
+                                        isPast={isPastActivity}
+                                    />
+                                </View>
+                            );
+                        } else {
+                            // For a gap segment, just render an empty space
+                            const gapHeight = segment.displayEnd - segment.displayStart;
+                            return (
+                                <View
+                                    key={`gap-${index}`}
+                                    style={{ height: gapHeight }}
                                 />
-                                {index < activities.length - 1 && (
-                                    <View style={{ height: getGapBetweenActivities(activity, activities[index + 1]) }} />
-                                )}
-                            </View>
-                        );
+                            );
+                        }
                     })}
                 </View>
             </View>

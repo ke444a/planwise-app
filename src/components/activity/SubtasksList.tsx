@@ -20,7 +20,7 @@ const SubtasksList = ({
 }: SubtasksListProps) => {
     return (
         <View style={tw`gap-y-2`}>
-            {subtasks.map((subtask, index) => (
+            {subtasks && subtasks.length > 0 && subtasks.map((subtask, index) => (
                 <Animated.View 
                     key={subtask.id} 
                     entering={FadeInDown.duration(300).delay(index * 100)}
