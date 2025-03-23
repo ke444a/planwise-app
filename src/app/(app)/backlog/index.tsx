@@ -3,7 +3,6 @@ import tw from "twrnc";
 import { router, Redirect } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { BacklogItem } from "@/components/backlog";
-import { useUserStore } from "@/libs/userStore";
 import { useGetBacklogItemsQuery } from "@/api/backlogs/getBacklogItems";
 import { useAppContext } from "@/context/AppContext";
 import { useDeleteItemFromBacklogMutation } from "@/api/backlogs/deleteItemFromBacklog";
@@ -13,25 +12,21 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 
 const BacklogScreen = () => {
-    const { user } = useUserStore();
     const { setError } = useAppContext();
-    const { data: backlogItems, isPending, isError } = useGetBacklogItemsQuery(user?.uid);
+    const { data: backlogItems, isPending, isError } = useGetBacklogItemsQuery();
     const { mutate: deleteItemFromBacklog } = useDeleteItemFromBacklogMutation();
     const { mutate: completeBacklogItem } = useCompleteBacklogItemMutation();
 
     const handleComplete = (item: IBacklogItem) => {
-        if (!user?.uid) return;
         completeBacklogItem({
             itemId: item.id!,
-            uid: user.uid,
             isCompleted: !item.isCompleted
         });
     };
 
     const handleDelete = (id: string) => {
-        if (!user?.uid) return;
         deleteItemFromBacklog(
-            { id, uid: user.uid },
+            { id },
             {
                 onError: (error) => {
                     console.error("Error deleting backlog item:", error);
@@ -46,7 +41,7 @@ const BacklogScreen = () => {
 
     const handleAddToSchedule = (id: string) => {
         const item = backlogItems?.find(item => item.id === id);
-        if (!item || !user?.uid) return;
+        if (!item) return;
         router.push(`/backlog/convert-to-activity/${id}`);
     };
 

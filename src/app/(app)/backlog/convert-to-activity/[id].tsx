@@ -5,30 +5,35 @@ import { TouchableOpacity } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { useUserStore } from "@/libs/userStore";
 import { useGetBacklogItemQuery } from "@/api/backlogs/getBacklogItem";
 import { useDeleteItemFromBacklogMutation } from "@/api/backlogs/deleteItemFromBacklog";
 import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { BacklogItemActivityForm } from "@/components/backlog";
+import { useGetUserQuery } from "@/api/users/getUser";
+import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
+import { NotificationModal } from "@/components/ui/NotificationModal";
 
 type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
 const ConvertToActivityScreen = () => {
     const { id } = useLocalSearchParams();
-    const { user } = useUserStore();
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { data: item, isPending } = useGetBacklogItemQuery(id as string, user?.uid || "");
+    const { data: item, isPending } = useGetBacklogItemQuery(id as string);
     const { mutate: deleteFromBacklog } = useDeleteItemFromBacklogMutation();
     const { mutate: addToSchedule } = useAddActivityToScheduleMutation();
     const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
+    const { data: userData } = useGetUserQuery();
+    const { data: scheduleData } = useGetScheduleForDayQuery(selectedDate);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
     const handleClose = () => {
         router.back();
     };
 
     const handleAddToSchedule = () => {
-        if (!activityDetails?.title.trim() || !user?.uid || !id || !item) return;
+        if (!activityDetails?.title.trim() || !id || !item) return;
+        if (!userData || !scheduleData) return;
 
         const activity: IActivity = {
             ...activityDetails,
@@ -36,15 +41,20 @@ const ConvertToActivityScreen = () => {
             isCompleted: false,
         };
 
+        const currentStamina = scheduleData.reduce((acc, activity) => acc + activity.staminaCost, 0);
+        const totalStaminaUsed = currentStamina + activity.staminaCost;
+        if (userData.maxStamina > 0 && totalStaminaUsed / userData.maxStamina > 1.2) {
+            setIsModalVisible(true);
+            return;
+        }
+
         addToSchedule({ 
             activity, 
-            date: selectedDate, 
-            uid: user.uid 
+            date: selectedDate
         }, {
             onSuccess: () => {
                 deleteFromBacklog({ 
-                    id: id as string, 
-                    uid: user.uid 
+                    id: id as string
                 });
                 router.back();
             }
@@ -73,6 +83,11 @@ const ConvertToActivityScreen = () => {
                 submitButtonLabel="Add to Schedule"
                 submitButtonIcon={<Ionicons name="calendar" size={24} style={tw`text-gray-950`} />}
                 onSubmit={handleAddToSchedule}
+            />
+
+            <NotificationModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
             />
         </ScreenWrapper>
     );

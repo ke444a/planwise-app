@@ -11,14 +11,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const FocusScreen = () => {
     const router = useRouter();
-    const { activityId, date, uid } = useLocalSearchParams<{
+    const { activityId, activityDate } = useLocalSearchParams<{
         activityId: string;
-        date: string;
-        uid: string;
+        activityDate: string;
     }>();
-    
-    const parsedDate = new Date(date);
-    const { data: activity } = useGetActivityFromScheduleQuery(activityId, parsedDate, uid);
+    const parsedDate = new Date(activityDate);
+    const { data: activity } = useGetActivityFromScheduleQuery(activityId, parsedDate);
     const { mutate: completeActivity } = useCompleteActivityMutation();
     const [timeRemaining, setTimeRemaining] = useState("");
     const [subtasks, setSubtasks] = useState(activity?.subtasks || []);
@@ -70,11 +68,10 @@ const FocusScreen = () => {
     };
 
     const handleComplete = async () => {
-        if (!activityId || !parsedDate || !uid) return;
+        if (!activityId || !parsedDate) return;
         completeActivity({
             activityId,
             date: parsedDate,
-            uid,
             isCompleted: true
         });
         router.back();

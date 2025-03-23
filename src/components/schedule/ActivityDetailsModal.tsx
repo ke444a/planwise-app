@@ -21,6 +21,7 @@ interface ActivityDetailsModalProps {
     onEdit: () => void;
     onComplete: () => void;
     onMoveToBacklog: () => void;
+    activityDate: Date;
 }
 
 const getIsCurrentActivity = (startTime: string, endTime: string): boolean => {
@@ -41,7 +42,8 @@ const ActivityDetailsModal = ({
     onDelete,
     onEdit,
     onComplete,
-    onMoveToBacklog
+    onMoveToBacklog,
+    activityDate
 }: ActivityDetailsModalProps) => {
     const { user } = useUserStore();
     const router = useRouter();
@@ -52,11 +54,10 @@ const ActivityDetailsModal = ({
         if (!user?.uid) return;
         onClose();
         router.push({
-            pathname: "/focus",
+            pathname: "/activity/focus",
             params: {
                 activityId: activity.id,
-                date: new Date().toISOString(),
-                uid: user.uid
+                activityDate: activityDate.toISOString()
             }
         });
     };
@@ -64,7 +65,6 @@ const ActivityDetailsModal = ({
     const handleSubtaskPress = (subtaskId: string, isCompleted: boolean) => {
         if (!user) return;
         tickSubtask({
-            uid: user.uid,
             date: new Date(),
             activityId: activity.id!,
             subtaskId: subtaskId,

@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
 import { Ionicons } from "@expo/vector-icons";
 import { GeneratedActivityItem } from "./GeneratedActivityItem";
@@ -10,6 +10,7 @@ import { useState, useCallback } from "react";
 import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
 import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import { useAppContext } from "@/context/AppContext";
+import { NotificationModal } from "@/components/ui/NotificationModal";
 
 interface Props {
     activities: IActivity[];
@@ -33,6 +34,7 @@ const ModelActivityBox = ({
 
     const { setError } = useAppContext();
     const [tasksAdded, setTasksAdded] = useState(0);
+    const [isModalVisible, setIsModalVisible] = useState(false);
     const percentageStaminaUsed = userMaxStamina > 0 ? staminaUsed / userMaxStamina : 0;
     const totalTasks = Array.isArray(activities) ? activities.length : 0;
     const [activitiesStatus, setActivitiesStatus] = useState<GeneratedActivityItemStatus[]>(Array(totalTasks).fill("idle"));
@@ -42,7 +44,7 @@ const ModelActivityBox = ({
             const activityToAdd = activities[index];
             const totalStaminaUsed = staminaUsed + activityToAdd.staminaCost;
             if (userMaxStamina > 0 && totalStaminaUsed / userMaxStamina > 1.2) {
-                Alert.alert("You're pushing it!", "Your stamina is maxed out. It's time to focus on the most important things. You can add more activities to your backlog.");
+                setIsModalVisible(true);
                 return;
             }
 
@@ -156,6 +158,11 @@ const ModelActivityBox = ({
                     </Animated.View>
                 ))}
             </View>
+
+            <NotificationModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+            />
         </View>
     );
 };

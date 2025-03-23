@@ -17,7 +17,6 @@ const deleteActivity = async (activityId: string, date: Date, uid: string) => {
 type Data = {
     activityId: string;
     date: Date;
-    uid: string;
 }
 
 export const useDeleteActivityMutation = () => {

@@ -8,6 +8,7 @@ interface ScheduleTimelineProps {
     startDayHour: number;
     endDayHour: number;
     activities: IActivity[];
+    scheduleDate: Date;
     onActivityComplete?: (_activity: IActivity) => void;
     onActivityDelete?: (_activity: IActivity) => void;
     onActivityEdit?: (_activity: IActivity) => void;
@@ -37,6 +38,7 @@ const ScheduleTimeline = ({
     startDayHour,
     endDayHour,
     activities,
+    scheduleDate,
     onActivityComplete = () => {},
     onActivityDelete = () => {},
     onActivityEdit = () => {},
@@ -242,6 +244,7 @@ const ScheduleTimeline = ({
                                     activity={activity} 
                                     iconHeight={activityHeight}
                                     containerHeight={activityContainerHeight}
+                                    activityDate={scheduleDate}
                                     onActivityComplete={onActivityComplete}
                                     onActivityDelete={onActivityDelete}
                                     onActivityEdit={onActivityEdit}

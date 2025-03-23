@@ -1,38 +1,46 @@
 import { View, Text } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
-import { useUserStore } from "@/libs/userStore";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { ActivityForm } from "@/components/activity/ActivityForm";
+import { NotificationModal } from "@/components/ui/NotificationModal";
 
 type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
 const AddActivityScreen = () => {
-    const { user } = useUserStore();
     const { mutate: addActivity } = useAddActivityToScheduleMutation();
-    const [selectedDate, setSelectedDate] = useState(new Date());
+    const { currentStamina, maxStamina, date } = useLocalSearchParams();
+    const [selectedDate, setSelectedDate] = useState(new Date(date as string));
     const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const currentStaminaNumber = Number(currentStamina);
+    const maxStaminaNumber = Number(maxStamina);
 
     const handleClose = () => {
         router.back();
     };
 
     const handleCreateActivity = () => {
-        if (!activityDetails?.title.trim() || !user?.uid) return;
-
+        if (!activityDetails?.title.trim()) return;
         const activity: IActivity = {
             ...activityDetails,
             isCompleted: false,
         };
         
+        const totalStaminaUsed = currentStaminaNumber + activity.staminaCost;
+        if (maxStaminaNumber > 0 && totalStaminaUsed / maxStaminaNumber > 1.2) {
+            setIsModalVisible(true);
+            return;
+        }
+        
         addActivity({ 
             activity, 
             date: selectedDate, 
-            uid: user.uid 
         });
         router.back();
     };
@@ -56,6 +64,11 @@ const AddActivityScreen = () => {
                 onSubmit={handleCreateActivity}
                 selectedDate={selectedDate}
                 onDateChange={setSelectedDate}
+            />
+
+            <NotificationModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
             />
         </ScreenWrapper>
     );
