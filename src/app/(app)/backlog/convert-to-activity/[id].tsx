@@ -13,6 +13,9 @@ import { BacklogItemActivityForm } from "@/components/backlog";
 import { useGetUserQuery } from "@/api/users/getUser";
 import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
 import { NotificationModal } from "@/components/ui/NotificationModal";
+import { AiSuggestionButton } from "@/components/activity/AiSuggestionButton";
+import { Toast } from "@/components/ui/Toast";
+import { addMinutesToTime } from "@/utils/addMinutesToTime";
 
 type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
@@ -26,9 +29,23 @@ const ConvertToActivityScreen = () => {
     const { data: userData } = useGetUserQuery();
     const { data: scheduleData } = useGetScheduleForDayQuery(selectedDate);
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [showToast, setShowToast] = useState(false);
 
     const handleClose = () => {
         router.back();
+    };
+
+    const handleAiSuggestion = (suggestion: IActivity) => {
+        setActivityDetails(prev => ({
+            ...prev!,
+            type: suggestion.type,
+            duration: suggestion.duration,
+            priority: suggestion.priority,
+            staminaCost: suggestion.staminaCost,
+            subtasks: suggestion.subtasks,
+            startTime: prev!.startTime,
+            endTime: addMinutesToTime(prev!.startTime, suggestion.duration)
+        }));
     };
 
     const handleAddToSchedule = () => {
@@ -68,10 +85,17 @@ const ConvertToActivityScreen = () => {
     return (
         <ScreenWrapper>
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-                <Text style={tw`text-2xl font-semibold`}>Add to Schedule</Text>
-                <TouchableOpacity onPress={handleClose}>
-                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
-                </TouchableOpacity>
+                <View style={tw`flex-row items-center gap-x-2`}>
+                    <TouchableOpacity onPress={handleClose}>
+                        <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
+                    </TouchableOpacity>
+                    <Text style={tw`text-2xl font-semibold`}>Add to Schedule</Text>
+                </View>
+                <AiSuggestionButton
+                    title={activityDetails?.title}
+                    onSuggestion={handleAiSuggestion}
+                    onShowToast={() => setShowToast(true)}
+                />
             </View>
 
             <BacklogItemActivityForm
@@ -88,6 +112,12 @@ const ConvertToActivityScreen = () => {
             <NotificationModal
                 isVisible={isModalVisible}
                 onClose={() => setIsModalVisible(false)}
+            />
+
+            <Toast
+                message="Please provide a title first to use AI auto-completion"
+                isVisible={showToast}
+                onHide={() => setShowToast(false)}
             />
         </ScreenWrapper>
     );

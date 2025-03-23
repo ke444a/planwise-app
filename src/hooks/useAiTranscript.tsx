@@ -17,7 +17,7 @@ export const useAiTranscript = () => {
             const model = getGenerativeModel(vertexai, {
                 model: "gemini-2.0-flash-001",
                 generationConfig: {
-                    temperature: 0.3
+                    temperature: 0.2
                 }
             });
             const response = await model.generateContent([

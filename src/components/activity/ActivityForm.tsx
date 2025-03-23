@@ -1,6 +1,6 @@
 import { View, Text, ScrollView } from "react-native";
 import tw from "twrnc";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { 
     DurationSection,
     ActivityTypePickerBottomSheet,
@@ -16,7 +16,7 @@ import { ButtonWithIcon } from "@/components/ui/ButtonWithIcon";
 import { addMinutesToTime } from "@/utils/addMinutesToTime";
 
 interface ActivityFormProps {
-    initialData?: Partial<IActivity>;
+    activityDetails: Omit<IActivity, "isCompleted" | "id">;
     onActivityDetailsChange: (_details: Omit<IActivity, "isCompleted" | "id">) => void;
     submitButtonLabel: string;
     submitButtonIcon: React.ReactNode;
@@ -26,7 +26,7 @@ interface ActivityFormProps {
 }
 
 export const ActivityForm = ({
-    initialData,
+    activityDetails,
     onActivityDetailsChange,
     submitButtonLabel,
     submitButtonIcon,
@@ -36,61 +36,35 @@ export const ActivityForm = ({
 }: ActivityFormProps) => {
     const [isTypePickerVisible, setIsTypePickerVisible] = useState(false);
     const [subtaskInput, setSubtaskInput] = useState("");
-    const [activityDetails, setActivityDetails] = useState<Omit<IActivity, "isCompleted" | "id">>(() => ({
-        title: initialData?.title || "",
-        type: initialData?.type || "misc",
-        startTime: initialData?.startTime || "12:00",
-        endTime: initialData?.endTime || "12:15",
-        duration: initialData?.duration || 15,
-        priority: initialData?.priority || "must_do",
-        staminaCost: initialData?.staminaCost || 0,
-        subtasks: initialData?.subtasks || [],
-    }));
-
-    useEffect(() => {
-        if (initialData) {
-            setActivityDetails(prev => ({
-                ...prev,
-                title: initialData.title || prev.title,
-                type: initialData.type || prev.type,
-                startTime: initialData.startTime || prev.startTime,
-                endTime: initialData.endTime || prev.endTime,
-                duration: initialData.duration || prev.duration,
-                priority: initialData.priority || prev.priority,
-                staminaCost: initialData.staminaCost || prev.staminaCost,
-                subtasks: initialData.subtasks || prev.subtasks,
-            }));
-        }
-    }, [initialData]);
-
-    useEffect(() => {
-        onActivityDetailsChange(activityDetails);
-    }, [activityDetails, onActivityDetailsChange]);
 
     const handleSubtaskSubmit = () => {
         if (subtaskInput.trim()) {
             const newSubtask = createNewSubtask(subtaskInput);
-            setActivityDetails(prev => ({
-                ...prev,
-                subtasks: [...prev.subtasks, newSubtask]
-            }));
+            onActivityDetailsChange({
+                ...activityDetails,
+                subtasks: [...activityDetails.subtasks, newSubtask]
+            });
             setSubtaskInput("");
         }
     };
 
     const handleSubtaskRemove = (id: string) => {
-        setActivityDetails(prev => ({
-            ...prev,
-            subtasks: prev.subtasks.filter(subtask => subtask.id !== id)
-        }));
+        onActivityDetailsChange({
+            ...activityDetails,
+            subtasks: activityDetails.subtasks.filter(subtask => subtask.id !== id)
+        });
     };
 
     const handleTimeSelected = (time: { start: string; end: string }) => {
-        setActivityDetails(prev => ({
-            ...prev,
+        onActivityDetailsChange({
+            ...activityDetails,
             startTime: time.start,
             endTime: time.end,
-        }));
+        });
+    };
+
+    const handleDetailsChange = (updates: Partial<Omit<IActivity, "isCompleted" | "id">>) => {
+        onActivityDetailsChange({ ...activityDetails, ...updates });
     };
 
     return (
@@ -104,7 +78,7 @@ export const ActivityForm = ({
                     title={activityDetails.title}
                     type={activityDetails.type}
                     priority={activityDetails.priority}
-                    onTitleChange={(title) => setActivityDetails(prev => ({ ...prev, title }))}
+                    onTitleChange={(title) => handleDetailsChange({ title })}
                     setIsTypePickerVisible={setIsTypePickerVisible}
                 />
 
@@ -126,11 +100,10 @@ export const ActivityForm = ({
                     duration={activityDetails.duration}
                     onDurationChange={(value) => {
                         const newEndTime = addMinutesToTime(activityDetails.startTime, value);
-                        setActivityDetails(prev => ({ 
-                            ...prev, 
+                        handleDetailsChange({ 
                             duration: value,
                             endTime: newEndTime
-                        }));
+                        });
                     }}
                 />
 
@@ -138,7 +111,7 @@ export const ActivityForm = ({
                     <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>How Urgent?</Text>
                     <PriorityPicker
                         selectedPriority={activityDetails.priority}
-                        onPriorityChange={(value) => setActivityDetails(prev => ({ ...prev, priority: value }))}
+                        onPriorityChange={(value) => handleDetailsChange({ priority: value })}
                     />
                 </View>
 
@@ -146,7 +119,7 @@ export const ActivityForm = ({
                     <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>How Much Stamina?</Text>
                     <StaminaPicker
                         value={activityDetails.staminaCost}
-                        onValueChange={(value) => setActivityDetails(prev => ({ ...prev, staminaCost: value }))}
+                        onValueChange={(value) => handleDetailsChange({ staminaCost: value })}
                     />
                 </View>
 
@@ -176,7 +149,7 @@ export const ActivityForm = ({
             <ActivityTypePickerBottomSheet
                 visible={isTypePickerVisible}
                 onClose={() => setIsTypePickerVisible(false)}
-                onTypeSelected={(value) => setActivityDetails(prev => ({ ...prev, type: value }))}
+                onTypeSelected={(value) => handleDetailsChange({ type: value })}
                 selectedType={activityDetails.type}
             />
         </>
