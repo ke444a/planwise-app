@@ -9,7 +9,6 @@ import { checkIsCurrentActivity } from "@/utils/checkIsCurrentActivity";
 import ActivityIcon from "../activity/ActivityIcon";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
-import { useUserStore } from "@/libs/userStore";
 import { useTickActivitySubtaskMutation } from "@/api/schedules/tickActivitySubtask";
 import LiftedBottomModal from "@/components/ui/LiftedBottomModal";
 
@@ -36,13 +35,11 @@ const ActivityDetailsModal = ({
     onMoveToBacklog,
     activityDate
 }: ActivityDetailsModalProps) => {
-    const { user } = useUserStore();
     const router = useRouter();
     const isCurrentActivity = checkIsCurrentActivity(activity.startTime, activity.endTime, activityDate);
     const { mutate: tickSubtask } = useTickActivitySubtaskMutation();
 
     const handleFocusNow = () => {
-        if (!user?.uid) return;
         onClose();
         router.push({
             pathname: "/activity/focus",
@@ -54,7 +51,6 @@ const ActivityDetailsModal = ({
     };
 
     const handleSubtaskPress = (subtaskId: string, isCompleted: boolean) => {
-        if (!user) return;
         tickSubtask({
             date: new Date(),
             activityId: activity.id!,

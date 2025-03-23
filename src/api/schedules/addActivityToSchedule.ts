@@ -3,14 +3,46 @@ import {
     collection,
     getFirestore, 
     addDoc,
+    query,
+    getDocs,
+    orderBy
 } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { checkTimeOverlap } from "@/utils/timeOverlap";
+
+export class ScheduleOverlapError extends Error {
+    overlappingActivity: IActivity;
+    
+    constructor(activity: IActivity) {
+        super(`Activity overlaps with "${activity.title}" (${activity.startTime}-${activity.endTime})`);
+        this.name = "ScheduleOverlapError";
+        this.overlappingActivity = activity;
+    }
+}
 
 const addActivityToSchedule = async (activity: IActivity, date: Date, uid: string) => {
     const db = getFirestore();
     const formattedDate = date.toISOString().split("T")[0];
     const activityCollectionRef = collection(db, "schedules", uid, formattedDate);
-    const docRef = await addDoc(activityCollectionRef, activity);
+
+    // Get existing activities for the day
+    const q = query(activityCollectionRef, orderBy("startTime"));
+    const querySnapshot = await getDocs(q);
+    const existingActivities: IActivity[] = [];
+    querySnapshot.forEach((doc) => {
+        existingActivities.push({ ...doc.data(), id: doc.id } as IActivity);
+    });
+
+    // Check for overlaps
+    const overlappingActivity = checkTimeOverlap(activity.startTime, activity.endTime, existingActivities);
+    if (overlappingActivity) {
+        throw new ScheduleOverlapError(overlappingActivity);
+    }
+
+    const docRef = await addDoc(activityCollectionRef, {
+        ...activity,
+        subtasks: activity.subtasks || []
+    });
     return { ...activity, id: docRef.id };
 };
 

@@ -1,8 +1,8 @@
+import { useAuth } from "@/context/AuthContext";
 import { getFirestore, doc, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 type PreferenceUpdateData = {
-    uid: string;
     updates: Partial<{
         "onboardingInfo.startDayTime": string;
         "onboardingInfo.endDayTime": string;
@@ -12,23 +12,27 @@ type PreferenceUpdateData = {
     }>;
 }
 
-const updateUserPreferences = async (data: PreferenceUpdateData) => {
+const updateUserPreferences = async (data: PreferenceUpdateData, uid: string) => {
     const db = getFirestore();
-    const userRef = doc(db, "users", data.uid);
+    const userRef = doc(db, "users", uid);
     await updateDoc(userRef, data.updates);
 };
 
 export const useUpdateUserPreferencesMutation = () => {
     const queryClient = useQueryClient();
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not found");
+    }
 
     return useMutation({
-        mutationFn: updateUserPreferences,
+        mutationFn: (data: PreferenceUpdateData) => updateUserPreferences(data, authUser.uid),
         onMutate: async (variables) => {
-            await queryClient.cancelQueries({ queryKey: ["user", variables.uid] });
+            await queryClient.cancelQueries({ queryKey: ["user", authUser.uid] });
 
-            const previousUser = queryClient.getQueryData<IUser>(["user", variables.uid]);
+            const previousUser = queryClient.getQueryData<IUser>(["user", authUser.uid]);
 
-            queryClient.setQueryData<IUser>(["user", variables.uid], (old) => {
+            queryClient.setQueryData<IUser>(["user", authUser.uid], (old) => {
                 if (!old) return old;
 
                 const newUser = { ...old };
@@ -51,11 +55,11 @@ export const useUpdateUserPreferencesMutation = () => {
 
             return { previousUser };
         },
-        onError: (_err, variables, context) => {
-            queryClient.setQueryData(["user", variables.uid], context?.previousUser);
+        onError: (_err, _, context) => {
+            queryClient.setQueryData(["user", authUser.uid], context?.previousUser);
         },
-        onSettled: (data, error, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["user", variables.uid] });
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["user", authUser.uid] });
         },
     });
 };

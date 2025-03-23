@@ -3,8 +3,17 @@ import { getVertexAI, getGenerativeModel, Schema } from "@react-native-firebase/
 import { useCallback, useState } from "react";
 import { getFunctions, httpsCallable } from "@react-native-firebase/functions";
 import { ACTIVITY_TYPES } from "@/libs/constants";
+import { useAppContext } from "@/context/AppContext";
+import { getDocs, query } from "@react-native-firebase/firestore";
+import { getFirestore, orderBy } from "@react-native-firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
+import { collection } from "@react-native-firebase/firestore";
+import { timeToMinutes } from "@/utils/timeToMinutes";
 
-export const useAiChat = () => {
+
+export const useAiChat = (date: Date) => {
+    const { setError } = useAppContext();
+    const { authUser } = useAuth();
     const [messages, setMessages] = useState<IChatMessage[]>([]);
     const [isGeneratingSchedule, setIsGeneratingSchedule] = useState(false);
 
@@ -23,17 +32,78 @@ export const useAiChat = () => {
             const generateSchedule = httpsCallable(functions, "generateSchedule");
             const { data } = await generateSchedule({ 
                 userInput,
-                date: new Date(timestamp).toISOString().split("T")[0]
+                date: new Date(date).toISOString().split("T")[0]
             });
-            addMessage({ role: "model", content: JSON.stringify((data as { schedule: IActivity[] }).schedule), timestamp });
+            addMessage({ role: "model", content: JSON.stringify((data as { schedule: IActivityGenAI[] }).schedule), timestamp });
         } catch (error) {
-            console.error("Error generating schedule", error);
-            addMessage({ role: "model", content: "Oops, something went wrong. Please try again.", timestamp });
+            setError({
+                message: "Oops, something went wrong. Please try again.",
+                code: "ai-chat-failed",
+                error
+            });
         } finally {
             setIsGeneratingSchedule(false);
         }
-    }, [addMessage]);
+    }, [addMessage, setError]);
 
+    const validateTaskOverlap = (tasks: IActivityGenAI[], existingSchedule: IActivity[]): IActivityGenAI[] => {
+        // Create a deep copy of tasks to ensure we can modify it
+        const modifiedTasks = tasks.map(task => ({...task}));
+
+        const isOverlapping = (startA: string, endA: string, startB: string, endB: string): boolean => {
+            const start1 = timeToMinutes(startA);
+            const end1 = timeToMinutes(endA);
+            const start2 = timeToMinutes(startB);
+            const end2 = timeToMinutes(endB);
+
+            return start1 < end2 && start2 < end1;
+        };
+
+        // Check overlaps between tasks themselves
+        for (let i = 0; i < modifiedTasks.length; i++) {
+            for (let j = i + 1; j < modifiedTasks.length; j++) {
+                if (isOverlapping(modifiedTasks[i].startTime, modifiedTasks[i].endTime, 
+                    modifiedTasks[j].startTime, modifiedTasks[j].endTime)) {
+                    const msgA = `Overlaps with "${modifiedTasks[j].title}" (${modifiedTasks[j].startTime} - ${modifiedTasks[j].endTime})`;
+                    const msgB = `Overlaps with "${modifiedTasks[i].title}" (${modifiedTasks[i].startTime} - ${modifiedTasks[i].endTime})`;
+                    modifiedTasks[i].warnings = modifiedTasks[i].warnings || [];
+                    modifiedTasks[j].warnings = modifiedTasks[j].warnings || [];
+                    modifiedTasks[i]?.warnings?.push(msgA);
+                    modifiedTasks[j]?.warnings?.push(msgB);
+                }
+            }
+        }
+
+        // Check overlaps with existing schedule
+        for (const task of modifiedTasks) {
+            for (const activity of existingSchedule) {
+                if (isOverlapping(task.startTime, task.endTime, activity.startTime, activity.endTime)) {
+                    const msg = `Overlaps with already scheduled activity "${activity.title}" (${activity.startTime} - ${activity.endTime})`;
+                    task.warnings = task.warnings || [];
+                    task.warnings.push(msg);
+                }
+            }
+        }
+
+        return modifiedTasks;
+    };
+
+    const validateOverlappingActivities = useCallback(async (generatedSchedule: IActivityGenAI[]) => {
+        const db = getFirestore();
+        const activityCollectionRef = collection(db, "schedules", authUser!.uid, date.toISOString().split("T")[0]);
+
+        // Get existing activities for the day
+        const q = query(activityCollectionRef, orderBy("startTime"));
+        const querySnapshot = await getDocs(q);
+        const existingActivities: IActivity[] = [];
+        querySnapshot.forEach((doc) => {
+            existingActivities.push({ ...doc.data(), id: doc.id } as IActivity);
+        });
+        
+        // Use the returned modified tasks
+        const modifiedSchedule = validateTaskOverlap(generatedSchedule, existingActivities);
+        return modifiedSchedule;
+    }, [authUser, date]);
 
     const generateFollowUpSchedule = useCallback(async (userInput: string, timestamp: number) => {
         try {
@@ -68,15 +138,19 @@ export const useAiChat = () => {
                 }
             });
             const { response } = await chat.sendMessage([userInput]);
-            addMessage({ role: "model", content: response.text(), timestamp });
+            const parsedResponse = JSON.parse(response.text()) as IActivityGenAI[];
+            const validatedSchedule = await validateOverlappingActivities(parsedResponse);
+            addMessage({ role: "model", content: JSON.stringify(validatedSchedule), timestamp });
         } catch (error) {
-            console.log(error);
-            addMessage({ role: "model", content: "Oops, something went wrong. Please try again.", timestamp });
+            setError({
+                message: "Oops, something went wrong. Please try again.",
+                code: "ai-chat-failed",
+                error
+            });
         } finally {
             setIsGeneratingSchedule(false);
         }
-    }, [addMessage, messages]);
-
+    }, [addMessage, messages, setError, validateOverlappingActivities]);
     
     const generateSchedule = useCallback(async (userInput: string, timestamp: number) => {
         // Exclude user's message that was sent a second ago (timestamp - 1) (if exists)

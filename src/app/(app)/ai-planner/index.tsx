@@ -17,9 +17,9 @@ const formatDate = (dateString: string) => {
 };
 
 const AiPlannerScreen = () => {
-    const { messages, addMessage, generateSchedule, isGeneratingSchedule } = useAiChat();
     const [isConversationActive, setIsConversationActive] = useState(false);
     const { date, currentStamina, maxStamina } = useLocalSearchParams();
+    const { messages, addMessage, generateSchedule, isGeneratingSchedule } = useAiChat(new Date(date as string));
 
     const handleSendMessage = (message: string) => {
         setIsConversationActive(true);

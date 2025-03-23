@@ -9,7 +9,7 @@ import { getPriorityLabel } from "@/utils/getPriorityLabel";
 import { useGeneratedItemAnimations } from "@/hooks/useGeneratedItemAnimations";
 
 interface ActivityItemProps {
-    activity: IActivity;
+    activity: IActivityGenAI;
     status: "idle" | "added" | "removed" | "backlog";
     onAddToSchedule: () => void;
     onRemove: () => void;
@@ -32,6 +32,9 @@ export const GeneratedActivityItem = ({
         optionsStyle,
         contentStyle,
     } = useGeneratedItemAnimations(status);
+
+    const hasWarnings = Array.isArray(activity?.warnings) && activity.warnings.length > 0;
+    const firstWarning = hasWarnings && Array.isArray(activity.warnings) ? activity.warnings[0] : null;
 
     return (
         <View>
@@ -86,7 +89,7 @@ export const GeneratedActivityItem = ({
                                     </Text>
 
                                     {/* Bottom row with stamina and priority */}
-                                    <View style={tw`flex-row flex-wrap gap-3 items-center`}>
+                                    <View style={tw`flex-row flex-wrap gap-3 items-center mb-1`}>
                                         <View style={tw`flex-row items-center`}>
                                             <Text style={tw`text-gray-500 font-medium mr-1 text-sm`}>{activity.staminaCost}</Text>
                                             <Ionicons name="flash" size={14} style={tw`text-gray-500`} />
@@ -99,6 +102,16 @@ export const GeneratedActivityItem = ({
                                             </View>
                                         )}
                                     </View>
+
+                                    {/* Warning message if exists */}
+                                    {firstWarning && (
+                                        <View style={tw`flex-row items-center bg-orange-50 rounded-lg p-1`}>
+                                            <Ionicons name="warning" size={16} style={tw`text-orange-500 mr-1`} />
+                                            <Text style={tw`text-orange-500 text-sm flex-1`}>
+                                                {firstWarning}
+                                            </Text>
+                                        </View>
+                                    )}
                                 </>
                             )}
                         </Animated.View>
@@ -110,7 +123,11 @@ export const GeneratedActivityItem = ({
                 <View style={tw`flex-row justify-between p-2 bg-purple-200 rounded-b-xl`}>
                     <TouchableOpacity 
                         onPress={onAddToSchedule}
-                        style={tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`}
+                        disabled={hasWarnings}
+                        style={[
+                            tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`,
+                            hasWarnings && tw`opacity-50`
+                        ]}
                     >
                         <Ionicons name="add" size={20} style={tw`text-gray-950 mr-1`} />
                         <Text style={tw`text-gray-950 font-medium`}>Add</Text>

@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { LogBox } from "react-native";
 import { getFunctions, connectFunctionsEmulator } from "@react-native-firebase/functions";
+import tw, { useDeviceContext } from "twrnc";
 
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 // import auth from "@react-native-firebase/auth";
@@ -16,6 +17,10 @@ import { getFunctions, connectFunctionsEmulator } from "@react-native-firebase/f
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
+    useDeviceContext(tw, {
+        observeDeviceColorSchemeChanges: false,
+        initialColorScheme: "light"
+    });
     // useEffect(() => {
     //     const signOut = async () => {
     //         await auth().signOut();

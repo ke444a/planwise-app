@@ -1,15 +1,17 @@
 import { useAppContext } from "@/context/AppContext";
 import { getApp } from "@react-native-firebase/app";
 import { getVertexAI, getGenerativeModel } from "@react-native-firebase/vertexai";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 
 export const useAiTranscript = () => {
     const { setError } = useAppContext();
+    const [isTranscribing, setIsTranscribing] = useState(false);
 
     const transcribeUserSpeech = useCallback(async (audioUriBase64: string): Promise<string | null> => {
         const prompt = "Generate a transcript of the provided audio. Remove any filler words and non-speech sounds. Return only the transcript without any other text.";
         try {
+            setIsTranscribing(true);
             const app = getApp();
             const vertexai = getVertexAI(app, {
                 location: "europe-west1"
@@ -27,17 +29,19 @@ export const useAiTranscript = () => {
             const transcript = response.response.text();
             return transcript.trim();
         } catch (error) {
-            console.error("Error transcribing user speech", error);
             setError({
                 message: "Failed to transcribe user speech",
                 code: "transcribe-failed",
                 error
             });
             return null;
+        } finally {
+            setIsTranscribing(false);
         }
     }, [setError]);
 
     return {
-        transcribeUserSpeech
+        transcribeUserSpeech,
+        isTranscribing
     };
 };

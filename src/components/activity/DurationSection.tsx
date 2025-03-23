@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DurationSlider from "@/components/activity/DurationSlider";
 import DurationPickerBottomSheet from "@/components/activity/DurationPickerBottomSheet";
 
@@ -46,6 +46,16 @@ export const DurationSection = ({ duration, onDurationChange }: DurationSectionP
         }
         setDurationOptions(newDurationOptions);
     };
+
+    useEffect(() => {
+        const newDurationOptions = [...DEFAULT_DURATION_OPTIONS];
+        const isNewOption = !newDurationOptions.some(opt => opt.value === duration);
+        if (isNewOption) {
+            newDurationOptions.push({ label: formatDuration(duration), value: duration });
+            newDurationOptions.sort((a, b) => a.value - b.value);
+        }
+        setDurationOptions(newDurationOptions);
+    }, [duration]);
 
     return (
         <View>

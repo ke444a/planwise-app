@@ -1,4 +1,4 @@
-import { View, TextInput, TouchableOpacity, Text, Platform, KeyboardAvoidingView, Keyboard } from "react-native";
+import { View, TextInput, TouchableOpacity, Text, Platform, KeyboardAvoidingView, Keyboard, ActivityIndicator } from "react-native";
 import tw from "twrnc";
 import { useState, useEffect, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,7 +16,7 @@ const ChatInput = ({
     onSendMessage
 }: ChatInputProps) => {
     const [inputText, setInputText] = useState("");
-    const { transcribeUserSpeech } = useAiTranscript();
+    const { transcribeUserSpeech, isTranscribing } = useAiTranscript();
     const insets = useSafeAreaInsets();
     const audioUriTimestampRef = useRef<number | null>(null);
     const { 
@@ -110,13 +110,17 @@ const ChatInput = ({
                 </View>
                 {isRecording ? renderRecordingInterface() : (
                     <View style={tw`flex-row justify-end px-4 gap-x-2`}>
-                        <TouchableOpacity onPress={handleMicPress}>
-                            <MaterialCommunityIcons 
-                                name={"microphone-outline"} 
-                                size={32}
-                                style={tw`text-white`}
-                            />
-                        </TouchableOpacity>
+                        {isTranscribing ? (
+                            <ActivityIndicator size="large" color="white" />
+                        ) : (
+                            <TouchableOpacity onPress={handleMicPress}>
+                                <MaterialCommunityIcons 
+                                    name={"microphone-outline"} 
+                                    size={32}
+                                    style={tw`text-white`}
+                                />
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             onPress={handleSend}
                             disabled={!isInputActive}

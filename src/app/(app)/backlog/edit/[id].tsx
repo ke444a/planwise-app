@@ -2,10 +2,8 @@ import { View, Text } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { useUserStore } from "@/libs/userStore";
 import { useGetBacklogItemQuery } from "@/api/backlogs/getBacklogItem";
 import { useUpdateBacklogItemMutation } from "@/api/backlogs/updateBacklogItem";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
@@ -17,8 +15,7 @@ type DraftDetails = Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updat
 
 const EditBacklogItemScreen = () => {
     const { id } = useLocalSearchParams();
-    const { user } = useUserStore();
-    const { data: item, isPending } = useGetBacklogItemQuery(id as string, user?.uid || "");
+    const { data: item, isPending } = useGetBacklogItemQuery(id as string);
     const { mutate: updateBacklogItem } = useUpdateBacklogItemMutation();
     const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
     const [draftDetails, setDraftDetails] = useState<DraftDetails | null>(null);
@@ -28,7 +25,7 @@ const EditBacklogItemScreen = () => {
     };
 
     const handleUpdateItem = () => {
-        if (!user?.uid || !id || !item) return;
+        if (!id || !item) return;
 
         if (item.itemType === "activity" && activityDetails?.title.trim()) {
             const updatedItem = {
@@ -37,14 +34,14 @@ const EditBacklogItemScreen = () => {
                 isCompleted: item.isCompleted,
                 itemType: "activity" as const,
             };
-            updateBacklogItem({ item: updatedItem, uid: user.uid });
+            updateBacklogItem(updatedItem);
         } else if (item.itemType === "draft" && draftDetails?.title.trim()) {
             const updatedItem = {
                 id: id as string,
                 ...draftDetails,
                 itemType: "draft" as const,
             };
-            updateBacklogItem({ item: updatedItem, uid: user.uid });
+            updateBacklogItem(updatedItem);
         }
         router.back();
     };
@@ -55,12 +52,12 @@ const EditBacklogItemScreen = () => {
 
     return (
         <ScreenWrapper>
-            <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-                <Text style={tw`text-2xl font-semibold`}>
-                    {item.itemType === "activity" ? "Edit Activity" : "Edit Item"}
-                </Text>
-                <TouchableOpacity onPress={handleClose}>
-                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
+            <View style={tw`px-4 py-6`}>
+                <TouchableOpacity onPress={handleClose} style={tw`flex-row items-center gap-x-2`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950`}>
+                        {item.itemType === "activity" ? "Edit Activity" : "Edit Item"}
+                    </Text>
                 </TouchableOpacity>
             </View>
 

@@ -13,7 +13,7 @@ import { useAppContext } from "@/context/AppContext";
 import { NotificationModal } from "@/components/ui/NotificationModal";
 
 interface Props {
-    activities: IActivity[];
+    activities: IActivityGenAI[];
     date: Date;
     staminaUsed: number;
     userMaxStamina: number;
@@ -49,7 +49,17 @@ const ModelActivityBox = ({
             }
 
             await addActivityToSchedule({
-                activity: activityToAdd,
+                activity: {
+                    title: activityToAdd.title,
+                    startTime: activityToAdd.startTime,
+                    endTime: activityToAdd.endTime,
+                    duration: activityToAdd.duration,
+                    staminaCost: activityToAdd.staminaCost,
+                    priority: activityToAdd.priority,
+                    type: activityToAdd.type,
+                    isCompleted: false,
+                    subtasks: []
+                },
                 date: date
             });
             setActivitiesStatus(prev => {
@@ -77,9 +87,18 @@ const ModelActivityBox = ({
     }, []);
 
     const handleAddToBacklog = useCallback((index: number) => {
+        const activityToAdd = activities[index];
         addItemToBacklog({
             item: {
-                ...activities[index],
+                title: activityToAdd.title,
+                duration: activityToAdd.duration,
+                startTime: activityToAdd.startTime,
+                endTime: activityToAdd.endTime,
+                staminaCost: activityToAdd.staminaCost,
+                priority: activityToAdd.priority,
+                type: activityToAdd.type,
+                isCompleted: false,
+                subtasks: [],
                 itemType: "activity"
             }
         }, {
@@ -145,7 +164,7 @@ const ModelActivityBox = ({
             <View style={tw`gap-4`}>
                 {Array.isArray(activities) && activities.map((activity, index) => (
                     <Animated.View 
-                        key={activity.id || index}
+                        key={index}
                         entering={FadeInDown.duration(400).delay(300 + (index * 150))}
                     >
                         <GeneratedActivityItem 

@@ -1,5 +1,6 @@
 import { getFirestore, doc, deleteDoc, collection, query, where, getDocs } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 const deleteUser = async (uid: string) => {
     const db = getFirestore();
@@ -23,11 +24,15 @@ const deleteUser = async (uid: string) => {
 
 export const useDeleteUserMutation = () => {
     const queryClient = useQueryClient();
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not found");
+    }
 
     return useMutation({
-        mutationFn: deleteUser,
-        onSuccess: (_, uid) => {
-            queryClient.removeQueries({ queryKey: ["user", uid] });
+        mutationFn: () => deleteUser(authUser.uid),
+        onSuccess: () => {
+            queryClient.removeQueries({ queryKey: ["user", authUser.uid] });
             queryClient.removeQueries({ queryKey: ["schedule"] });
         }
     });

@@ -130,7 +130,7 @@ const ActivityCard = ({
                                     activity.isCompleted && tw`line-through opacity-70`
                                 ]}
                             >
-                                {activity.title.length > 20 ? `${activity.title.slice(0, 20)}...` : activity.title}
+                                {activity.title.length > 24 ? `${activity.title.slice(0, 24)}...` : activity.title}
                             </Text>
                         
                             {/* Bottom row with stamina, priority, and subtasks */}

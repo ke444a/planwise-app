@@ -39,6 +39,12 @@ export const ACTIVITY_TYPE_TO_STR: Record<ActivityType, string> = {
     "misc": "Miscellaneous"
 };
 
+export const DAY_STRUCTURE_TO_STR: Record<IOnboardingInfo["dayStructure"], string> = {
+    "morning": "Early Bird",
+    "night": "Night Owl",
+    "mixed": "Paced Planner"
+};
+
 export interface IPriorityOption {
     value: ActivityPriority;
     label: string;

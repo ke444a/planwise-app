@@ -60,7 +60,7 @@ const AdvancedScreen = () => {
 
             const credential = GoogleAuthProvider.credential(data.idToken);
             await reauthenticateWithCredential(user, credential);
-            await deleteUser(user.uid);
+            await deleteUser();
             await user.delete();
         } catch (error) {
             setError({
@@ -75,18 +75,10 @@ const AdvancedScreen = () => {
     return (
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
-                <View style={tw`flex-row justify-between items-center mb-8`}>
-                    <View style={tw`w-1/3`}>
-                        <TouchableOpacity 
-                            onPress={() => router.back()}
-                            style={tw`mr-4`}
-                        >
-                            <Ionicons name="chevron-back" size={24} style={tw`text-gray-950`} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={tw`text-2xl font-semibold`}>Advanced</Text>
-                    <View style={tw`w-1/3`} />
-                </View>
+                <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2 mb-8`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950`}>Advanced</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity 
                     style={tw`flex-row items-center p-3 bg-white border border-gray-200 rounded-xl mb-3`}

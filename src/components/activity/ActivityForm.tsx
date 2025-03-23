@@ -42,7 +42,7 @@ export const ActivityForm = ({
             const newSubtask = createNewSubtask(subtaskInput);
             onActivityDetailsChange({
                 ...activityDetails,
-                subtasks: [...activityDetails.subtasks, newSubtask]
+                subtasks: [...(activityDetails.subtasks || []), newSubtask]
             });
             setSubtaskInput("");
         }
@@ -51,7 +51,7 @@ export const ActivityForm = ({
     const handleSubtaskRemove = (id: string) => {
         onActivityDetailsChange({
             ...activityDetails,
-            subtasks: activityDetails.subtasks.filter(subtask => subtask.id !== id)
+            subtasks: activityDetails.subtasks?.filter(subtask => subtask.id !== id) || []
         });
     };
 
@@ -126,7 +126,7 @@ export const ActivityForm = ({
                 <View style={tw`mb-8`}>
                     <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>Any Subtasks?</Text>
                     <SubtasksList
-                        subtasks={activityDetails.subtasks}
+                        subtasks={activityDetails.subtasks || []}
                         subtaskInput={subtaskInput}
                         onSubtaskInputChange={setSubtaskInput}
                         onSubtaskSubmit={handleSubtaskSubmit}

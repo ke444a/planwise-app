@@ -101,7 +101,7 @@ const TimeRangePicker = ({
                     tw`absolute -z-10 left-0 right-0 h-[${ITEM_HEIGHT}px]`,
                     { top: PICKER_HEIGHT / 2 - ITEM_HEIGHT / 2 }
                 ]}>
-                    <View style={tw`bg-purple-50 rounded-full w-full h-[50px]`} />
+                    <View style={tw`bg-purple-100 rounded-full w-full h-[50px]`} />
                 </View>
                 
                 <FlatList

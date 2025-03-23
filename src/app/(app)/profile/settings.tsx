@@ -4,13 +4,11 @@ import { router, Redirect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
 import { useUpdateUserPreferencesMutation } from "@/api/users/updateUserPreferences";
 import { useAppContext } from "@/context/AppContext";
 import { ReactNode, useState } from "react";
-import { convertActivityTypeToStr } from "@/utils/convertActivityTypeToStr";
-import { convertDayStructureToStr } from "@/utils/convertDayStructureToStr";
+import { ACTIVITY_TYPE_TO_STR, DAY_STRUCTURE_TO_STR } from "@/libs/constants";
 import TimePickerBottomSheet from "@/components/profile/TimePickerBottomSheet";
 import StaminaPickerBottomSheet from "@/components/profile/StaminaPickerBottomSheet";
 import DayStructurePickerBottomSheet from "@/components/profile/DayTypePickerBottomSheet";
@@ -39,9 +37,8 @@ const PreferenceRow = ({ icon, label, value, onPress }: IPreferenceRow) => (
 );
 
 const PreferencesScreen = () => {
-    const { user } = useUserStore();
     const { setError } = useAppContext();
-    const { data: userData, isPending, isError } = useGetUserQuery(user?.uid);
+    const { data: userData, isPending, isError } = useGetUserQuery();
     const { mutate: updatePreferences } = useUpdateUserPreferencesMutation();
     const [timePickerVisible, setTimePickerVisible] = useState(false);
     const [selectedTimeType, setSelectedTimeType] = useState<"start" | "end" | null>(null);
@@ -62,12 +59,9 @@ const PreferencesScreen = () => {
         setTimePickerVisible(true);
     };
 
-    const handleTimeSelected = (selectedTime: string) => {
-        if (!user?.uid) return;
-        
+    const handleTimeSelected = (selectedTime: string) => {        
         const updateField = selectedTimeType === "start" ? "onboardingInfo.startDayTime" : "onboardingInfo.endDayTime";
         updatePreferences({
-            uid: user.uid,
             updates: {
                 [updateField]: selectedTime
             }
@@ -86,10 +80,8 @@ const PreferencesScreen = () => {
     };
 
     const handleStaminaSelected = (value: number) => {
-        if (!user?.uid) return;
 
         updatePreferences({
-            uid: user.uid,
             updates: {
                 maxStamina: value
             }
@@ -105,10 +97,7 @@ const PreferencesScreen = () => {
     };
 
     const handleDayStructureSelected = (value: "morning" | "mixed" | "night") => {
-        if (!user?.uid) return;
-
         updatePreferences({
-            uid: user.uid,
             updates: {
                 "onboardingInfo.dayStructure": value
             }
@@ -124,10 +113,7 @@ const PreferencesScreen = () => {
     };
 
     const handlePriorityActivitiesSelected = (values: ActivityType[]) => {
-        if (!user?.uid) return;
-
         updatePreferences({
-            uid: user.uid,
             updates: {
                 "onboardingInfo.priorityActivities": values
             }
@@ -164,8 +150,8 @@ const PreferencesScreen = () => {
         return <Redirect href="/profile" />;
     }
 
-    const dayStructure = convertDayStructureToStr(userData.onboardingInfo.dayStructure);
-    const priorityActivities = convertActivityTypeToStr(userData.onboardingInfo.priorityActivities);
+    const dayStructure = DAY_STRUCTURE_TO_STR[userData.onboardingInfo.dayStructure];
+    const priorityActivities = userData.onboardingInfo.priorityActivities.map((activity) => ACTIVITY_TYPE_TO_STR[activity]);
     
     const preferences: IPreferenceRow[] = [
         {
@@ -205,18 +191,10 @@ const PreferencesScreen = () => {
     return (
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
-                <View style={tw`flex-row justify-between items-center mb-8`}>
-                    <View style={tw`w-1/3`}>
-                        <TouchableOpacity 
-                            onPress={() => router.back()}
-                            style={tw`mr-4`}
-                        >
-                            <Ionicons name="chevron-back" size={24} style={tw`text-gray-950`} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={tw`text-2xl font-semibold`}>Preferences</Text>
-                    <View style={tw`w-1/3`} />
-                </View>
+                <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2 mb-8`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950`}>Preferences</Text>
+                </TouchableOpacity>
 
                 {preferences.map((pref, index) => (
                     <PreferenceRow key={index} {...pref} />

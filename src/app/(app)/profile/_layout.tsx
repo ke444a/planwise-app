@@ -6,6 +6,7 @@ export default function ProfileLayout() {
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="settings" options={{ headerShown: false }} />
             <Stack.Screen name="advanced" options={{ headerShown: false }} />
+            <Stack.Screen name="accessibility" options={{ headerShown: false }} />
         </Stack>
     );
 }

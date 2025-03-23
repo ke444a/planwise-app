@@ -6,7 +6,6 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import ActivityIcon from "../activity/ActivityIcon";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useUserStore } from "@/libs/userStore";
 import { useTickBacklogItemSubtaskMutation } from "@/api/backlogs/tickBacklogItemSubtask";
 import LiftedBottomModal from "@/components/ui/LiftedBottomModal";
 
@@ -29,13 +28,10 @@ const BacklogItemDetailsModal = ({
     onComplete,
     onAddToSchedule
 }: BacklogItemDetailsModalProps) => {
-    const { user } = useUserStore();
     const { mutate: tickSubtask } = useTickBacklogItemSubtaskMutation();
 
     const handleSubtaskPress = (subtaskId: string, isCompleted: boolean) => {
-        if (!user) return;
         tickSubtask({
-            uid: user.uid,
             itemId: item.id!,
             subtaskId: subtaskId,
             isCompleted: !isCompleted,

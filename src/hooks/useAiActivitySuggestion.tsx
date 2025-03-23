@@ -28,9 +28,8 @@ export const useAiActivitySuggestion = () => {
                 subtasks
             };
         } catch (error) {
-            console.error("Error suggesting activity details", error);
             setError({
-                message: "Failed to suggest activity details",
+                message: "Oops, something went wrong. Please try again.",
                 code: "suggest-activity-failed",
                 error
             });

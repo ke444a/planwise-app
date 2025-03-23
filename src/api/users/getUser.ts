@@ -18,10 +18,14 @@ const getUser = async (uid?: string) => {
 
 export const useGetUserQuery = () => {
     const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not found");
+    }
+
     return useQuery({
-        queryKey: ["user", authUser?.uid],
-        queryFn: () => getUser(authUser?.uid),
-        enabled: !!authUser?.uid,
+        queryKey: ["user", authUser.uid],
+        queryFn: () => getUser(authUser.uid),
+        enabled: !!authUser.uid,
         staleTime: 1000 * 60 * 5
     });
 };

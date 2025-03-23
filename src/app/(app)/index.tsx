@@ -7,7 +7,7 @@ import HeaderStaminaBar from "@/components/schedule/HeaderStaminaBar";
 import HeaderDateNavigation from "@/components/schedule/HeaderDateNavigation";
 import ScheduleTimeline from "@/components/schedule/ScheduleTimeline";
 import { useGetUserQuery } from "@/api/users/getUser";
-import { Redirect, router, useRouter } from "expo-router";
+import { Redirect, router } from "expo-router";
 import ErrorModal from "@/components/ui/ErrorModal";
 import { IError } from "@/context/AppContext";
 import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
@@ -16,39 +16,39 @@ import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
 import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 const ScheduleScreen = () => {
-    const { data: userData, isPending, isError } = useGetUserQuery();
+    const { data: userData, isError, isPending: isUserLoading } = useGetUserQuery();
     const insets = useSafeAreaInsets();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const { data: scheduleData, isError: isScheduleError, isPending: isSchedulePending } = useGetScheduleForDayQuery(currentDate);
-    const router = useRouter();
 
+    const { data: currentScheduleData, isError: isScheduleError } = useGetScheduleForDayQuery(currentDate);
+    
     const { mutate: completeActivity } = useCompleteActivityMutation();
     const { mutate: deleteActivity } = useDeleteActivityMutation();
     const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
-
-    if (isPending || isSchedulePending) {
-        return null;
-    }
     if (isError || isScheduleError) {
         const errorObj: IError = {
             message: "Error retrieving user data. Please try again later."
         };
         return <ErrorModal error={errorObj} handleModalClose={() => {}} />;
     }
-    if (userData?.onboardingInfo === null || 
-        !userData?.onboardingInfo.startDayTime || 
-        !userData?.onboardingInfo.endDayTime ||
-        !userData?.onboardingInfo.dayStructure ||
-        !userData?.onboardingInfo.priorityActivities) {
+    if (isUserLoading) {
+        return null;
+    }
+
+    if (userData && userData?.onboardingInfo === null || 
+        !userData?.onboardingInfo?.startDayTime || 
+        !userData?.onboardingInfo?.endDayTime ||
+        !userData?.onboardingInfo?.dayStructure ||
+        !userData?.onboardingInfo?.priorityActivities) {
         return <Redirect href="/onboarding" />;
     }
 
     const startDayHour = parseInt(userData.onboardingInfo.startDayTime.split(":")[0]);
     const endDayHour = parseInt(userData.onboardingInfo.endDayTime.split(":")[0]);
-    const currentStamina = scheduleData.reduce((acc, activity) => acc + activity.staminaCost, 0);
+    const currentStamina = currentScheduleData?.reduce((acc, activity) => acc + activity.staminaCost, 0) ?? 0;
 
     const handleActivityComplete = (activity: IActivity) => {
         if (!activity.id) return;
@@ -117,12 +117,14 @@ const ScheduleScreen = () => {
                 currentDate={currentDate} 
                 setCurrentDate={setCurrentDate} 
             />
-            <View style={[
-                tw`flex-1 bg-white rounded-t-3xl`,
-                styles.scheduleContainerShadow
-            ]}>
+            <Animated.View 
+                style={[tw`flex-1 bg-white rounded-t-3xl`, styles.scheduleContainerShadow]}
+                entering={FadeIn.duration(200)}
+                exiting={FadeOut.duration(200)}
+                key={currentDate.toISOString()}
+            >
                 <ScheduleTimeline 
-                    activities={scheduleData}
+                    activities={currentScheduleData ?? []}
                     scheduleDate={currentDate}
                     startDayHour={startDayHour}
                     endDayHour={endDayHour}
@@ -131,7 +133,7 @@ const ScheduleScreen = () => {
                     onActivityEdit={handleActivityEdit}
                     onActivityMoveToBacklog={handleActivityMoveToBacklog}
                 />
-            </View>
+            </Animated.View>
             <TouchableOpacity
                 style={[
                     tw`absolute bottom-14 right-6 w-16 h-16 bg-purple-400 rounded-full items-center justify-center`,
