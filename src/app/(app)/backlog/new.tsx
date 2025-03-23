@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import tw from "twrnc";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useUserStore } from "@/libs/userStore";
 import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { BacklogItemDraftForm } from "@/components/backlog";
@@ -11,7 +10,6 @@ import { BacklogItemDraftForm } from "@/components/backlog";
 type DraftDetails = Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updatedAt">;
 
 const NewTaskScreen = () => {
-    const { user } = useUserStore();
     const { mutate: addItemToBacklog } = useAddItemToBacklogMutation();
     const [draftDetails, setDraftDetails] = useState<DraftDetails>({
         title: "",
@@ -25,14 +23,13 @@ const NewTaskScreen = () => {
     };
 
     const handleSave = () => {
-        if (!user?.uid || !draftDetails.title.trim()) return;
+        if (!draftDetails.title.trim()) return;
 
         addItemToBacklog({
             item: {
                 ...draftDetails,
                 itemType: "draft",
-            },
-            uid: user.uid
+            }
         }, {
             onSuccess: () => {
                 router.back();

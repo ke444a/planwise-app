@@ -53,6 +53,7 @@ interface ActivityCardProps {
     activity: IActivity;
     iconHeight: number;
     containerHeight: number;
+    activityDate: Date;
     onActivityComplete: (_activity: IActivity) => void;
     onActivityDelete: (_activity: IActivity) => void;
     onActivityEdit: (_activity: IActivity) => void;
@@ -64,6 +65,7 @@ const ActivityCard = ({
     activity, 
     iconHeight, 
     containerHeight,
+    activityDate,
     onActivityComplete,
     onActivityDelete,
     onActivityEdit,
@@ -181,6 +183,7 @@ const ActivityCard = ({
             <ActivityDetailsModal
                 activity={activity}
                 visible={isModalVisible}
+                activityDate={activityDate}
                 onClose={() => setIsModalVisible(false)}
                 onComplete={() => {
                     onActivityComplete(activity);

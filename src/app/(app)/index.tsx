@@ -51,34 +51,38 @@ const ScheduleScreen = () => {
     const currentStamina = scheduleData.reduce((acc, activity) => acc + activity.staminaCost, 0);
 
     const handleActivityComplete = (activity: IActivity) => {
-        if (!activity.id || !user?.uid) return;
+        if (!activity.id) return;
         completeActivity({
             activityId: activity.id,
             date: currentDate,
-            uid: user.uid,
             isCompleted: !activity.isCompleted
         });
     };
 
     const handleActivityDelete = (activity: IActivity) => {
-        if (!activity.id || !user?.uid) return;
+        if (!activity.id) return;
         deleteActivity({
             activityId: activity.id,
-            date: currentDate,
-            uid: user.uid
+            date: currentDate
         });
     };
 
     const handleActivityEdit = (activity: IActivity) => {
-        router.push(`/activity/edit?id=${activity.id}&date=${currentDate.toISOString()}`);
+        router.push({
+            pathname: "/activity/edit",
+            params: {
+                id: activity.id,
+                date: currentDate.toISOString(),
+                currentStamina: currentStamina,
+                maxStamina: userData.maxStamina
+            }
+        });
     };
 
     const handleActivityMoveToBacklog = (activity: IActivity) => {
-        if (!user?.uid) return;
         deleteActivity({
             activityId: activity.id!,
-            date: currentDate,
-            uid: user.uid
+            date: currentDate
         });
         addItemToBacklog({
             item: {
@@ -102,7 +106,11 @@ const ScheduleScreen = () => {
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />            
             <View style={tw`flex-row items-center justify-between px-4`}>
                 <HeaderStaminaBar currentStamina={currentStamina} maxStamina={userData.maxStamina} />
-                <ScheduleButtonsPanel />
+                <ScheduleButtonsPanel 
+                    currentStamina={currentStamina} 
+                    maxStamina={userData.maxStamina} 
+                    currentDate={currentDate}
+                />
             </View>
             
             <HeaderDateNavigation 
@@ -115,6 +123,7 @@ const ScheduleScreen = () => {
             ]}>
                 <ScheduleTimeline 
                     activities={scheduleData}
+                    scheduleDate={currentDate}
                     startDayHour={startDayHour}
                     endDayHour={endDayHour}
                     onActivityComplete={handleActivityComplete}
@@ -145,9 +154,22 @@ const ScheduleScreen = () => {
     );
 };
 
-const ScheduleButtonsPanel = () => {
+interface ScheduleButtonsPanelProps {
+    currentStamina: number;
+    maxStamina: number;
+    currentDate: Date;
+}
+
+const ScheduleButtonsPanel = ({ currentStamina, maxStamina, currentDate }: ScheduleButtonsPanelProps) => {
     const handleCreateActivityPress = () => {
-        router.push("/activity/add");
+        router.push({
+            pathname: "/activity/add",
+            params: {
+                currentStamina: currentStamina,
+                maxStamina: maxStamina,
+                date: currentDate.toISOString()
+            }
+        });
     };
 
     const handleProfilePress = () => {

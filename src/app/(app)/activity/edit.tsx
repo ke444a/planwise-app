@@ -5,27 +5,26 @@ import { TouchableOpacity } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { useUserStore } from "@/libs/userStore";
 import { useGetActivityFromScheduleQuery } from "@/api/schedules/getActivityFromSchedule";
 import { useUpdateActivityMutation } from "@/api/schedules/updateActivity";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { ActivityForm } from "@/components/activity/ActivityForm";
+import { NotificationModal } from "@/components/ui/NotificationModal";
 
 type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
 const EditActivityScreen = () => {
-    const { id, date } = useLocalSearchParams();
-    const { user } = useUserStore();
+    const { id, date, currentStamina, maxStamina } = useLocalSearchParams();
+    const currentStaminaNumber = Number(currentStamina);
+    const maxStaminaNumber = Number(maxStamina);
     const [selectedDate, setSelectedDate] = useState(new Date(date as string));
     const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
+    const [isModalVisible, setIsModalVisible] = useState(false);
 
-    // Fetch activity data
     const { data: activity, isLoading } = useGetActivityFromScheduleQuery(
         id as string,
-        selectedDate,
-        user?.uid || ""
+        selectedDate
     );
-
     const { mutate: updateActivity } = useUpdateActivityMutation();
 
     const handleClose = () => {
@@ -33,7 +32,7 @@ const EditActivityScreen = () => {
     };
 
     const handleUpdateActivity = () => {
-        if (!activityDetails?.title.trim() || !user?.uid || !id) return;
+        if (!activityDetails?.title.trim() || !id) return;
 
         const updatedActivity: IActivity = {
             id: id as string,
@@ -41,16 +40,26 @@ const EditActivityScreen = () => {
             isCompleted: activity?.isCompleted || false,
         };
 
+        const totalStaminaUsed = currentStaminaNumber + updatedActivity.staminaCost;
+        if (
+            maxStaminaNumber > 0 && 
+            totalStaminaUsed / maxStaminaNumber > 1.2 && 
+            !updatedActivity.isCompleted && 
+            updatedActivity.staminaCost > (activity?.staminaCost || 0)
+        ) {
+            setIsModalVisible(true);
+            return;
+        }
+
         updateActivity({ 
             activity: updatedActivity, 
             date: selectedDate, 
-            uid: user.uid 
         });
         router.back();
     };
 
     if (isLoading || !activity) {
-        return null; // Or show a loading spinner
+        return null;
     }
 
     return (
@@ -70,6 +79,11 @@ const EditActivityScreen = () => {
                 onSubmit={handleUpdateActivity}
                 selectedDate={selectedDate}
                 onDateChange={setSelectedDate}
+            />
+
+            <NotificationModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
             />
         </ScreenWrapper>
     );
