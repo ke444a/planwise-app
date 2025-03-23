@@ -3,48 +3,30 @@ import tw from "twrnc";
 import { useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import AiCapabilityList from "@/components/ai-planner/AiCapabilityList";
-import ChatWindow from "@/components/ai-planner/ChatWindow";
-import { useAiChat, IChatMessage } from "@/hooks/useAiChat";
-import ChatInput from "@/components/ai-planner/ChatInput";
-import { useUserStore } from "@/libs/userStore";
-import { useGetUserQuery } from "@/api/users/getUser";
-import { IError } from "@/context/AppContext";
-import ErrorModal from "@/components/ui/ErrorModal";
+import { useAiChat } from "@/hooks/useAiChat";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
+import { AiCapabilityList, ChatInput, ChatWindow } from "@/components/ai-chat";
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    });
+};
 
 const AiPlannerScreen = () => {
-    const { user } = useUserStore();
-    const { data: userData, isPending, error } = useGetUserQuery(user?.uid);
-    const { messages, addMessage, generateSchedule } = useAiChat(userData?.onboardingInfo);
+    const { messages, addMessage, generateSchedule, isGeneratingSchedule } = useAiChat();
     const [isConversationActive, setIsConversationActive] = useState(false);
-    const { date } = useLocalSearchParams();
-
-    if (isPending) {
-        return null;
-    }
-    if (error) {
-        const errorObj: IError = {
-            message: "Error retrieving user data. Please try again later."
-        };
-        return <ErrorModal error={errorObj} handleModalClose={() => {}} />;
-    }
-
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        });
-    };
+    const { date, currentStamina, maxStamina } = useLocalSearchParams();
 
     const handleSendMessage = (message: string) => {
         setIsConversationActive(true);
         const timestamp = Date.now();
         const newUserMessage: IChatMessage = { role: "user", content: message, timestamp };
-        addMessage(newUserMessage);
         generateSchedule(message, timestamp + 1);
+        addMessage(newUserMessage);
     };
 
     return (
@@ -58,7 +40,15 @@ const AiPlannerScreen = () => {
                     <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
                 </TouchableOpacity>
             </View>
-            {isConversationActive ? <ChatWindow messages={messages} date={new Date(date as string)} /> : <AiCapabilityList />}
+            {isConversationActive ? 
+                <ChatWindow 
+                    messages={messages} 
+                    isGeneratingSchedule={isGeneratingSchedule} 
+                    date={new Date(date as string)} 
+                    currentStamina={Number(currentStamina)}
+                    userMaxStamina={Number(maxStamina)}
+                /> : 
+                <AiCapabilityList />}
             <ChatInput onSendMessage={handleSendMessage} />
         </ScreenWrapper>
     );

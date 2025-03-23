@@ -4,6 +4,8 @@ import {
     doc,
 } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
+
 
 const deleteActivity = async (activityId: string, date: Date, uid: string) => {
     const db = getFirestore();
@@ -19,23 +21,27 @@ type Data = {
 }
 
 export const useDeleteActivityMutation = () => {
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not authenticated");
+    }
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ activityId, date, uid }: Data) => deleteActivity(activityId, date, uid),
+        mutationFn: ({ activityId, date }: Data) => deleteActivity(activityId, date, authUser.uid),
         onMutate: async (variables) => {
             // Cancel outgoing refetches
             await queryClient.cancelQueries({ 
-                queryKey: ["schedule", variables.date, variables.uid]
+                queryKey: ["schedule", variables.date, authUser.uid]
             });
 
             // Snapshot previous value
             const previousSchedule = queryClient.getQueryData<IActivity[]>(
-                ["schedule", variables.date, variables.uid]
+                ["schedule", variables.date, authUser.uid]
             );
 
             // Optimistically update schedule
             queryClient.setQueryData<IActivity[]>(
-                ["schedule", variables.date, variables.uid],
+                ["schedule", variables.date, authUser.uid],
                 (old) => {
                     if (!old) return [];
                     return old.filter(activity => activity.id !== variables.activityId);
@@ -47,14 +53,14 @@ export const useDeleteActivityMutation = () => {
         onError: (_error, variables, context) => {
             if (context?.previousSchedule) {
                 queryClient.setQueryData(
-                    ["schedule", variables.date, variables.uid],
+                    ["schedule", variables.date, authUser.uid],
                     context.previousSchedule
                 );
             }
         },
         onSettled: (_data, _error, variables) => {
             queryClient.invalidateQueries({ 
-                queryKey: ["schedule", variables.date, variables.uid]
+                queryKey: ["schedule", variables.date, authUser.uid]
             });
         },
     });

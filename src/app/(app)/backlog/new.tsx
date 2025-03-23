@@ -42,11 +42,12 @@ const NewTaskScreen = () => {
 
     return (
         <ScreenWrapper>
-            <View style={tw`px-4 py-6`}>
+            <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                 <TouchableOpacity onPress={handleClose} style={tw`flex-row items-center gap-x-2`}>
-                    <Ionicons name="chevron-back" size={24} style={tw`text-purple-500`} />
-                    <Text style={tw`text-2xl font-medium text-purple-500`}>New item</Text>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-600`}>New item</Text>
                 </TouchableOpacity>
+                <View />
             </View>
 
             <BacklogItemDraftForm

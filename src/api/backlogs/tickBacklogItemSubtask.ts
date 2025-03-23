@@ -4,7 +4,7 @@ import {
     updateDoc
 } from "@react-native-firebase/firestore";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-
+import { useAuth } from "@/context/AuthContext";
 
 const tickBacklogItemSubtask = async (
     uid: string,
@@ -37,27 +37,30 @@ const tickBacklogItemSubtask = async (
 };
 
 type TickBacklogItemSubtaskData = {
-    uid: string;
     itemId: string;
     subtaskId: string;
     isCompleted: boolean;
 }
 
 export const useTickBacklogItemSubtaskMutation = () => {
+    const { authUser } = useAuth();
+    if (!authUser) {
+        throw new Error("User not authenticated");
+    }
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ uid, itemId, subtaskId, isCompleted }: TickBacklogItemSubtaskData) => 
-            tickBacklogItemSubtask(uid, itemId, subtaskId, isCompleted),
+        mutationFn: ({ itemId, subtaskId, isCompleted }: TickBacklogItemSubtaskData) => 
+            tickBacklogItemSubtask(authUser.uid, itemId, subtaskId, isCompleted),
         onMutate: async (variables) => {
             // Cancel any outgoing refetches
-            await queryClient.cancelQueries({ queryKey: ["backlog", variables.uid] });
+            await queryClient.cancelQueries({ queryKey: ["backlog", authUser.uid] });
 
             // Snapshot the previous value
-            const previousItems = queryClient.getQueryData<IBacklogItem[]>(["backlog", variables.uid]);
+            const previousItems = queryClient.getQueryData<IBacklogItem[]>(["backlog", authUser.uid]);
 
             // Optimistically update to the new value
-            queryClient.setQueryData<IBacklogItem[]>(["backlog", variables.uid], (old) => {
+            queryClient.setQueryData<IBacklogItem[]>(["backlog", authUser.uid], (old) => {
                 if (!old) return [];
 
                 return old.map(item => {
@@ -78,13 +81,13 @@ export const useTickBacklogItemSubtaskMutation = () => {
             // Return a context object with the snapshotted value
             return { previousItems };
         },
-        onError: (_error, variables, context) => {
+        onError: (_error, _, context) => {
             // If the mutation fails, roll back to the previous value
-            queryClient.setQueryData<IBacklogItem[]>(["backlog", variables.uid], context?.previousItems);
+            queryClient.setQueryData<IBacklogItem[]>(["backlog", authUser.uid], context?.previousItems);
         },
-        onSettled: (_data, _error, variables) => {
+        onSettled: (_data, _error) => {
             // Always refetch after error or success
-            queryClient.invalidateQueries({ queryKey: ["backlog", variables.uid] });
+            queryClient.invalidateQueries({ queryKey: ["backlog", authUser.uid] });
         },
     });
 };

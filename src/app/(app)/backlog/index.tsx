@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import tw from "twrnc";
 import { router, Redirect } from "expo-router";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { BacklogItem } from "@/components/backlog";
 import { useUserStore } from "@/libs/userStore";
@@ -10,6 +9,8 @@ import { useAppContext } from "@/context/AppContext";
 import { useDeleteItemFromBacklogMutation } from "@/api/backlogs/deleteItemFromBacklog";
 import { useCompleteBacklogItemMutation } from "@/api/backlogs/completeBacklogItem";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
 
 const BacklogScreen = () => {
     const { user } = useUserStore();
@@ -58,22 +59,13 @@ const BacklogScreen = () => {
 
     return (
         <ScreenWrapper>
-            <View style={tw`px-4 pt-6`}>
-                <View style={tw`flex-row justify-between items-center mb-6`}>
-                    <Text style={tw`text-2xl font-semibold text-gray-950`}>Your backlog</Text>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
-                    </TouchableOpacity>
-                </View>
-
-                <TouchableOpacity 
-                    style={tw`flex-row items-center p-4 bg-white rounded-xl mb-6 border border-dashed border-gray-300`}
-                    onPress={() => router.push("/backlog/new")}
-                >
-                    <View style={tw`w-8 h-8 rounded-full bg-purple-100 items-center justify-center mr-3`}>
-                        <AntDesign name="plus" size={20} style={tw`text-purple-400`} />
-                    </View>
-                    <Text style={tw`text-gray-600 text-lg font-medium`}>Add new item</Text>
+            <View style={tw`flex-row justify-between items-center px-4 py-6`}>
+                <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-600`}>My Backlog</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/backlog/new")}>
+                    <MaterialCommunityIcons name="plus-box" size={32} style={tw`text-purple-500`} />
                 </TouchableOpacity>
             </View>
 
@@ -99,9 +91,7 @@ const BacklogScreen = () => {
                     tw`absolute bottom-14 right-6 w-16 h-16 bg-purple-400 rounded-full items-center justify-center`,
                     styles.floatingButton
                 ]}
-                onPress={() => {
-                    console.log("Open AI chat to create backlog items");
-                }}
+                onPress={() => router.push("/backlog/ai-backlog")}
             >
                 <MaterialCommunityIcons name="robot" size={35} style={tw`text-white`} />
             </TouchableOpacity>

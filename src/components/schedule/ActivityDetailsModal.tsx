@@ -86,7 +86,7 @@ const ActivityDetailsModal = ({
                             <Text style={tw`text-gray-500 text-base`}>
                                 {activity.startTime}-{activity.endTime} ({getActivityDurationLabel(activity.duration)})
                             </Text>
-                            <Text style={tw`text-2xl font-semibold text-gray-950 max-w-[90%] shrink`}>{activity.title}</Text>
+                            <Text style={tw`text-2xl font-semibold text-gray-950 max-w-[250px] shrink`}>{activity.title}</Text>
                         </View>
                     </View>
                     <TouchableOpacity onPress={onClose}>

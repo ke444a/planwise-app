@@ -2,7 +2,6 @@ import { View, Text } from "react-native";
 import { router } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import { useAddActivityToScheduleMutation } from "@/api/schedules/addActivityToSchedule";
@@ -41,9 +40,12 @@ const AddActivityScreen = () => {
     return (
         <ScreenWrapper>
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-                <Text style={tw`text-2xl font-semibold`}>Add Activity</Text>
-                <TouchableOpacity onPress={handleClose}>
-                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
+                <TouchableOpacity onPress={handleClose} style={tw`flex-row items-center gap-x-2`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-600`}>Add Activity</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
+                    <Ionicons name="sparkles" size={24} style={tw`text-purple-400`} />
                 </TouchableOpacity>
             </View>
 

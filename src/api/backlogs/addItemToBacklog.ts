@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { 
     serverTimestamp,
     collection,
@@ -21,17 +22,18 @@ const addItemToBacklog = async (item: IBacklogItem, uid: string) => {
 
 type AddToBacklogData = {
     item: IBacklogItem;
-    uid: string;
 }
 
 export const useAddItemToBacklogMutation = () => {
+    const { authUser } = useAuth();
+    if (!authUser) throw new Error("User not found");
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ item, uid }: AddToBacklogData) => addItemToBacklog(item, uid),
-        onSuccess: (_data, variables) => {
+        mutationFn: ({ item }: AddToBacklogData) => addItemToBacklog(item, authUser.uid),
+        onSuccess: () => {
             // Invalidate and refetch backlog queries
-            queryClient.invalidateQueries({ queryKey: ["backlog", variables.uid] });
+            queryClient.invalidateQueries({ queryKey: ["backlog", authUser.uid] });
         },
     });
 };

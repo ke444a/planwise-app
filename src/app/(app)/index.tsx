@@ -6,9 +6,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import HeaderStaminaBar from "@/components/schedule/HeaderStaminaBar";
 import HeaderDateNavigation from "@/components/schedule/HeaderDateNavigation";
 import ScheduleTimeline from "@/components/schedule/ScheduleTimeline";
-import { useUserStore } from "@/libs/userStore";
 import { useGetUserQuery } from "@/api/users/getUser";
-import { Redirect, useRouter } from "expo-router";
+import { Redirect, router, useRouter } from "expo-router";
 import ErrorModal from "@/components/ui/ErrorModal";
 import { IError } from "@/context/AppContext";
 import { useGetScheduleForDayQuery } from "@/api/schedules/getScheduleForDay";
@@ -16,13 +15,14 @@ import { useCompleteActivityMutation } from "@/api/schedules/completeActivity";
 import { useDeleteActivityMutation } from "@/api/schedules/deleteActivity";
 import { useAddItemToBacklogMutation } from "@/api/backlogs/addItemToBacklog";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AntDesign from "@expo/vector-icons/AntDesign";
+
 
 const ScheduleScreen = () => {
-    const { user } = useUserStore();
-    const { data: userData, isPending, isError } = useGetUserQuery(user?.uid);
+    const { data: userData, isPending, isError } = useGetUserQuery();
     const insets = useSafeAreaInsets();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const { data: scheduleData, isError: isScheduleError, isPending: isSchedulePending } = useGetScheduleForDayQuery(currentDate, user?.uid || "");
+    const { data: scheduleData, isError: isScheduleError, isPending: isSchedulePending } = useGetScheduleForDayQuery(currentDate);
     const router = useRouter();
 
     const { mutate: completeActivity } = useCompleteActivityMutation();
@@ -49,35 +49,6 @@ const ScheduleScreen = () => {
     const startDayHour = parseInt(userData.onboardingInfo.startDayTime.split(":")[0]);
     const endDayHour = parseInt(userData.onboardingInfo.endDayTime.split(":")[0]);
     const currentStamina = scheduleData.reduce((acc, activity) => acc + activity.staminaCost, 0);
-    const activitiesWithSpecials = scheduleData.length > 0 
-        ? [
-            {
-                id: "day_start",
-                title: "Wake Up",
-                startTime: userData.onboardingInfo.startDayTime,
-                endTime: userData.onboardingInfo.startDayTime,
-                duration: 0,
-                staminaCost: 0,
-                type: "life_maintenance" as const,
-                priority: "routine" as const,
-                isCompleted: false,
-                subtasks: []
-            },
-            ...scheduleData,
-            {
-                id: "day_end",
-                title: "Wind Down",
-                startTime: userData.onboardingInfo.endDayTime,
-                endTime: userData.onboardingInfo.endDayTime,
-                duration: 0,
-                staminaCost: 0,
-                type: "life_maintenance" as const,
-                priority: "routine" as const,
-                isCompleted: false,
-                subtasks: []
-            }
-        ]
-        : [];
 
     const handleActivityComplete = (activity: IActivity) => {
         if (!activity.id || !user?.uid) return;
@@ -122,8 +93,7 @@ const ScheduleScreen = () => {
                 endTime: activity.endTime,
                 staminaCost: activity.staminaCost,
                 subtasks: activity.subtasks
-            },
-            uid: user.uid
+            }
         });
     };
 
@@ -132,7 +102,7 @@ const ScheduleScreen = () => {
             <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />            
             <View style={tw`flex-row items-center justify-between px-4`}>
                 <HeaderStaminaBar currentStamina={currentStamina} maxStamina={userData.maxStamina} />
-                <ScheduleButtonsPanel currentDate={currentDate} />
+                <ScheduleButtonsPanel />
             </View>
             
             <HeaderDateNavigation 
@@ -144,7 +114,7 @@ const ScheduleScreen = () => {
                 styles.scheduleContainerShadow
             ]}>
                 <ScheduleTimeline 
-                    activities={activitiesWithSpecials}
+                    activities={scheduleData}
                     startDayHour={startDayHour}
                     endDayHour={endDayHour}
                     onActivityComplete={handleActivityComplete}
@@ -159,20 +129,25 @@ const ScheduleScreen = () => {
                     styles.floatingButton
                 ]}
                 onPress={() => {
-                    router.push("/activity/add");
+                    router.push({
+                        pathname: "/ai-planner",
+                        params: {
+                            date: currentDate.toISOString(),
+                            currentStamina: currentStamina,
+                            maxStamina: userData.maxStamina
+                        }
+                    });
                 }}
             >
-                <MaterialCommunityIcons name="plus" size={35} style={tw`text-white`} />
+                <MaterialCommunityIcons name="robot" size={35} style={tw`text-white`} />
             </TouchableOpacity>
         </View>
     );
 };
 
-const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
-    const router = useRouter();
-
-    const handleAiPlannerPress = () => {
-        router.push(`/ai-planner?date=${currentDate.toISOString()}`);
+const ScheduleButtonsPanel = () => {
+    const handleCreateActivityPress = () => {
+        router.push("/activity/add");
     };
 
     const handleProfilePress = () => {
@@ -185,11 +160,11 @@ const ScheduleButtonsPanel = ({ currentDate }: { currentDate: Date }) => {
 
     return (
         <View style={tw`flex-row ml-4`}>
+            <TouchableOpacity style={tw`mr-4`} onPress={handleCreateActivityPress}>
+                <AntDesign name="pluscircle" size={24} style={tw`text-gray-950`} />
+            </TouchableOpacity>
             <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress}>
                 <FontAwesome name="inbox" size={24} style={tw`text-gray-950`} />
-            </TouchableOpacity>
-            <TouchableOpacity style={tw`mr-4`} onPress={handleAiPlannerPress}>
-                <Ionicons name="sparkles" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleProfilePress}>
                 <Ionicons name="settings-sharp" size={24} style={tw`text-gray-950`} />

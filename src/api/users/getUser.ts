@@ -1,5 +1,6 @@
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/context/AuthContext";
 
 const getUser = async (uid?: string) => {
     if (!uid) return null;
@@ -15,10 +16,12 @@ const getUser = async (uid?: string) => {
     }
 };
 
-export const useGetUserQuery = (uid?: string) => {
+export const useGetUserQuery = () => {
+    const { authUser } = useAuth();
     return useQuery({
-        queryKey: ["user", uid],
-        queryFn: () => getUser(uid),
-        enabled: !!uid
+        queryKey: ["user", authUser?.uid],
+        queryFn: () => getUser(authUser?.uid),
+        enabled: !!authUser?.uid,
+        staleTime: 1000 * 60 * 5
     });
 };

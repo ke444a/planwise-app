@@ -3,7 +3,6 @@ import { View, ScrollView, Dimensions } from "react-native";
 import tw from "twrnc";
 import ActivityCard from "./ActivityCard";
 import { timeToMinutes } from "@/utils/timeToMinutes";
-import SpecialActivityCard from "./SpecialActivityCard";
 
 interface ScheduleTimelineProps {
     startDayHour: number;
@@ -28,18 +27,15 @@ const MIN_ACTIVITY_ICON_HEIGHT = 52;
 
 const getActivityRows = (activity: IActivity) => {
     let rows = 3;
-    if (activity.priority !== "routine" && activity.subtasks.length > 0) {
-        rows += 1;
-    }
     if (activity.title.length >= 25) {
         rows += 1;
     }
     return rows;
 };
 
-const ScheduleTimeline = ({ 
-    startDayHour, 
-    endDayHour, 
+const ScheduleTimeline = ({
+    startDayHour,
+    endDayHour,
     activities,
     onActivityComplete = () => {},
     onActivityDelete = () => {},
@@ -120,6 +116,83 @@ const ScheduleTimeline = ({
         return Math.min(minutesBetween * PIXELS_PER_GAP_MIN, MAX_ACTIVITY_GAP);
     };
     
+    // Calculate the elapsed timeline percentage
+    const getElapsedTimePosition = () => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes() + 30;
+        
+        // If current time is not within day hours, return null
+        if (currentHour < startDayHour || currentHour > endDayHour) {
+            return null;
+        }
+        
+        // Find the position where current time falls
+        let elapsedHeight = 0;
+        let currentActivityFound = false;
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        
+        for (let i = 0; i < activities.length; i++) {
+            const activity = activities[i];
+            const activityStartMinutes = timeToMinutes(activity.startTime);
+            const activityEndMinutes = timeToMinutes(activity.endTime);
+            
+            // If current time is before this activity starts
+            if (currentTimeInMinutes < activityStartMinutes) {
+                break;
+            }
+            
+            // If current time is during this activity
+            if (currentTimeInMinutes >= activityStartMinutes && currentTimeInMinutes < activityEndMinutes) {
+                // Add full height for activities that have started
+                elapsedHeight += MIN_ACTIVITY_ICON_HEIGHT / 2; // At least position at the middle of icon
+                currentActivityFound = true;
+                break;
+            }
+            
+            // Add this activity's full height for past activities
+            elapsedHeight += getActivityHeight(activity);
+            
+            // Add gap after this activity if not the last one
+            if (i < activities.length - 1) {
+                elapsedHeight += getGapBetweenActivities(activity, activities[i + 1]);
+            }
+        }
+        
+        // If no current activity was found but there are activities,
+        // and we're within the day hours, position at the first activity
+        if (!currentActivityFound && activities.length > 0 && 
+            currentHour >= startDayHour && currentHour <= endDayHour) {
+            const firstActivity = activities[0];
+            const firstActivityStartMinutes = timeToMinutes(firstActivity.startTime);
+            
+            // If current time is before the first activity, position at start
+            if (currentTimeInMinutes < firstActivityStartMinutes) {
+                return 0;
+            }
+            
+            // If we're past all activities, position at the end of the last one
+            if (currentTimeInMinutes >= timeToMinutes(activities[activities.length-1].endTime)) {
+                return elapsedHeight;
+            }
+        }
+        
+        return elapsedHeight;
+    };
+    
+    const elapsedPosition = getElapsedTimePosition();
+    
+    // Check if activity is in the past
+    const isActivityInPast = (activity: IActivity) => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        
+        const activityEndMinutes = timeToMinutes(activity.endTime);
+        return currentTimeInMinutes > activityEndMinutes;
+    };
+    
     return (
         <ScrollView 
             ref={scrollViewRef}
@@ -130,7 +203,7 @@ const ScheduleTimeline = ({
             <View style={tw`flex-row`}>
                 {/* Activities column with timeline */}
                 <View style={tw`flex-1`}>
-                    {/* Vertical timeline line */}
+                    {/* Background gray timeline line */}
                     <View 
                         style={[
                             tw`absolute bg-gray-300`,
@@ -143,24 +216,26 @@ const ScheduleTimeline = ({
                         ]} 
                     />
                     
+                    {/* Red elapsed timeline line with current time */}
+                    {elapsedPosition !== null && (
+                        <View 
+                            style={[
+                                tw`absolute bg-purple-400`,
+                                { 
+                                    width: 2,
+                                    left: 25,
+                                    top: 0,
+                                    height: elapsedPosition
+                                }
+                            ]} 
+                        />
+                    )}
+                    
                     {activities.map((activity, index) => {
                         const activityHeight = getActivityHeight(activity);
                         const activityContainerHeight = TOTAL_ACTIVITY_SIZE_BY_ROW[getActivityRows(activity) as 3 | 4 | 5];
+                        const isPastActivity = isActivityInPast(activity);
 
-                        if (activity.id === "day_start" || activity.id === "day_end") {
-                            return (
-                                <View key={index}>
-                                    <SpecialActivityCard 
-                                        type={activity.id}
-                                        title={activity.title}
-                                        startTime={activity.startTime}
-                                    />
-                                    {index === 0 && (
-                                        <View style={{ height: getGapBetweenActivities(activity, activities[index + 1]) }} />
-                                    )}
-                                </View>
-                            );
-                        }
                         return (
                             <View key={index}>                                
                                 <ActivityCard
@@ -171,6 +246,7 @@ const ScheduleTimeline = ({
                                     onActivityDelete={onActivityDelete}
                                     onActivityEdit={onActivityEdit}
                                     onActivityMoveToBacklog={onActivityMoveToBacklog}
+                                    isPast={isPastActivity}
                                 />
                                 {index < activities.length - 1 && (
                                     <View style={{ height: getGapBetweenActivities(activity, activities[index + 1]) }} />
