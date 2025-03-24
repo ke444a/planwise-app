@@ -2,7 +2,7 @@ import { View, Text, TextInput, Pressable } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import tw from "twrnc";
 import Animated, { FadeInDown, LinearTransition } from "react-native-reanimated";
-
+import { useTheme } from "@/context/ThemeContext";
 interface SubtasksListProps {
     subtasks: ISubtask[];
     subtaskInput: string;
@@ -18,6 +18,7 @@ const SubtasksList = ({
     onSubtaskSubmit,
     onSubtaskRemove
 }: SubtasksListProps) => {
+    const { colorScheme } = useTheme();
     return (
         <View style={tw`gap-y-2`}>
             {subtasks && subtasks.length > 0 && subtasks.map((subtask, index) => (
@@ -48,6 +49,7 @@ const SubtasksList = ({
                     onSubmitEditing={onSubtaskSubmit}
                     placeholder="Add subtask"
                     returnKeyType="done"
+                    placeholderTextColor={colorScheme === "dark" ? "rgba(0, 0, 0, 0.5)" : "#4b5563"}
                 />
             </View>
         </View>

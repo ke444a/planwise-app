@@ -60,9 +60,9 @@ export const DurationSection = ({ duration, onDurationChange }: DurationSectionP
     return (
         <View>
             <View style={tw`flex-row items-center justify-between mb-4`}>
-                <Text style={tw`text-2xl font-semibold text-gray-950`}>How long?</Text>
+                <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>How long?</Text>
                 <TouchableOpacity onPress={() => setIsDurationPickerVisible(true)}>
-                    <Text style={tw`text-gray-500 font-medium text-lg`}>More...</Text>
+                    <Text style={tw`text-gray-500 font-medium text-lg dark:text-gray-300`}>More...</Text>
                 </TouchableOpacity>
             </View>
             <DurationSlider

@@ -14,7 +14,7 @@ const HeaderStaminaBar = ({ currentStamina, maxStamina }: StaminaBarProps) => {
     return (
         <View style={[tw`flex-row items-center rounded-full py-1 bg-white w-full shrink relative`, styles.staminaBarShadow]}>
             <Animated.View 
-                style={tw.style("absolute left-0 top-0 bottom-0 right-0 bg-purple-200 rounded-full", { width: `${percentage}%` })}
+                style={tw.style("absolute left-0 top-0 bottom-0 right-0 bg-purple-200 dark:bg-purple-300 rounded-full", { width: `${percentage}%` })}
                 entering={FadeIn.duration(300)}
                 exiting={FadeOut.duration(300)}
                 key={`stamina-${currentStamina}`}

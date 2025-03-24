@@ -85,14 +85,14 @@ const ActivityCard = ({
                             >
                                 {/* Background color layer */}
                                 <View style={[
-                                    tw`absolute inset-0 bg-slate-200`,
+                                    tw`absolute inset-0 bg-slate-200 dark:bg-white`,
                                 ]} />
                             
                                 {/* Progress fill for current activity */}
                                 {isCurrentActivity && (
                                     <View 
                                         style={[
-                                            tw`absolute bg-purple-200 left-0 top-0 right-0`,
+                                            tw`absolute bg-purple-200 dark:bg-purple-300 left-0 top-0 right-0`,
                                             { height: `${activityProgress}%` }
                                         ]}
                                     />
@@ -100,7 +100,7 @@ const ActivityCard = ({
                             
                                 {/* Past activity fill */}
                                 {isPast && (
-                                    <View style={tw`absolute inset-0 bg-purple-200`} />
+                                    <View style={tw`absolute inset-0 bg-purple-200 dark:bg-purple-300`} />
                                 )}
                             
                                 {/* Icon centered on top */}
@@ -115,18 +115,18 @@ const ActivityCard = ({
                         </View>
                         <View style={tw`ml-3 flex-1`}>
                             {isCurrentActivity ? (
-                                <Text style={tw`text-gray-500 text-sm mb-1`}>
+                                <Text style={tw`text-gray-500 dark:text-gray-300 text-sm mb-1`}>
                                     {getTimeRemainingText(activity.endTime)}
                                 </Text>
                             ) : (
-                                <Text style={tw`text-gray-500 text-sm mb-1`}>
+                                <Text style={tw`text-gray-500 dark:text-gray-300 text-sm mb-1`}>
                                     {activity.startTime}-{activity.endTime} ({getActivityDurationLabel(activity.duration)})
                                 </Text>
                             )}
                         
                             <Text 
                                 style={[
-                                    tw`text-gray-950 font-semibold text-lg mb-1`,
+                                    tw`text-gray-950 dark:text-white font-semibold text-lg mb-1`,
                                     activity.isCompleted && tw`line-through opacity-70`
                                 ]}
                             >
@@ -137,19 +137,19 @@ const ActivityCard = ({
                             <View style={tw`flex-row flex-wrap gap-2 max-w-[220px] items-center`}>
                                 {activity.subtasks && activity.subtasks.length > 0 && (
                                     <View style={tw`flex-row items-center p-1`}>
-                                        <Text style={tw`text-gray-500 font-medium`}>
+                                        <Text style={tw`text-gray-500 dark:text-gray-300 font-medium`}>
                                             {activity.subtasks.filter(task => task.isCompleted).length}/{activity.subtasks.length}
                                         </Text>
-                                        <Ionicons name="checkbox" size={16} style={tw`ml-1 text-gray-500`} />
+                                        <Ionicons name="checkbox" size={16} style={tw`ml-1 text-gray-500 dark:text-gray-300`} />
                                     </View>
                                 )}
                                 <View style={tw`flex-row items-center p-1`}>
-                                    <Text style={tw`text-gray-500 font-medium mr-1`}>{activity.staminaCost}</Text>
-                                    <Ionicons name="flash" size={16} style={tw`text-gray-500`} />
+                                    <Text style={tw`text-gray-500 dark:text-gray-300 font-medium mr-1`}>{activity.staminaCost}</Text>
+                                    <Ionicons name="flash" size={16} style={tw`text-gray-500 dark:text-gray-300`} />
                                 </View>
                                 {activity.priority !== "routine" && (
                                     <View style={tw`p-1`}>
-                                        <Text style={tw`font-medium text-gray-500`}>{getPriorityLabel(activity.priority)}</Text>
+                                        <Text style={tw`font-medium text-gray-500 dark:text-gray-300`}>{getPriorityLabel(activity.priority)}</Text>
                                     </View>
                                 )}
                             </View>

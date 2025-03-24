@@ -2,6 +2,7 @@ import { Text, TouchableOpacity, View, TextInput } from "react-native";
 import tw from "twrnc";
 import ActivityIcon from "@/components/activity/ActivityIcon";
 import { ACTIVITY_TYPE_TO_STR } from "@/libs/constants";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Props {
     title: string;
@@ -18,6 +19,7 @@ const ActivityTypeAndTitlePicker = ({
     onTitleChange,
     setIsTypePickerVisible
 }: Props) => {
+    const { colorScheme } = useTheme();
     return (
         <View style={tw`flex-row items-center`}>
             <TouchableOpacity 
@@ -32,13 +34,13 @@ const ActivityTypeAndTitlePicker = ({
             </TouchableOpacity>
             <View style={tw`flex-1`}>
                 <TextInput
-                    style={tw`border-b border-gray-300 text-xl text-gray-950 mb-3 py-1a`}
+                    style={tw`border-b border-gray-300 text-xl text-gray-950 mb-3 py-1 dark:text-white`}
                     value={title}
                     onChangeText={onTitleChange}
                     placeholder="What?"
-                    placeholderTextColor="#4b5563"
+                    placeholderTextColor={colorScheme === "dark" ? "rgba(255, 255, 255, 0.5)" : "#4b5563"}
                 />
-                <Text style={tw`text-gray-500 text-sm font-medium`}>{ACTIVITY_TYPE_TO_STR[type]}</Text>
+                <Text style={tw`text-gray-500 text-sm font-medium dark:text-gray-300`}>{ACTIVITY_TYPE_TO_STR[type]}</Text>
             </View>
         </View>
     );

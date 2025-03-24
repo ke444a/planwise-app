@@ -26,8 +26,8 @@ export const DatePickerSection = ({ selectedDate, onDateChange }: DatePickerSect
                 onPress={() => setIsDatePickerVisible(true)}
                 style={tw`flex-row items-center justify-center`}
             >
-                <MaterialCommunityIcons name="calendar" size={24} style={tw`text-gray-600 mr-2`} />
-                <Text style={tw`text-gray-950 text-lg`}>{formatDate(selectedDate)}</Text>
+                <MaterialCommunityIcons name="calendar" size={24} style={tw`text-gray-600 dark:text-neutral-100 mr-2`} />
+                <Text style={tw`text-gray-950 dark:text-white text-lg`}>{formatDate(selectedDate)}</Text>
             </TouchableOpacity>
 
             <Modal

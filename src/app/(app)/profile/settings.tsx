@@ -192,8 +192,8 @@ const PreferencesScreen = () => {
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
                 <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2 mb-8`}>
-                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
-                    <Text style={tw`text-2xl font-semibold text-gray-950`}>Preferences</Text>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>Preferences</Text>
                 </TouchableOpacity>
 
                 {preferences.map((pref, index) => (

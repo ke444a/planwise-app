@@ -102,8 +102,8 @@ const ScheduleScreen = () => {
     };
 
     return (
-        <View style={tw`flex-1 bg-purple-50`}>
-            <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />            
+        <View style={tw`flex-1 bg-purple-50 dark:bg-pink-200`}>
+            <View style={[tw`bg-purple-50 dark:bg-pink-200`, { paddingTop: insets.top }]} />            
             <View style={tw`flex-row items-center justify-between px-4`}>
                 <HeaderStaminaBar currentStamina={currentStamina} maxStamina={userData.maxStamina} />
                 <ScheduleButtonsPanel 
@@ -118,7 +118,7 @@ const ScheduleScreen = () => {
                 setCurrentDate={setCurrentDate} 
             />
             <Animated.View 
-                style={[tw`flex-1 bg-white rounded-t-3xl`, styles.scheduleContainerShadow]}
+                style={[tw`flex-1 bg-white rounded-t-3xl dark:bg-zinc-900`, styles.scheduleContainerShadow]}
                 entering={FadeIn.duration(200)}
                 exiting={FadeOut.duration(200)}
                 key={currentDate.toISOString()}

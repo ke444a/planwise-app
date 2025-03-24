@@ -83,8 +83,8 @@ const TimeRangePicker = ({
         return (
             <View style={tw`h-[${ITEM_HEIGHT}px] justify-center items-center`}>
                 <Text style={[
-                    tw`text-base text-gray-950 px-4`,
-                    isSelected && tw`text-lg font-semibold`,
+                    tw`text-base text-gray-950 px-4 dark:text-white`,
+                    isSelected && tw`text-lg font-semibold text-gray-950`,
                     !isSelected && tw`font-normal`,
                     { opacity }
                 ]}>

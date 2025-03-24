@@ -139,14 +139,14 @@ const ModelActivityBox = ({
             >
                 <View style={tw`flex-col gap-y-2`}>
                     <View style={tw`flex-row items-center`}>
-                        <Ionicons name="checkbox" size={20} style={tw`mr-1 text-gray-950`} />
-                        <Text style={tw`text-gray-950 font-medium`}>{tasksAdded}/{totalTasks} tasks added</Text>
+                        <Ionicons name="checkbox" size={20} style={tw`mr-1 text-gray-950 dark:text-white`} />
+                        <Text style={tw`text-gray-950 dark:text-white font-medium`}>{tasksAdded}/{totalTasks} tasks added</Text>
                     </View>
                     <View style={tw`flex-row items-center`}>
-                        <Ionicons name="flash" size={20} style={tw.style("mr-1 text-gray-950", percentageStaminaUsed > 0.8 && "text-orange-400", percentageStaminaUsed > 0.95 && "text-red-400")} />
+                        <Ionicons name="flash" size={20} style={tw.style("mr-1 text-gray-950 dark:text-white", percentageStaminaUsed > 0.8 && "text-orange-400", percentageStaminaUsed > 0.95 && "text-red-400")} />
                         <Text style={
                             tw.style(
-                                "font-medium text-gray-950",
+                                "font-medium text-gray-950 dark:text-white",
                                 percentageStaminaUsed > 0.8 && "text-orange-400 underline",
                                 percentageStaminaUsed > 0.95 && "text-red-400 underline"
                             )

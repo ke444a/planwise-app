@@ -85,7 +85,7 @@ export const BacklogItemActivityForm = ({
                 />
 
                 <View style={tw`mb-4`}>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>When?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>When?</Text>
                     <TimeRangePicker
                         initialTime={activityDetails.startTime}
                         durationMinutes={activityDetails.duration}
@@ -112,7 +112,7 @@ export const BacklogItemActivityForm = ({
                 />
 
                 <View>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>How Urgent?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>How Urgent?</Text>
                     <PriorityPicker
                         selectedPriority={activityDetails.priority}
                         onPriorityChange={(value) => handleDetailsChange({ priority: value })}
@@ -120,7 +120,7 @@ export const BacklogItemActivityForm = ({
                 </View>
 
                 <View>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>How Much Stamina?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>How Much Stamina?</Text>
                     <StaminaPicker
                         value={activityDetails.staminaCost}
                         onValueChange={(value) => handleDetailsChange({ staminaCost: value })}
@@ -128,7 +128,7 @@ export const BacklogItemActivityForm = ({
                 </View>
 
                 <View style={tw`mb-8`}>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>Any Subtasks?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>Any Subtasks?</Text>
                     <SubtasksList
                         subtasks={activityDetails.subtasks || []}
                         subtaskInput={subtaskInput}

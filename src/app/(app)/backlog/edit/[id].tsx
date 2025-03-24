@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetBacklogItemQuery } from "@/api/backlogs/getBacklogItem";
 import { useUpdateBacklogItemMutation } from "@/api/backlogs/updateBacklogItem";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
@@ -17,8 +17,34 @@ const EditBacklogItemScreen = () => {
     const { id } = useLocalSearchParams();
     const { data: item, isPending } = useGetBacklogItemQuery(id as string);
     const { mutate: updateBacklogItem } = useUpdateBacklogItemMutation();
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
     const [draftDetails, setDraftDetails] = useState<DraftDetails | null>(null);
+    
+    const [activityDetails, setActivityDetails] = useState<ActivityDetails>({
+        title: "",
+        type: "misc",
+        startTime: "12:00",
+        endTime: "12:15",
+        duration: 15,
+        priority: "must_do",
+        staminaCost: 0,
+        subtasks: [],
+    });
+
+    useEffect(() => {
+        if (item && item.itemType === "activity") {
+            setActivityDetails(prev => ({
+                ...prev,
+                title: item.title || prev.title,
+                type: item.type || prev.type,
+                startTime: item.startTime || prev.startTime,
+                endTime: item.endTime || prev.endTime,
+                duration: item.duration || prev.duration,
+                priority: item.priority || prev.priority,
+                staminaCost: typeof item.staminaCost === "number" ? item.staminaCost : prev.staminaCost,
+                subtasks: item.subtasks || prev.subtasks,
+            }));
+        }
+    }, [item]);
 
     const handleClose = () => {
         router.back();
@@ -27,7 +53,7 @@ const EditBacklogItemScreen = () => {
     const handleUpdateItem = () => {
         if (!id || !item) return;
 
-        if (item.itemType === "activity" && activityDetails?.title.trim()) {
+        if (item.itemType === "activity" && activityDetails.title.trim()) {
             const updatedItem = {
                 id: id as string,
                 ...activityDetails,
@@ -54,8 +80,8 @@ const EditBacklogItemScreen = () => {
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
                 <TouchableOpacity onPress={handleClose} style={tw`flex-row items-center gap-x-2`}>
-                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
-                    <Text style={tw`text-2xl font-semibold text-gray-950`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>
                         {item.itemType === "activity" ? "Edit Activity" : "Edit Item"}
                     </Text>
                 </TouchableOpacity>
@@ -63,9 +89,9 @@ const EditBacklogItemScreen = () => {
 
             {item.itemType === "activity" ? (
                 <BacklogItemActivityForm
-                    initialData={item}
-                    showDatePicker={false}
+                    activityDetails={activityDetails}
                     onActivityDetailsChange={setActivityDetails}
+                    showDatePicker={false}
                     submitButtonLabel="Update"
                     submitButtonIcon={<Ionicons name="checkmark" size={24} style={tw`text-gray-950`} />}
                     onSubmit={handleUpdateItem}

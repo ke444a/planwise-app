@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import tw, { useAppColorScheme } from "twrnc";
+import tw from "twrnc";
 import { useUserStore } from "@/libs/userStore";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Feather from "@expo/vector-icons/Feather";
@@ -8,7 +8,6 @@ import { router } from "expo-router";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 
 const ProfileScreen = () => {
-    useAppColorScheme(tw);
     const { user } = useUserStore();
 
     return (
@@ -20,8 +19,8 @@ const ProfileScreen = () => {
                         <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
                     </TouchableOpacity> */}
                     <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`}>
-                        <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
-                        <Text style={tw`text-2xl font-semibold text-gray-950`}>My Profile</Text>
+                        <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
+                        <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>My Profile</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={tw`flex-row items-start mb-6`}>
@@ -29,8 +28,8 @@ const ProfileScreen = () => {
                         <Ionicons name="person" size={32} style={tw`text-gray-950`} />
                     </View>
                     <View>
-                        <Text style={tw`text-xl font-semibold text-gray-950 mb-1`}>{user?.fullName || "User"}</Text>
-                        <Text style={tw`text-gray-500 font-medium`}>{user?.email}</Text>
+                        <Text style={tw`text-xl font-semibold text-gray-950 mb-1 dark:text-white`}>{user?.fullName || "User"}</Text>
+                        <Text style={tw`text-gray-500 font-medium dark:text-gray-300`}>{user?.email}</Text>
                     </View>
                 </View>
 

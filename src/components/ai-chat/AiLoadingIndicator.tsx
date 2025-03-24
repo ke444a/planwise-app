@@ -60,14 +60,14 @@ const AiLoadingIndicator = ({ message }: { message?: string }) => {
     return (
         <Animated.View style={[fadingAnimation]}>
             <View style={tw`flex-row items-center my-4`}>
-                <MaterialCommunityIcons name="robot" size={24} style={tw`text-gray-600`} />
+                <MaterialCommunityIcons name="robot" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
                 <View style={tw`ml-2 flex-row items-center`}>
-                    <Text style={tw`text-gray-600 font-medium text-lg`}>
+                    <Text style={tw`text-gray-600 dark:text-neutral-100 font-medium text-lg`}>
                         {message || "Wait a moment. I'm thinking"}
                     </Text>
-                    <Animated.Text style={[tw`text-gray-600 font-medium text-lg`, dot1Animation]}>.</Animated.Text>
-                    <Animated.Text style={[tw`text-gray-600 font-medium text-lg`, dot2Animation]}>.</Animated.Text>
-                    <Animated.Text style={[tw`text-gray-600 font-medium text-lg`, dot3Animation]}>.</Animated.Text>
+                    <Animated.Text style={[tw`text-gray-600 dark:text-neutral-100 font-medium text-lg`, dot1Animation]}>.</Animated.Text>
+                    <Animated.Text style={[tw`text-gray-600 dark:text-neutral-100 font-medium text-lg`, dot2Animation]}>.</Animated.Text>
+                    <Animated.Text style={[tw`text-gray-600 dark:text-neutral-100 font-medium text-lg`, dot3Animation]}>.</Animated.Text>
                 </View>
             </View>
         </Animated.View>

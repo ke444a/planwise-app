@@ -2,11 +2,11 @@ import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useAppColorScheme } from "twrnc";
+import { useTheme } from "@/context/ThemeContext";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 
 const AccessibilityScreen = () => {
-    const [_colorScheme, toggleColorScheme] = useAppColorScheme(tw);
+    const { setSpecificTheme } = useTheme();
 
     return (
         <ScreenWrapper>
@@ -22,7 +22,7 @@ const AccessibilityScreen = () => {
                     <View style={tw`flex-row items-center justify-between w-full`}>
                         {/* Light Theme Option */}
                         <TouchableOpacity 
-                            onPress={toggleColorScheme}
+                            onPress={() => setSpecificTheme("light")}
                             style={tw`items-center`}
                         >
                             <View style={tw`h-32 w-48 rounded-3xl bg-white border-2 border-purple-200 mb-4 dark:border-0`}>
@@ -34,7 +34,7 @@ const AccessibilityScreen = () => {
                         
                         {/* Dark Theme Option */}
                         <TouchableOpacity 
-                            onPress={toggleColorScheme}
+                            onPress={() => setSpecificTheme("dark")}
                             style={tw`items-center`}
                         >
                             <View style={tw`h-32 w-48 rounded-3xl bg-gray-500 dark:border-2 dark:border-purple-200 mb-4`}>

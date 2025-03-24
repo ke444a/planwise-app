@@ -120,7 +120,7 @@ export const GeneratedActivityItem = ({
             </TouchableWithoutFeedback>
 
             <Animated.View style={[tw`overflow-hidden`, optionsStyle]}>
-                <View style={tw`flex-row justify-between p-2 bg-purple-200 rounded-b-xl`}>
+                <View style={tw`flex-row justify-between p-2 bg-purple-200 dark:bg-purple-300 rounded-b-xl`}>
                     <TouchableOpacity 
                         onPress={onAddToSchedule}
                         disabled={hasWarnings}

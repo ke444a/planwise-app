@@ -47,8 +47,8 @@ const HeaderDateNavigation = ({
                 onPress={() => setIsDatePickerVisible(true)}
                 style={tw`flex-row items-center`}
             >
-                <MaterialCommunityIcons name="calendar" size={24} style={tw`text-gray-600 mr-2`} />
-                <Text style={tw`text-xl font-bold text-gray-800`}>
+                <MaterialCommunityIcons name="calendar" size={24} style={tw`text-gray-600 mr-2 dark:text-gray-950`} />
+                <Text style={tw`text-xl font-bold text-gray-800 dark:text-gray-950`}>
                     {formatDate(currentDate)}
                 </Text>
             </TouchableOpacity>

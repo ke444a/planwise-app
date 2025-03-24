@@ -33,11 +33,11 @@ const AiPlannerScreen = () => {
         <ScreenWrapper>
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                 <View>
-                    <Text style={tw`text-2xl font-semibold mb-1`}>Plan My Day</Text>
-                    <Text style={tw`text-gray-500 font-medium text-lg`}>{formatDate(date as string)}</Text>
+                    <Text style={tw`text-2xl font-semibold mb-1 text-gray-950 dark:text-white`}>Plan My Day</Text>
+                    <Text style={tw`text-gray-500 dark:text-neutral-100 font-medium text-lg`}>{formatDate(date as string)}</Text>
                 </View>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
+                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500 dark:text-neutral-100`} />
                 </TouchableOpacity>
             </View>
             {isConversationActive ? 

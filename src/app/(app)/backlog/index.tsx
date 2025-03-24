@@ -56,11 +56,11 @@ const BacklogScreen = () => {
         <ScreenWrapper>
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                 <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`}>
-                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600`} />
-                    <Text style={tw`text-2xl font-semibold text-gray-950`}>My Backlog</Text>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-white`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>My Backlog</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => router.push("/backlog/new")}>
-                    <MaterialCommunityIcons name="plus-box" size={32} style={tw`text-gray-950`} />
+                    <MaterialCommunityIcons name="plus-box" size={32} style={tw`text-gray-950 dark:text-white`} />
                 </TouchableOpacity>
             </View>
 
