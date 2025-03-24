@@ -13,6 +13,7 @@ interface BaseButtonProps {
     variant?: "primary" | "secondary" | "error";
     fullWidth?: boolean;
     disabled?: boolean;
+    testID?: string;
 }
 
 interface ButtonWithIconProps extends Omit<BaseButtonProps, "children"> {
@@ -57,6 +58,7 @@ export const useButtonPressAnimation = (props?: Props) => {
 export const BaseButton = ({
     onPress,
     children,
+    testID,
     variant = "primary",
     fullWidth = false,
     disabled = false,
@@ -108,6 +110,7 @@ export const BaseButton = ({
                 `,
                 animatedStyles
             ]}
+            testID={testID}
         >
             <View style={tw`p-4`}>
                 {children}
@@ -120,6 +123,7 @@ export const ButtonWithIcon = ({
     onPress,
     icon,
     label,
+    testID,
     iconPosition = "left",
     variant = "primary",
     fullWidth = false,
@@ -131,6 +135,7 @@ export const ButtonWithIcon = ({
             variant={variant}
             fullWidth={fullWidth}
             disabled={disabled}
+            testID={testID}
         >
             <View
                 style={tw`

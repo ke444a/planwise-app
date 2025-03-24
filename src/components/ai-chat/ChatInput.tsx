@@ -106,12 +106,13 @@ const ChatInput = ({
                         editable={!isRecording}
                         // returnKeyType="send"
                         enablesReturnKeyAutomatically={true}
+                        testID="ai-chat-input"
                     />
                 </View>
                 {isRecording ? renderRecordingInterface() : (
                     <View style={tw`flex-row justify-end px-4 gap-x-2`}>
                         {isTranscribing ? (
-                            <ActivityIndicator size="large" color="white" />
+                            <ActivityIndicator size={32} color="white" />
                         ) : (
                             <TouchableOpacity onPress={handleMicPress}>
                                 <MaterialCommunityIcons 
@@ -125,11 +126,12 @@ const ChatInput = ({
                             onPress={handleSend}
                             disabled={!isInputActive}
                             style={tw.style(!isInputActive && "opacity-50")}
+                            testID="ai-chat-send-button"
                         >
                             <MaterialCommunityIcons 
                                 name={isInputActive ? "arrow-up-circle" : "arrow-right-circle"} 
                                 size={32} 
-                                style={tw`text-white`} 
+                                style={tw`text-white`}
                             />
                         </TouchableOpacity>
                     </View>

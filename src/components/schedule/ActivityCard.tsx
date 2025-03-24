@@ -7,6 +7,7 @@ import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
 import { useState } from "react";
 import ActivityDetailsModal from "@/components/schedule/ActivityDetailsModal";
 import ActivityIcon from "../activity/ActivityIcon";
+import { LinearGradient } from "expo-linear-gradient";
 import { getPriorityLabel } from "@/utils/getPriorityLabel";
 import { checkIsCurrentActivity } from "@/utils/checkIsCurrentActivity";
 
@@ -49,6 +50,7 @@ interface ActivityCardProps {
     onActivityEdit: (_activity: IActivity) => void;
     onActivityMoveToBacklog: (_activity: IActivity) => void;
     isPast?: boolean;
+    testID?: string;
 }
 
 const ActivityCard = ({ 
@@ -60,7 +62,8 @@ const ActivityCard = ({
     onActivityDelete,
     onActivityEdit,
     onActivityMoveToBacklog,
-    isPast = false
+    isPast = false,
+    testID
 }: ActivityCardProps) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const isCurrentActivity = checkIsCurrentActivity(activity.startTime, activity.endTime, activityDate);
@@ -69,7 +72,7 @@ const ActivityCard = ({
     
     return (
         <>
-            <View style={[tw`flex flex-row items-center w-full pr-4`, { minHeight: containerHeight }]}>
+            <View style={[tw`flex flex-row items-center w-full pr-4`, { minHeight: containerHeight }]} testID={testID}>
                 <Pressable 
                     style={tw`flex-1 flex-row items-center`}
                     onPress={() => setIsModalVisible(true)}
@@ -90,11 +93,10 @@ const ActivityCard = ({
                             
                                 {/* Progress fill for current activity */}
                                 {isCurrentActivity && (
-                                    <View 
-                                        style={[
-                                            tw`absolute bg-purple-200 dark:bg-purple-300 left-0 top-0 right-0`,
-                                            { height: `${activityProgress}%` }
-                                        ]}
+                                    <LinearGradient
+                                        colors={["#E9DAF1", "#e2e8f0"]} 
+                                        locations={[activityProgress / 100, Math.min(1, (activityProgress / 100) + 0.2)]}
+                                        style={tw`absolute inset-0`}
                                     />
                                 )}
                             

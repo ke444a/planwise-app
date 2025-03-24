@@ -50,6 +50,7 @@ const SubtasksList = ({
                     placeholder="Add subtask"
                     returnKeyType="done"
                     placeholderTextColor={colorScheme === "dark" ? "rgba(0, 0, 0, 0.5)" : "#4b5563"}
+                    testID="subtask-input"
                 />
             </View>
         </View>

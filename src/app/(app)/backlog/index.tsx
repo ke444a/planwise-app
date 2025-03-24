@@ -29,7 +29,11 @@ const BacklogScreen = () => {
             { id },
             {
                 onError: (error) => {
-                    console.error("Error deleting backlog item:", error);
+                    setError({
+                        message: "Unable to delete backlog item. Please try again later.",
+                        code: "delete-backlog-item-failed",
+                        error
+                    });
                 }
             }
         );
@@ -53,13 +57,13 @@ const BacklogScreen = () => {
     }
 
     return (
-        <ScreenWrapper>
+        <ScreenWrapper testID="backlog-screen">
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                 <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`}>
                     <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-white`} />
                     <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>My Backlog</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("/backlog/new")}>
+                <TouchableOpacity onPress={() => router.push("/backlog/new")} testID="backlog-new-button">
                     <MaterialCommunityIcons name="plus-box" size={32} style={tw`text-gray-950 dark:text-white`} />
                 </TouchableOpacity>
             </View>
@@ -68,10 +72,12 @@ const BacklogScreen = () => {
                 style={tw`px-4`}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={tw`pb-32`}
+                accessibilityLabel="List of backlog items"
             >
                 {backlogItems.length > 0 && backlogItems.map((item) => (
-                    <BacklogItem 
-                        key={item.id} 
+                    <BacklogItem
+                        key={item.id}
+                        testID={`backlog-item-${item.id}`}
                         item={item}
                         onComplete={handleComplete}
                         onDelete={handleDelete}

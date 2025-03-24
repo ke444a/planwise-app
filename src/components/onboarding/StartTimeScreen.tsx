@@ -19,7 +19,7 @@ const StartTimeScreen: React.FC<StartTimeScreenProps> = ({ onNextPress }) => {
     return (
         <View style={tw`flex-1 justify-between`}>
             <View>
-                <Text style={tw`text-3xl font-semibold text-gray-950 mb-3 max-w-[70%]`}>
+                <Text style={tw`text-3xl font-semibold text-gray-950 mb-3 max-w-[70%] pt-6`}>
                         When do You Want to Start Your Day?
                 </Text>
                 <Text style={tw`text-lg text-gray-500 font-medium mb-8`}>
@@ -32,7 +32,7 @@ const StartTimeScreen: React.FC<StartTimeScreenProps> = ({ onNextPress }) => {
                 />
             </View>
                 
-            <View style={tw`mt-4`}>
+            <View style={tw`mt-6 mb-12`}>
                 <ButtonWithIcon
                     label="Next"
                     onPress={handleNextPress}

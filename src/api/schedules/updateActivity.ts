@@ -1,11 +1,12 @@
 import { useAuth } from "@/context/AuthContext";
-import { getFirestore, doc, updateDoc, collection, query, getDocs, orderBy } from "@react-native-firebase/firestore";
+import { getFirestore, doc, collection, query, getDocs, orderBy, setDoc, deleteDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { checkTimeOverlap } from "@/utils/timeOverlap";
 
 interface UpdateActivityParams {
     activity: IActivity;
-    date: Date;
+    originalDate: Date;
+    selectedDate: Date;
     originalActivity: IActivity;
 }
 
@@ -19,18 +20,20 @@ export class ScheduleOverlapError extends Error {
     }
 }
 
-const updateActivity = async (activity: IActivity, date: Date, uid: string, originalActivity: IActivity) => {
+const updateActivity = async (activity: IActivity, originalDate: Date, selectedDate: Date, uid: string, originalActivity: IActivity) => {
     const db = getFirestore();
-    const formattedDate = date.toISOString().split("T")[0];
+    const formattedOriginalDate = originalDate.toISOString().split("T")[0];
+    const formattedSelectedDate = selectedDate.toISOString().split("T")[0];
 
     // Check if time-related fields were changed
     const timeChanged = activity.startTime !== originalActivity.startTime || 
                        activity.endTime !== originalActivity.endTime ||
-                       activity.duration !== originalActivity.duration;
+                       activity.duration !== originalActivity.duration ||
+                       formattedOriginalDate !== formattedSelectedDate;
 
     if (timeChanged) {
         // Get existing activities for overlap check
-        const activityCollectionRef = collection(db, "schedules", uid, formattedDate);
+        const activityCollectionRef = collection(db, "schedules", uid, formattedSelectedDate);
         const q = query(activityCollectionRef, orderBy("startTime"));
         const querySnapshot = await getDocs(q);
         const existingActivities: IActivity[] = [];
@@ -49,8 +52,10 @@ const updateActivity = async (activity: IActivity, date: Date, uid: string, orig
         }
     }
 
-    const activityDocRef = doc(db, "schedules", uid, formattedDate, activity.id!);
-    await updateDoc(activityDocRef, {
+    const originalActivityDocRef = doc(db, "schedules", uid, formattedOriginalDate, activity.id!);
+    const selectedActivityDocRef = doc(db, "schedules", uid, formattedSelectedDate, activity.id!);
+    await deleteDoc(originalActivityDocRef);
+    await setDoc(selectedActivityDocRef, {
         title: activity.title,
         type: activity.type,
         startTime: activity.startTime,
@@ -61,6 +66,20 @@ const updateActivity = async (activity: IActivity, date: Date, uid: string, orig
         subtasks: activity.subtasks || [],
         isCompleted: activity.isCompleted,
     });
+
+
+    // await updateDoc(activityDocRef, {
+    //     title: activity.title,
+    //     type: activity.type,
+    //     startTime: activity.startTime,
+    //     endTime: activity.endTime,
+    //     duration: activity.duration,
+    //     priority: activity.priority,
+    //     staminaCost: activity.staminaCost,
+    //     subtasks: activity.subtasks || [],
+    //     isCompleted: activity.isCompleted,
+    // });
+    //
     return activity;
 };
 
@@ -72,10 +91,10 @@ export const useUpdateActivityMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ activity, date, originalActivity }: UpdateActivityParams) => 
-            updateActivity(activity, date, authUser.uid, originalActivity),
-        onMutate: async ({ activity, date }) => {
-            const queryKey = ["schedule", date, authUser.uid];
+        mutationFn: ({ activity, originalDate, selectedDate, originalActivity }: UpdateActivityParams) => 
+            updateActivity(activity, originalDate, selectedDate, authUser.uid, originalActivity),
+        onMutate: async ({ activity, originalDate }) => {
+            const queryKey = ["schedule", originalDate, authUser.uid];
             await queryClient.cancelQueries({ queryKey });
 
             const previousActivities = queryClient.getQueryData<IActivity[]>(queryKey) ?? [];
@@ -87,7 +106,7 @@ export const useUpdateActivityMutation = () => {
                 return [activity];
             });
 
-            return { previousActivities, queryKey, date };
+            return { previousActivities, queryKey, originalDate };
         },
         onError: (_err, _variables, context) => {
             if (context) {
@@ -95,7 +114,7 @@ export const useUpdateActivityMutation = () => {
             }
         },
         onSettled: (_data, _error, variables) => {
-            queryClient.invalidateQueries({ queryKey: ["schedule", variables.date, authUser.uid] });
+            queryClient.invalidateQueries({ queryKey: ["schedule", variables.originalDate, authUser.uid] });
         },
     });
 };

@@ -6,9 +6,10 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAuth } from "@/context/AuthContext";
 import { useDeleteUserMutation } from "@/api/users/deleteUser";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { getAuth, GoogleAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useAppContext } from "@/context/AppContext";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
+import { getApp } from "@react-native-firebase/app";
+import auth, { getAuth, reauthenticateWithCredential } from "@react-native-firebase/auth";
 
 const AdvancedScreen = () => {
     const { signOut } = useAuth();
@@ -47,8 +48,9 @@ const AdvancedScreen = () => {
 
     const deleteAccount = async () => {
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
+            const app = getApp();
+            const authApp = getAuth(app);
+            const user = authApp.currentUser;
             if (!user) throw new Error("No user signed in");
 
             GoogleSignin.configure({
@@ -58,7 +60,7 @@ const AdvancedScreen = () => {
             const { data } = await GoogleSignin.signIn();
             if (!data?.idToken) throw new Error("Failed to get Google ID token");
 
-            const credential = GoogleAuthProvider.credential(data.idToken);
+            const credential = auth.GoogleAuthProvider.credential(data.idToken);
             await reauthenticateWithCredential(user, credential);
             await deleteUser();
             await user.delete();

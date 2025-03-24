@@ -1,4 +1,4 @@
-import { TouchableOpacity, ActivityIndicator } from "react-native";
+import { TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 import tw from "twrnc";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAiActivitySuggestion } from "@/hooks/useAiActivitySuggestion";
@@ -37,8 +37,8 @@ export const AiSuggestionButton = ({
                     isCompleted: false
                 });
             }
-        } catch (error) {
-            console.error("Error getting AI suggestion:", error);
+        } catch (_error) {
+            Alert.alert("Error", "Unable to get AI auto-complete. Please try again later.");
         }
     };
 

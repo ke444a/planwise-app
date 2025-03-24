@@ -44,6 +44,7 @@ const Option = ({ option, index, selectedIndex, onPress }: OptionProps) => {
         <TouchableOpacity
             style={tw`flex-1 items-center justify-center`}
             onPress={() => onPress(index)}
+            testID={`duration-slider-option-${index}`}
         >
             <Animated.Text
                 style={[
@@ -138,7 +139,7 @@ const DurationSlider = ({
     }));
 
     return (
-        <View style={tw`w-full`}>
+        <View style={tw`w-full`} testID="duration-slider">
             <GestureDetector gesture={gesture}>
                 <View style={tw`relative h-12 rounded-lg bg-slate-100 overflow-hidden`}>
                     <Animated.View

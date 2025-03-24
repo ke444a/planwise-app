@@ -19,30 +19,20 @@ const EditBacklogItemScreen = () => {
     const { mutate: updateBacklogItem } = useUpdateBacklogItemMutation();
     const [draftDetails, setDraftDetails] = useState<DraftDetails | null>(null);
     
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails>({
-        title: "",
-        type: "misc",
-        startTime: "12:00",
-        endTime: "12:15",
-        duration: 15,
-        priority: "must_do",
-        staminaCost: 0,
-        subtasks: [],
-    });
+    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
 
     useEffect(() => {
         if (item && item.itemType === "activity") {
-            setActivityDetails(prev => ({
-                ...prev,
-                title: item.title || prev.title,
-                type: item.type || prev.type,
-                startTime: item.startTime || prev.startTime,
-                endTime: item.endTime || prev.endTime,
-                duration: item.duration || prev.duration,
-                priority: item.priority || prev.priority,
-                staminaCost: typeof item.staminaCost === "number" ? item.staminaCost : prev.staminaCost,
-                subtasks: item.subtasks || prev.subtasks,
-            }));
+            setActivityDetails({
+                title: item.title || "",
+                type: item.type || "misc",
+                startTime: item.startTime || "12:00",
+                endTime: item.endTime || "12:15",
+                duration: item.duration || 15,
+                priority: item.priority || "must_do",
+                staminaCost: item.staminaCost ?? 0,
+                subtasks: item.subtasks || [],
+            });
         }
     }, [item]);
 
@@ -53,7 +43,7 @@ const EditBacklogItemScreen = () => {
     const handleUpdateItem = () => {
         if (!id || !item) return;
 
-        if (item.itemType === "activity" && activityDetails.title.trim()) {
+        if (item.itemType === "activity" && activityDetails?.title.trim()) {
             const updatedItem = {
                 id: id as string,
                 ...activityDetails,
@@ -72,7 +62,7 @@ const EditBacklogItemScreen = () => {
         router.back();
     };
 
-    if (isPending || !item) {
+    if (isPending || !item || !activityDetails) {
         return null;
     }
 

@@ -316,6 +316,7 @@ const ScheduleTimeline = ({
                             return (
                                 <View key={`activity-${index}`}>
                                     <ActivityCard
+                                        testID={`activity-card-${index}`}
                                         activity={activity}
                                         iconHeight={iconHeight}
                                         containerHeight={ACTIVITY_CARD_HEIGHT}

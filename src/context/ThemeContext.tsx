@@ -18,8 +18,7 @@ export const ThemeProvider = (props: PropsWithChildren) => {
         try {
             const storedTheme = await AsyncStorage.getItem("colorScheme");
             return (storedTheme as ColorScheme) || "light";
-        } catch (error) {
-            console.error("Error reading theme from storage:", error);
+        } catch (_error) {
             return "light";
         }
     };

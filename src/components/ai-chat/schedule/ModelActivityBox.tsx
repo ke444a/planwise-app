@@ -167,7 +167,8 @@ const ModelActivityBox = ({
                         key={index}
                         entering={FadeInDown.duration(400).delay(300 + (index * 150))}
                     >
-                        <GeneratedActivityItem 
+                        <GeneratedActivityItem
+                            testID={`generated-activity-item-${index}`}
                             activity={activity}
                             status={activitiesStatus[index]}
                             onAddToSchedule={() => handleAddToSchedule(index)}

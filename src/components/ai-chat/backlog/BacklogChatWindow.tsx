@@ -11,7 +11,7 @@ interface ChatWindowProps {
 
 const renderModelMessage = (content: string) => {
     const items = JSON.parse(content) as IBacklogItemGenAI[];
-    if (items.length > 0) {
+    if (items && items.length > 0) {
         return <ModelBacklogBox items={items} />;
     }
     return <ModelChatBox text={"Sorry, I couldn't figure out what you wanted to add to your backlog. Could you please try again?"} />;

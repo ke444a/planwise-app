@@ -102,7 +102,7 @@ const ScheduleScreen = () => {
     };
 
     return (
-        <View style={tw`flex-1 bg-purple-50 dark:bg-pink-200`}>
+        <View style={tw`flex-1 bg-purple-50 dark:bg-pink-200`} testID="home-screen">
             <View style={[tw`bg-purple-50 dark:bg-pink-200`, { paddingTop: insets.top }]} />            
             <View style={tw`flex-row items-center justify-between px-4`}>
                 <HeaderStaminaBar currentStamina={currentStamina} maxStamina={userData.maxStamina} />
@@ -149,6 +149,7 @@ const ScheduleScreen = () => {
                         }
                     });
                 }}
+                testID="ai-planner-button"
             >
                 <MaterialCommunityIcons name="robot" size={35} style={tw`text-white`} />
             </TouchableOpacity>
@@ -184,10 +185,10 @@ const ScheduleButtonsPanel = ({ currentStamina, maxStamina, currentDate }: Sched
 
     return (
         <View style={tw`flex-row ml-4`}>
-            <TouchableOpacity style={tw`mr-4`} onPress={handleCreateActivityPress}>
+            <TouchableOpacity style={tw`mr-4`} onPress={handleCreateActivityPress} testID="create-activity-button">
                 <AntDesign name="pluscircle" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
-            <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress}>
+            <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress} testID="backlog-button">
                 <FontAwesome name="inbox" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleProfilePress}>

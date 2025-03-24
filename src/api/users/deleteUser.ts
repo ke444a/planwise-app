@@ -16,9 +16,14 @@ const deleteUser = async (uid: string) => {
         where("uid", "==", uid)
     );
     const querySnapshot = await getDocs(q);
+
+    const backlogCollection = collection(db, "backlog");
+    const backlogQuery = query(backlogCollection, where("uid", "==", uid));
+    const backlogQuerySnapshot = await getDocs(backlogQuery);
     
     // Delete each schedule document
-    const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
+    const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref))
+        .concat(backlogQuerySnapshot.docs.map((doc) => deleteDoc(doc.ref)));
     await Promise.all(deletePromises);
 };
 

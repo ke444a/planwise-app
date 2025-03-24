@@ -49,9 +49,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             let idToken = "";
             try {
                 idToken = await user.getIdToken();
-            } catch (error) {
+            } catch (_error) {
                 // Silently fail if the token is not available
-                console.log("Error getting ID token", error);
+                // console.log("Error getting ID token", error);
             }
             setToken(idToken);
             setUserZustandStore({

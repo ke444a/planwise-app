@@ -78,6 +78,7 @@ export const BacklogItemDraftForm = ({
                         onChangeText={(text) => setDraftDetails(prev => ({ ...prev, title: text }))}
                         placeholder="What?"
                         placeholderTextColor={colorScheme === "dark" ? "rgba(255, 255, 255, 0.5)" : "#4b5563"}
+                        testID="backlog-item-input"
                     />
                 </View>
 
@@ -105,6 +106,7 @@ export const BacklogItemDraftForm = ({
                     fullWidth
                     icon={submitButtonIcon}
                     disabled={!draftDetails.title.trim()}
+                    testID="backlog-item-create-button"
                 />
             </View>
         </>

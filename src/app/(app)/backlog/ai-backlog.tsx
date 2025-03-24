@@ -5,8 +5,9 @@ import { useState } from "react";
 import { router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useAiBacklog } from "@/hooks/useAiBacklog";
-import { AiCapabilityList, ChatInput } from "@/components/ai-chat";
+import { ChatInput } from "@/components/ai-chat";
 import BacklogChatWindow from "@/components/ai-chat/backlog/BacklogChatWindow";
+import BacklogCapabilityList from "@/components/ai-chat/backlog/BacklogCapabilityList";
 
 const AiBacklogScreen = () => {
     useAppColorScheme(tw);
@@ -35,7 +36,7 @@ const AiBacklogScreen = () => {
             </View>
             {isConversationActive ? 
                 <BacklogChatWindow messages={messages} /> : 
-                <AiCapabilityList />}
+                <BacklogCapabilityList />}
             <ChatInput onSendMessage={handleSendMessage} />
         </ScreenWrapper>
     );

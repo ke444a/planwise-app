@@ -26,6 +26,7 @@ export const StaminaPicker = ({ value, onValueChange }: StaminaPickerProps) => {
                                 value === option ? tw`bg-purple-100` : tw`bg-slate-200`
                             ]}
                             onPress={() => onValueChange(option)}
+                            testID={`stamina-option-${option}`}
                         >
                             <View style={tw`relative w-5 h-5`}>
                                 <Ionicons name="flash" size={20} style={tw`text-gray-600 absolute`} />

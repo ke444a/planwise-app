@@ -1,0 +1,32 @@
+appId: com.planwise.app
+---
+# - assertVisible: { id: "home-screen" }
+# - tapOn: { id: "create-activity-button" }
+# - assertVisible: { id: "add-activity-screen" }
+# - tapOn: { id: "activity-name-input" }
+# - inputText: "Read a book"
+# - tapOn: { id: "activity-type-picker", repeat: 2 }
+# - assertVisible: { text: ".*Education.*" }
+# - tapOn: { text: ".*Education.*" }
+# - swipe:
+#     from: { id: "time-range-picker" }
+#     direction: UP
+#     duration: 200
+# - tapOn: { text: "30m" }
+- scrollUntilVisible:
+    direction: DOWN
+    element: ".*How Urgent.*"
+    centerElement: true
+- tapOn: ".*Get It Done.*"
+- tapOn: { id: "stamina-option-3" }
+- tapOn: { id: "subtask-input" }
+- inputText: "Get book from shelf"
+- pressKey: Enter
+- assertVisible: { text: ".*Get book from shelf.*" }
+- tapOn: { id: "subtask-input" }
+- inputText: "Read first chapter"
+- pressKey: Enter
+- assertVisible: { text: ".*Read first chapter.*" }
+- tapOn: { id: "create-activity-button" }
+- assertVisible: { id: "home-screen" }
+- assertVisible: ".*Read a book.*"

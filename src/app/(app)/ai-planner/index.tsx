@@ -5,7 +5,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useAiChat } from "@/hooks/useAiChat";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
-import { AiCapabilityList, ChatInput, ChatWindow } from "@/components/ai-chat";
+import { ChatInput, ChatWindow } from "@/components/ai-chat";
+import ActivityCapabilityList from "@/components/ai-chat/schedule/ActivityCapabilityList";
 
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -36,7 +37,7 @@ const AiPlannerScreen = () => {
                     <Text style={tw`text-2xl font-semibold mb-1 text-gray-950 dark:text-white`}>Plan My Day</Text>
                     <Text style={tw`text-gray-500 dark:text-neutral-100 font-medium text-lg`}>{formatDate(date as string)}</Text>
                 </View>
-                <TouchableOpacity onPress={() => router.back()}>
+                <TouchableOpacity onPress={() => router.back()} testID="ai-planner-close-button">
                     <AntDesign name="closecircle" size={24} style={tw`text-gray-500 dark:text-neutral-100`} />
                 </TouchableOpacity>
             </View>
@@ -48,7 +49,7 @@ const AiPlannerScreen = () => {
                     currentStamina={Number(currentStamina)}
                     userMaxStamina={Number(maxStamina)}
                 /> : 
-                <AiCapabilityList />}
+                <ActivityCapabilityList />}
             <ChatInput onSendMessage={handleSendMessage} />
         </ScreenWrapper>
     );

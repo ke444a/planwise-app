@@ -95,7 +95,7 @@ const TimeRangePicker = ({
     };
 
     return (
-        <View style={tw`items-center`}>
+        <View style={tw`items-center`} testID="time-range-picker">
             <View style={[tw`h-[${PICKER_HEIGHT}px] relative`, { width: PICKER_WIDTH }]}>
                 <View style={[
                     tw`absolute -z-10 left-0 right-0 h-[${ITEM_HEIGHT}px]`,

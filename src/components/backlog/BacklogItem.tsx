@@ -13,6 +13,7 @@ interface BacklogItemProps {
     onDelete: (_id: string) => void;
     onEdit: (_id: string) => void;
     onAddToSchedule: (_id: string) => void;
+    testID?: string;
 }
 
 const BacklogItem = ({ 
@@ -20,7 +21,8 @@ const BacklogItem = ({
     onComplete,
     onDelete,
     onEdit,
-    onAddToSchedule 
+    onAddToSchedule,
+    testID
 }: BacklogItemProps) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -51,6 +53,7 @@ const BacklogItem = ({
             <TouchableOpacity 
                 style={tw`flex-row items-center p-4 bg-white rounded-xl mb-3`}
                 onPress={() => setIsModalVisible(true)}
+                testID={testID}
             >
                 {renderIcon(item.isCompleted)}
                 <View style={tw`flex-1`}>
@@ -70,12 +73,12 @@ const BacklogItem = ({
                     <TouchableOpacity 
                         style={[
                             tw`w-[24px] h-[24px] rounded-full items-center justify-center border-2`,
-                            item.isCompleted ? tw`bg-purple-400 border-purple-400` : tw`border-gray-500`
+                            item.isCompleted ? tw`bg-gray-600 border-gray-600` : tw`border-gray-500`
                         ]}
                         onPress={() => onComplete(item)}
                     >
                         {item.isCompleted && (
-                            <Ionicons name="checkmark" size={20} style={tw`text-white`} />
+                            <Ionicons name="checkmark" size={20} style={tw`text-white`} testID="backlog-item-checkmark" />
                         )}
                     </TouchableOpacity>
                 </View>

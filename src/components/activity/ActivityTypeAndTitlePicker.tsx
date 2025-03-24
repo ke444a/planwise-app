@@ -25,6 +25,7 @@ const ActivityTypeAndTitlePicker = ({
             <TouchableOpacity 
                 onPress={() => setIsTypePickerVisible(true)}
                 style={tw`h-14 w-14 bg-gray-100 rounded-lg items-center justify-center mr-3`}
+                testID="activity-type-picker"
             >
                 <ActivityIcon
                     activityType={type}
@@ -34,6 +35,7 @@ const ActivityTypeAndTitlePicker = ({
             </TouchableOpacity>
             <View style={tw`flex-1`}>
                 <TextInput
+                    testID="activity-name-input"
                     style={tw`border-b border-gray-300 text-xl text-gray-950 mb-3 py-1 dark:text-white`}
                     value={title}
                     onChangeText={onTitleChange}

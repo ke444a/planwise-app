@@ -26,7 +26,7 @@ const EditActivityScreen = () => {
 
     const { data: activity, isPending } = useGetActivityFromScheduleQuery(
         id as string,
-        selectedDate
+        new Date(date as string)
     );
     const { mutate: updateActivity } = useUpdateActivityMutation();
 
@@ -51,6 +51,7 @@ const EditActivityScreen = () => {
             id: id as string,
             ...activityDetails,
             isCompleted: activity.isCompleted || false,
+            subtasks: activityDetails.subtasks || []
         };
 
         if (updatedActivity.startTime > updatedActivity.endTime) {
@@ -71,7 +72,8 @@ const EditActivityScreen = () => {
 
         updateActivity({ 
             activity: updatedActivity,
-            date: selectedDate,
+            originalDate: new Date(date as string),
+            selectedDate: selectedDate,
             originalActivity: activity
         }, {
             onSuccess: () => {

@@ -44,7 +44,7 @@ export const useAiChat = (date: Date) => {
         } finally {
             setIsGeneratingSchedule(false);
         }
-    }, [addMessage, setError]);
+    }, [addMessage, setError, date]);
 
     const validateTaskOverlap = (tasks: IActivityGenAI[], existingSchedule: IActivity[]): IActivityGenAI[] => {
         // Create a deep copy of tasks to ensure we can modify it
@@ -138,9 +138,9 @@ export const useAiChat = (date: Date) => {
                 }
             });
             const { response } = await chat.sendMessage([userInput]);
-            const parsedResponse = JSON.parse(response.text()) as IActivityGenAI[];
-            const validatedSchedule = await validateOverlappingActivities(parsedResponse);
-            addMessage({ role: "model", content: JSON.stringify(validatedSchedule), timestamp });
+            // const parsedResponse = JSON.parse(response.text()) as IActivityGenAI[];
+            // const validatedSchedule = await validateOverlappingActivities(parsedResponse);
+            addMessage({ role: "model", content: response.text(), timestamp });
         } catch (error) {
             setError({
                 message: "Oops, something went wrong. Please try again.",
@@ -150,7 +150,7 @@ export const useAiChat = (date: Date) => {
         } finally {
             setIsGeneratingSchedule(false);
         }
-    }, [addMessage, messages, setError, validateOverlappingActivities]);
+    }, [addMessage, messages, setError]);
     
     const generateSchedule = useCallback(async (userInput: string, timestamp: number) => {
         // Exclude user's message that was sent a second ago (timestamp - 1) (if exists)

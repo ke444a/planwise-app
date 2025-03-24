@@ -113,6 +113,7 @@ const ActivityDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onDelete}
+                            testID="activity-details-modal-delete-button"
                         >
                             <MaterialCommunityIcons name="trash-can-outline" size={20} style={tw`text-gray-950`} />
                             <Text style={tw`text-gray-950 font-medium mt-1`}>Delete</Text>
@@ -120,6 +121,7 @@ const ActivityDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onEdit}
+                            testID="activity-details-modal-edit-button"
                         >
                             <Feather name="edit" size={20} style={tw`text-gray-950`} />
                             <Text style={tw`text-gray-950 font-medium mt-1`}>Edit</Text>
@@ -127,6 +129,7 @@ const ActivityDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onComplete}
+                            testID="activity-details-modal-complete-button"
                         >
                             {activity.isCompleted ? (
                                 <MaterialIcons name="remove-done" size={20} style={tw`text-gray-950`} />

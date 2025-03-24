@@ -100,6 +100,7 @@ const BacklogItemDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onDelete}
+                            testID="backlog-item-details-modal-delete-button"
                         >
                             <MaterialCommunityIcons name="trash-can-outline" size={20} style={tw`text-gray-950`} />
                             <Text style={tw`text-gray-950 font-medium mt-1`}>Delete</Text>
@@ -107,6 +108,7 @@ const BacklogItemDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onEdit}
+                            testID="backlog-item-details-modal-edit-button"
                         >
                             <Feather name="edit" size={20} style={tw`text-gray-950`} />
                             <Text style={tw`text-gray-950 font-medium mt-1`}>Edit</Text>
@@ -114,6 +116,7 @@ const BacklogItemDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onComplete}
+                            testID="backlog-item-details-modal-complete-button"
                         >
                             {item.isCompleted ? (
                                 <MaterialCommunityIcons name="close-circle" size={20} style={tw`text-gray-950`} />

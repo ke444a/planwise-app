@@ -1,0 +1,26 @@
+appId: com.planwise.app
+---
+- assertVisible: { id: "home-screen" }
+- tapOn: { id: "backlog-button" }
+- assertVisible: { id: "backlog-screen" }
+- tapOn: { id: "backlog-new-button" }
+- assertVisible: { id: "backlog-item-input" }
+- tapOn: { id: "backlog-item-input" }
+- inputText: "Buy groceries"
+- assertVisible: { id: "duration-slider" }
+- tapOn: { id: "duration-slider" }
+- tapOn: { id: "duration-slider-option-2" }
+- assertVisible: { id: "subtask-input" }
+- tapOn: { id: "subtask-input" }
+- inputText: "Buy fruits"
+- pressKey: Enter
+- tapOn: { id: "backlog-item-create-button" }
+- assertVisible: ".*groceries.*"
+- tapOn: ".*groceries.*"
+- assertVisible: { id: "backlog-item-details-modal-complete-button" }
+- tapOn: { id: "backlog-item-details-modal-complete-button" }
+- assertVisible: { id: "backlog-item-checkmark" }
+- tapOn: ".*groceries.*"
+- assertVisible: { id: "backlog-item-details-modal-delete-button" }
+- tapOn: { id: "backlog-item-details-modal-delete-button" }
+- assertNotVisible: ".*groceries.*"

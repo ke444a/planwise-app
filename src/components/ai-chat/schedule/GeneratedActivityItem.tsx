@@ -14,6 +14,7 @@ interface ActivityItemProps {
     onAddToSchedule: () => void;
     onRemove: () => void;
     onAddToBacklog: () => void;
+    testID?: string;
 }
 
 export const GeneratedActivityItem = ({ 
@@ -21,7 +22,8 @@ export const GeneratedActivityItem = ({
     status, 
     onAddToSchedule, 
     onRemove, 
-    onAddToBacklog 
+    onAddToBacklog,
+    testID
 }: ActivityItemProps) => {
     const { 
         showOptions,
@@ -37,7 +39,7 @@ export const GeneratedActivityItem = ({
     const firstWarning = hasWarnings && Array.isArray(activity.warnings) ? activity.warnings[0] : null;
 
     return (
-        <View>
+        <View testID={testID}>
             <TouchableWithoutFeedback 
                 onPress={handleToggleOptions}
                 onPressIn={handlePressIn}
@@ -128,6 +130,7 @@ export const GeneratedActivityItem = ({
                             tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`,
                             hasWarnings && tw`opacity-50`
                         ]}
+                        testID={`generated-activity-item-add-${testID}`}
                     >
                         <Ionicons name="add" size={20} style={tw`text-gray-950 mr-1`} />
                         <Text style={tw`text-gray-950 font-medium`}>Add</Text>
@@ -136,6 +139,7 @@ export const GeneratedActivityItem = ({
                     <TouchableOpacity 
                         onPress={onRemove}
                         style={tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`}
+                        testID={`generated-activity-item-remove-${testID}`}
                     >
                         <Ionicons name="close" size={20} style={tw`text-gray-950 mr-1`} />
                         <Text style={tw`text-gray-950 font-medium`}>Remove</Text>
@@ -148,6 +152,7 @@ export const GeneratedActivityItem = ({
                             tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`,
                             status === "backlog" && tw`opacity-50`
                         ]}
+                        testID={`generated-activity-item-backlog-${testID}`}
                     >
                         <MaterialCommunityIcons 
                             name="clock-outline"
