@@ -15,7 +15,6 @@ import { Toast } from "@/components/ui/Toast";
 import { useAppContext } from "@/context/AppContext";
 import { checkTimeOverlap } from "@/utils/timeOverlap";
 
-type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
 const AddActivityScreen = () => {
     const { setError } = useAppContext();

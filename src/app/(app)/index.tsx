@@ -69,12 +69,12 @@ const ScheduleScreen = () => {
 
     const handleActivityEdit = (activity: IActivity) => {
         router.push({
-            pathname: "/activity/edit",
+            pathname: `/activity/edit/${activity.id}`,
             params: {
-                id: activity.id,
                 date: currentDate.toISOString(),
                 currentStamina: currentStamina,
-                maxStamina: userData.maxStamina
+                maxStamina: userData.maxStamina,
+                activityDetails: JSON.stringify(activity)
             }
         });
     };

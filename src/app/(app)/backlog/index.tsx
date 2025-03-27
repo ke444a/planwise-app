@@ -40,13 +40,25 @@ const BacklogScreen = () => {
     };
 
     const handleEdit = (id: string) => {
-        router.push(`/backlog/edit/${id}`);
+        const item = backlogItems?.find(item => item.id === id);
+        if (!item) return;
+        router.push({
+            pathname: `/backlog/edit/${id}`,
+            params: {
+                backlogItem: JSON.stringify(item)
+            }
+        });
     };
 
     const handleAddToSchedule = (id: string) => {
         const item = backlogItems?.find(item => item.id === id);
         if (!item) return;
-        router.push(`/backlog/convert-to-activity/${id}`);
+        router.push({
+            pathname: `/backlog/convert-to-activity/${id}`,
+            params: {
+                backlogItem: JSON.stringify(item)
+            }
+        });
     };
 
     if (isError) {

@@ -1,5 +1,6 @@
 import { useAppContext } from "@/context/AppContext";
 import { createNewSubtask } from "@/utils/createNewSubtask";
+import { getApp } from "@react-native-firebase/app";
 import { getFunctions, httpsCallable } from "@react-native-firebase/functions";
 import { useCallback, useState } from "react";
 
@@ -18,7 +19,8 @@ export const useAiActivitySuggestion = () => {
     const suggestActivityDetails = useCallback(async (taskTitle: string): Promise<IActivitySuggestion | null> => {
         setIsLoading(true);
         try {
-            const functions = getFunctions();
+            const app = getApp();
+            const functions = getFunctions(app, "europe-west1");
             const suggestActivity = httpsCallable(functions, "suggestActivityDetails");
             const { data } = await suggestActivity({ taskTitle });
             const activitySuggestion = data as Omit<IActivitySuggestion, "subtasks"> & { subtasks: string[] };
@@ -28,6 +30,7 @@ export const useAiActivitySuggestion = () => {
                 subtasks
             };
         } catch (error) {
+            console.log("error", error);
             setError({
                 message: "Oops, something went wrong. Please try again.",
                 code: "suggest-activity-failed",

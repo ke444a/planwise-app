@@ -3,8 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState, useEffect } from "react";
-import { useGetBacklogItemQuery } from "@/api/backlogs/getBacklogItem";
+import { useState } from "react";
 import { useDeleteItemFromBacklogMutation } from "@/api/backlogs/deleteItemFromBacklog";
 import { useAddActivityToScheduleMutation, ScheduleOverlapError } from "@/api/schedules/addActivityToSchedule";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
@@ -17,13 +16,11 @@ import { Toast } from "@/components/ui/Toast";
 import { addMinutesToTime } from "@/utils/addMinutesToTime";
 import { useAppContext } from "@/context/AppContext";
 
-type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
-
 const ConvertToActivityScreen = () => {
-    const { id } = useLocalSearchParams();
+    const { id, backlogItem: backlogItemParam } = useLocalSearchParams();
     const { setError } = useAppContext();
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { data: item, isPending } = useGetBacklogItemQuery(id as string);
+    const item = JSON.parse(backlogItemParam as string) as IBacklogItem;
     const { mutate: deleteFromBacklog } = useDeleteItemFromBacklogMutation();
     const { mutate: addToSchedule } = useAddActivityToScheduleMutation();
     const { data: userData } = useGetUserQuery();
@@ -33,35 +30,19 @@ const ConvertToActivityScreen = () => {
     const [showToast, setShowToast] = useState(false);
     const [overlapActivity, setOverlapActivity] = useState<IActivity | null>(null);
 
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails>({
-        title: "",
-        type: "misc",
-        startTime: "12:00",
-        endTime: "12:15",
-        duration: 15,
-        priority: "must_do",
-        staminaCost: 0,
-        subtasks: [],
+    const [activityDetails, setActivityDetails] = useState<ActivityDetails>(() => {
+        const isActivity = item.itemType === "activity";
+        return {
+            title: item.title || "",
+            type: isActivity ? item.type || "misc" : "misc",
+            startTime: isActivity ? item.startTime || "12:00" : "12:00",
+            endTime: isActivity ? item.endTime || "12:15" : "12:15",
+            duration: item.duration || 15,
+            priority: isActivity ? item.priority || "must_do" : "must_do",
+            staminaCost: isActivity ? item.staminaCost ?? 0 : 0,
+            subtasks: item.subtasks || [],
+        };
     });
-
-    useEffect(() => {
-        if (item) {
-            const isActivity = item.itemType === "activity";
-            setActivityDetails(prev => ({
-                ...prev,
-                title: item.title || prev.title,
-                duration: item.duration || prev.duration,
-                subtasks: item.subtasks || prev.subtasks,
-                ...(isActivity ? {
-                    type: item.type || prev.type,
-                    priority: item.priority || prev.priority,
-                    staminaCost: typeof item.staminaCost === "number" ? item.staminaCost : prev.staminaCost,
-                    startTime: item.startTime || prev.startTime,
-                    endTime: item.endTime || prev.endTime,
-                } : {}),
-            }));
-        }
-    }, [item]);
 
     const handleClose = () => {
         router.back();
@@ -80,7 +61,7 @@ const ConvertToActivityScreen = () => {
     };
 
     const handleAddToSchedule = () => {
-        if (!activityDetails.title.trim() || !id || !item) return;
+        if (!activityDetails.title.trim() || !id) return;
         if (!userData || !scheduleData) return;
 
         const activity: IActivity = {
@@ -119,10 +100,6 @@ const ConvertToActivityScreen = () => {
             }
         });
     };
-
-    if (isPending || !item) {
-        return null;
-    }
 
     return (
         <ScreenWrapper>

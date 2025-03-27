@@ -8,7 +8,7 @@ import { createNewSubtask } from "@/utils/createNewSubtask";
 import { useTheme } from "@/context/ThemeContext";
 
 interface BacklogItemDraftFormProps {
-    initialData?: Partial<IBacklogDraft>;
+    initialData: IBacklogDraft;
     onDraftDetailsChange: (_details: Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updatedAt">) => void;
     submitButtonLabel: string;
     submitButtonIcon: React.ReactNode;
@@ -24,24 +24,12 @@ export const BacklogItemDraftForm = ({
 }: BacklogItemDraftFormProps) => {
     const { colorScheme } = useTheme();
     const [draftDetails, setDraftDetails] = useState<Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updatedAt">>({
-        title: "",
-        duration: 15,
-        isCompleted: false,
-        subtasks: [],
+        title: initialData.title || "",
+        duration: initialData.duration || 15,
+        isCompleted: initialData.isCompleted || false,
+        subtasks: initialData.subtasks || [],
     });
     const [subtaskInput, setSubtaskInput] = useState("");
-
-    useEffect(() => {
-        if (initialData) {
-            setDraftDetails(prev => ({
-                ...prev,
-                title: initialData.title || "",
-                duration: initialData.duration || 15,
-                subtasks: initialData.subtasks || [],
-                isCompleted: initialData.isCompleted || false,
-            }));
-        }
-    }, [initialData]);
 
     useEffect(() => {
         onDraftDetailsChange(draftDetails);
