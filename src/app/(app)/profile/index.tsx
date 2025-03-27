@@ -7,6 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 
+
 const ProfileScreen = () => {
     const { user } = useUserStore();
 
@@ -14,10 +15,6 @@ const ProfileScreen = () => {
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
                 <View style={tw`flex-row items-center justify-between mb-8`}>
-                    {/* <Text style={tw`text-2xl font-semibold`}>My Profile</Text>
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
-                    </TouchableOpacity> */}
                     <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`}>
                         <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
                         <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>My Profile</Text>
@@ -53,24 +50,9 @@ const ProfileScreen = () => {
                     <Text style={tw`text-lg font-medium ml-1`}>Advanced</Text>
                     <Ionicons name="chevron-forward" size={20} style={tw`ml-auto text-gray-500`} />
                 </TouchableOpacity>
-
-                {/* <Text style={tw`text-lg font-semibold mt-6 mb-4`}>Productivity</Text>
-                <View style={tw`flex-row flex-wrap gap-4`}>
-                    {stats.map((stat, index) => (
-                        <StatCard key={index} {...stat} />
-                    ))}
-                </View> */}
             </View>
         </ScreenWrapper>
     );
 };
-
-// Helper function to format activity type for display
-// const formatActivityType = (type: ActivityType): string => {
-//     return type
-//         .split("_")
-//         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-//         .join(" ");
-// };
 
 export default ProfileScreen;

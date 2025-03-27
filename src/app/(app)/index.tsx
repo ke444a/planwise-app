@@ -18,6 +18,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
+
 const ScheduleScreen = () => {
     const { data: userData, isError, isPending: isUserLoading } = useGetUserQuery();
     const insets = useSafeAreaInsets();

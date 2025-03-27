@@ -20,7 +20,6 @@ const AccessibilityScreen = () => {
                     <Text style={tw`text-lg font-medium text-gray-950 mb-4 dark:text-white`}>Background color</Text>
                     
                     <View style={tw`flex-row items-center justify-between w-full`}>
-                        {/* Light Theme Option */}
                         <TouchableOpacity 
                             onPress={() => setSpecificTheme("light")}
                             style={tw`items-center`}
@@ -32,7 +31,6 @@ const AccessibilityScreen = () => {
                             </View>
                         </TouchableOpacity>
                         
-                        {/* Dark Theme Option */}
                         <TouchableOpacity 
                             onPress={() => setSpecificTheme("dark")}
                             style={tw`items-center`}

@@ -68,7 +68,6 @@ const BacklogItem = ({
                     </Text>
                 </View>
                 
-                {/* Completion checkmark on the right */}
                 <View>
                     <TouchableOpacity 
                         style={[

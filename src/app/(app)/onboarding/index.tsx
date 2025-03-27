@@ -45,7 +45,6 @@ const OnboardingScreen = () => {
             easing: Easing.out(Easing.ease)
         });
         
-        // Use setTimeout instead of animation callbacks to avoid crashes
         setTimeout(() => {
             setVisibleStep(nextStep);
             slideAnim.value = SCREEN_WIDTH * -0.1 * direction;

@@ -19,22 +19,18 @@ const tickActivitySubtask = async (
     const db = getFirestore();
     const dateString = date.toISOString().split("T")[0];
     const activityDocRef = doc(db, "schedules", uid, dateString, activityId);
-
-    // Get the current activity data
     const activityDocSnap = await getDoc(activityDocRef);
     if (!activityDocSnap.exists) {
         throw new Error("Activity not found");
     }
+
     const activityData = activityDocSnap.data();
-    // Update the subtask
     const updatedSubtasks = activityData?.subtasks.map((subtask: ISubtask) => {
         if (subtask.id === subtaskId) {
             return { ...subtask, isCompleted: isCompleted };
         }
         return subtask;
     });
-
-    // Update the activity in Firestore
     await updateDoc(activityDocRef, {
         subtasks: updatedSubtasks,
         updatedAt: serverTimestamp()

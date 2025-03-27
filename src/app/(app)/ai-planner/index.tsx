@@ -8,6 +8,7 @@ import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { ChatInput, ChatWindow } from "@/components/ai-chat";
 import ActivityCapabilityList from "@/components/ai-chat/schedule/ActivityCapabilityList";
 
+
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -16,6 +17,7 @@ const formatDate = (dateString: string) => {
         year: "numeric"
     });
 };
+
 
 const AiPlannerScreen = () => {
     const [isConversationActive, setIsConversationActive] = useState(false);

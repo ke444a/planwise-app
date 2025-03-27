@@ -26,9 +26,8 @@ const getBacklogItems = async (uid: string) => {
 
 export const useGetBacklogItemsQuery = () => {
     const { authUser } = useAuth();
-    if (!authUser) {
-        throw new Error("User not authenticated");
-    }
+    if (!authUser) throw new Error("User not authenticated");
+
     return useQuery({
         queryKey: ["backlog", authUser.uid],
         queryFn: () => getBacklogItems(authUser.uid),

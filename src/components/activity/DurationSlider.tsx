@@ -86,7 +86,6 @@ const DurationSlider = ({
         }
     }, [options, translateX, selectedIndex]);
 
-    // Handle controlled and uncontrolled initial values
     useEffect(() => {
         const initialValue = isControlled ? value : defaultValue;
         if (initialValue !== undefined) {
@@ -94,7 +93,6 @@ const DurationSlider = ({
         }
     });
 
-    // Handle controlled value updates
     useEffect(() => {
         if (isControlled && value !== undefined) {
             updatePositionFromValue(value);

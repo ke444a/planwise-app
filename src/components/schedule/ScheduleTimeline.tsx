@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { View, ScrollView } from "react-native";
 import tw from "twrnc";
 import ActivityCard from "./ActivityCard";
@@ -15,17 +15,17 @@ interface ScheduleTimelineProps {
   onActivityMoveToBacklog?: (_activity: IActivity) => void;
 }
 
-// Constants
-const ACTIVITY_CARD_HEIGHT = 90;
-const PIXELS_PER_DURATION_MIN = 1.5;
-const PIXELS_PER_GAP_MIN = 0.9;
-const DEFAULT_ACTIVITY_GAP = 16;
-const MAX_ACTIVITY_GAP = 200;
-const MIN_ACTIVITY_ICON_HEIGHT = 52;
+const ACTIVITY_CARD_HEIGHT = 90;  // default height of entire activity card
+const PIXELS_PER_DURATION_MIN = 1.5;  // how many pixels correspond to each minute on timeline
+const PIXELS_PER_GAP_MIN = 0.9;  // how many pixels correspond to each minute of gap between activities
+const DEFAULT_ACTIVITY_GAP = 16;  // default gap between activities
+const MAX_ACTIVITY_GAP = 200;  // maximum gap between activities
+const MIN_ACTIVITY_ICON_HEIGHT = 52;  // minimum height of activity icon
 
 // Calculate the display height for an activity’s icon
 const getActivityHeight = (activity: IActivity) => {
-    // Start with a minimum, and add some proportional height for durations > 15 min
+    // Height of the activity is proportional to its duration
+    // But each activity has a minimum height
     return Math.max(
         MIN_ACTIVITY_ICON_HEIGHT + (activity.duration - 15) * PIXELS_PER_DURATION_MIN,
         MIN_ACTIVITY_ICON_HEIGHT
@@ -50,13 +50,10 @@ const getGapBetweenActivities = (activity1: IActivity, activity2: IActivity) => 
 const isActivityInPast = (activity: IActivity, scheduleDate: Date) => {
     const now = new Date();
     const isSameDay = now.toDateString() === scheduleDate.toDateString();
-
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
     const currentTimeInMinutes = currentHour * 60 + currentMinute;
-
     const activityEndMinutes = timeToMinutes(activity.endTime);
-
     return isSameDay && currentTimeInMinutes > activityEndMinutes;
 };
 
@@ -66,7 +63,7 @@ interface TimelineSegment {
   endMin: number;        // end time in minutes from midnight
   displayStart: number;  // starting pixel offset on the timeline
   displayEnd: number;    // ending pixel offset on the timeline
-  activity?: IActivity;  // present if type = "activity"
+  activity?: IActivity;  // if segment is an activity
 }
 
 /**
@@ -74,7 +71,7 @@ interface TimelineSegment {
  * Large gaps get collapsed to a smaller or maximum height. Activities get a height
  * based on duration.
  */
-function buildSegments(activities: IActivity[]): TimelineSegment[] {
+const buildSegments = (activities: IActivity[]): TimelineSegment[] => {
     if (!activities || activities.length === 0) {
         return [];
     }
@@ -132,23 +129,22 @@ function buildSegments(activities: IActivity[]): TimelineSegment[] {
     }
 
     return segments;
-}
+};
 
 /**
  * Given the segments array, find where the current time falls
  * and interpolate the display position (pixel offset).
  */
-function getElapsedTimePosition(
+const getElapsedTimePosition = (
+    currentTime: Date,
     segments: TimelineSegment[],
     startDayHour: number,
     endDayHour: number
-): number | null {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinute = now.getMinutes();
+): number | null => {
+    const currentHour = currentTime.getHours();
+    const currentMinute = currentTime.getMinutes();
     const currentTimeInMinutes = currentHour * 60 + currentMinute;
-
-    // If out of the schedule’s range, return null
+    // If out of the schedule’s range, return null (no need to show anything)
     if (currentHour < startDayHour || currentHour >= endDayHour) {
         return null;
     }
@@ -178,15 +174,24 @@ function getElapsedTimePosition(
 
             // fraction of the way through this segment’s time range
             const fraction = segDuration > 0 ? elapsedInSegment / segDuration : 0;
-
             return seg.displayStart + fraction * segDisplaySize;
         }
     }
-
-    // Fallback if none matched (should not happen if everything is correct):
     return null;
-}
+};
 
+
+/**
+ * This is a component that displays user's schedule for the day
+ * in the form of a timeline.
+ * 
+ * We first sort the activities by their start times and then build a list of "segments,"
+ * each representing either an activity (with a height proportional to its duration) 
+ * or a gap (with a capped height). We place them one after another so that large 
+ * chunks of free time do not consume too much space visually. We also track the 
+ * current time to draw a purple line that shows how far into the schedule the user 
+ * currently is.
+ */
 const ScheduleTimeline = ({
     startDayHour,
     endDayHour,
@@ -197,7 +202,7 @@ const ScheduleTimeline = ({
     onActivityEdit = () => {},
     onActivityMoveToBacklog = () => {}
 }: ScheduleTimelineProps) => {
-    // const [currentTime, setCurrentTime] = useState(new Date());
+    const [currentTime, setCurrentTime] = useState(new Date());
     const scrollViewRef = useRef<ScrollView>(null);
     const isSameDay = useMemo(() => {
         const now = new Date();
@@ -205,67 +210,17 @@ const ScheduleTimeline = ({
     }, [scheduleDate]);
 
     // Update currentTime every 30s
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         setCurrentTime(new Date());
-    //     }, 30000);
-    //     return () => clearInterval(interval);
-    // }, []);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
-    // Build the segments for this schedule
     const segments = useMemo(() => buildSegments(activities), [activities]);
-
-    // Compute the elapsed time line position
     const elapsedPosition = useMemo(() => {
-        return getElapsedTimePosition(segments, startDayHour, endDayHour);
-    }, [segments, startDayHour, endDayHour]);
-
-    // Scroll to the closest activity whenever currentTime changes (if desired)
-    // useEffect(() => {
-    //     if (
-    //         scrollViewRef.current &&
-    //   currentTime.getHours() >= startDayHour &&
-    //   currentTime.getHours() <= endDayHour &&
-    //   activities.length > 0
-    //     ) {
-    //         // Find the closest activity to the current time
-    //         const currentTimeInMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-    //         let closestActivityIndex = 0;
-    //         let minTimeDiff = Infinity;
-
-    //         activities.forEach((activity, index) => {
-    //             const activityStartMinutes = timeToMinutes(activity.startTime);
-    //             const timeDiff = Math.abs(activityStartMinutes - currentTimeInMinutes);
-    //             if (timeDiff < minTimeDiff) {
-    //                 minTimeDiff = timeDiff;
-    //                 closestActivityIndex = index;
-    //             }
-    //         });
-
-    //         // After a short delay, scroll to that activity
-    //         setTimeout(() => {
-    //             if (scrollViewRef.current && segments.length > 0) {
-    //                 const screenHeight = Dimensions.get("window").height;
-    //                 let scrollPosition = 0;
-
-    //                 // Find which segment corresponds to the “closest” activity
-    //                 const closestAct = activities[closestActivityIndex];
-    //                 const segIndex = segments.findIndex(
-    //                     (s) => s.type === "activity" && s.activity === closestAct
-    //                 );
-
-    //                 if (segIndex >= 0) {
-    //                     // Sum the display height of all segments before that
-    //                     scrollPosition = segments[segIndex].displayStart;
-    //                     // Adjust so the activity is near the upper third of the screen
-    //                     scrollPosition = Math.max(0, scrollPosition - screenHeight / 3);
-    //                 }
-
-    //                 scrollViewRef.current.scrollTo({ y: scrollPosition, animated: true });
-    //             }
-    //         }, 500);
-    //     }
-    // }, [currentTime, activities, segments, startDayHour, endDayHour]);
+        return getElapsedTimePosition(currentTime, segments, startDayHour, endDayHour);
+    }, [currentTime, segments, startDayHour, endDayHour]);
 
     return (
         <ScrollView

@@ -22,6 +22,11 @@ interface Props {
     initialMinutes: number;
 }
 
+/**
+ * This is a time picker with scrollable hours and minutes.
+ * User can select the duration of the activity by scrolling through two columns.
+ * The first column is for the hours and the second is for the minutes.
+ */
 const DurationPickerBottomSheet = ({
     visible,
     onClose,
@@ -32,7 +37,7 @@ const DurationPickerBottomSheet = ({
     const [selectedHour, setSelectedHour] = useState(initialHours);
     const [selectedMinute, setSelectedMinute] = useState(initialMinutes);
 
-    // Arrays for hours & minutes
+    // Populate all possible values for hours and minutes
     const hours = useMemo(() => Array.from({ length: 24 }, (_, i) => i), []);
     const minutes = useMemo(() => Array.from({ length: 60 }, (_, i) => i), []);
 
@@ -42,19 +47,15 @@ const DurationPickerBottomSheet = ({
         onClose();
     };
 
-    // Called when user scrolls hours
     const onHoursMomentumScrollEnd = useCallback((e: any) => {
         const index = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
         setSelectedHour(hours[index]);
     }, [hours]);
-
-    // Called when user scrolls minutes
     const onMinutesMomentumScrollEnd = useCallback((e: any) => {
         const index = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
         setSelectedMinute(minutes[index]);
     }, [minutes]);
 
-    // Render each hour item
     const renderHourItem = useCallback((value: number) => {
         const isSelected = value === selectedHour;
         const textColor = isSelected ? "text-gray-950" : "text-gray-600";
@@ -68,7 +69,6 @@ const DurationPickerBottomSheet = ({
         );
     }, [selectedHour]);
 
-    // Render each minute item
     const renderMinuteItem = useCallback((value: number) => {
         const displayVal = value < 10 ? `0${value}` : `${value}`;
         const isSelected = value === selectedMinute;

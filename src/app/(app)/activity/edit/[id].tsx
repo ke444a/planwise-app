@@ -4,11 +4,13 @@ import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
-import { useUpdateActivityMutation, ScheduleOverlapError } from "@/api/schedules/updateActivity";
+import { useUpdateActivityMutation } from "@/api/schedules/updateActivity";
+import { ScheduleOverlapError } from "@/api/schedules/addActivityToSchedule";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { ActivityForm } from "@/components/activity/ActivityForm";
 import { NotificationModal } from "@/components/ui/NotificationModal";
 import { useAppContext } from "@/context/AppContext"; 
+
 
 const EditActivityScreen = () => {
     const { setError } = useAppContext();

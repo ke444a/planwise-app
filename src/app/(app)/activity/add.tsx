@@ -58,14 +58,13 @@ const AddActivityScreen = () => {
             activity.endTime,
             existingActivities
         );
-
         if (overlappingActivity) {
             setOverlapActivity(overlappingActivity);
             setIsOverlapModalVisible(true);
             return;
         }
 
-        // Check stamina
+        // Check stamina (shouldn't exceed 120% of max stamina)
         const totalStaminaUsed = currentStaminaNumber + activity.staminaCost;
         if (maxStaminaNumber > 0 && totalStaminaUsed / maxStaminaNumber > 1.2) {
             setIsStaminaModalVisible(true);
