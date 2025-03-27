@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import tw from "twrnc";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import DurationSlider from "@/components/activity/DurationSlider";
 import DurationPickerBottomSheet from "@/components/activity/DurationPickerBottomSheet";
 
@@ -47,12 +47,22 @@ export const DurationSection = ({ duration, onDurationChange }: DurationSectionP
         setDurationOptions(newDurationOptions);
     };
 
+    useEffect(() => {
+        const newDurationOptions = [...DEFAULT_DURATION_OPTIONS];
+        const isNewOption = !newDurationOptions.some(opt => opt.value === duration);
+        if (isNewOption) {
+            newDurationOptions.push({ label: formatDuration(duration), value: duration });
+            newDurationOptions.sort((a, b) => a.value - b.value);
+        }
+        setDurationOptions(newDurationOptions);
+    }, [duration]);
+
     return (
-        <View>
+        <View testID="duration-section">
             <View style={tw`flex-row items-center justify-between mb-4`}>
-                <Text style={tw`text-2xl font-semibold text-gray-950`}>How long?</Text>
+                <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>How Long?</Text>
                 <TouchableOpacity onPress={() => setIsDurationPickerVisible(true)}>
-                    <Text style={tw`text-gray-500 font-medium text-lg`}>More...</Text>
+                    <Text style={tw`text-gray-500 font-medium text-lg dark:text-gray-300`}>More...</Text>
                 </TouchableOpacity>
             </View>
             <DurationSlider

@@ -88,12 +88,12 @@ const ModelBacklogBox = ({ items }: Props) => {
             >
                 <View style={tw`flex-col gap-y-2`}>
                     <View style={tw`flex-row items-center`}>
-                        <MaterialIcons name="library-add-check" size={20} style={tw`mr-1 text-gray-950`} />
-                        <Text style={tw`text-gray-950 font-medium`}>{itemsAdded}/{totalItems} items added</Text>
+                        <MaterialIcons name="library-add-check" size={20} style={tw`mr-1 text-gray-950 dark:text-white`} />
+                        <Text style={tw`text-gray-950 dark:text-white font-medium`}>{itemsAdded}/{totalItems} items added</Text>
                     </View>
                     <View style={tw`flex-row items-center`}>
-                        <Ionicons name="time-outline" size={20} style={tw`mr-1 text-gray-950`} />
-                        <Text style={tw`font-medium text-gray-950`}>{getActivityDurationLabel(totalDuration)} total</Text>
+                        <Ionicons name="time-outline" size={20} style={tw`mr-1 text-gray-950 dark:text-white`} />
+                        <Text style={tw`font-medium text-gray-950 dark:text-white`}>{getActivityDurationLabel(totalDuration)} total</Text>
                     </View>
                 </View>
                 {items && items.length > 0 && (

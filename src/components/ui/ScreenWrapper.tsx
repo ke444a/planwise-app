@@ -4,16 +4,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface ScreenWrapperProps {
     children: React.ReactNode;
+    testID?: string;
 }
 
-const ScreenWrapper = ({ children }: ScreenWrapperProps) => {
+const ScreenWrapper = ({ children, testID }: ScreenWrapperProps) => {
     const insets = useSafeAreaInsets();
 
     return (
-        <View style={tw`flex-1 bg-purple-50`}>
-            <View style={[tw`bg-purple-50`, { paddingTop: insets.top }]} />
+        <View style={tw`flex-1 bg-purple-50 dark:bg-pink-200`} testID={testID}>
+            <View style={[tw`bg-purple-50 dark:bg-pink-200`, { paddingTop: insets.top }]} />
             <View style={[
-                tw`flex-1 bg-zinc-100 rounded-t-3xl`,
+                tw`flex-1 bg-zinc-100 rounded-t-3xl dark:bg-zinc-900`,
                 styles.containerShadow
             ]}>
                 {children}

@@ -34,7 +34,7 @@ const UserChatBox = ({ text }: UserChatBoxProps) => {
     });
 
     return (
-        <View style={tw`bg-slate-200 rounded-xl p-4 mb-6`}>
+        <View style={tw`bg-slate-200 rounded-xl p-4 mb-6`} testID="user-chat-box">
             <View style={tw`flex flex-row justify-between items-center`}>
                 <View style={tw`flex-row items-center mb-2`}>
                     <Ionicons name="person" size={20} style={tw`text-gray-950`} />

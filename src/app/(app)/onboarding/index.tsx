@@ -10,7 +10,6 @@ import Animated, {
     Easing
 } from "react-native-reanimated";
 import { StartTimeScreen, EndTimeScreen, DayStructureScreen, PriorityActivityScreen } from "@/components/onboarding";
-import { useUserStore } from "@/libs/userStore";
 import { useUploadOnboardingInfoMutation } from "@/api/users/uploadOnboardingInfo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppContext } from "@/context/AppContext";
@@ -19,7 +18,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const OnboardingScreen = () => {
     const insets = useSafeAreaInsets();
-    const { user } = useUserStore();
     const { mutate: uploadOnboardingInfo } = useUploadOnboardingInfoMutation();
     const [currentStep, setCurrentStep] = useState(0);
     const [visibleStep, setVisibleStep] = useState(0);
@@ -95,13 +93,9 @@ const OnboardingScreen = () => {
         if (visibleStep < 3) {
             setCurrentStep(visibleStep + 1);
         } else {
-            if (!user?.uid) return;
             if (!updatedData.startDayTime || !updatedData.endDayTime || !updatedData.dayStructure || !updatedData.priorityActivities) return;
             uploadOnboardingInfo(
-                {
-                    uid: user?.uid,
-                    onboardingInfo: updatedData as IOnboardingInfo
-                },
+                updatedData as IOnboardingInfo,
                 {
                     onSuccess: () => {
                         router.replace("/(app)");

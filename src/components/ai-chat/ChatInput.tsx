@@ -1,4 +1,4 @@
-import { View, TextInput, TouchableOpacity, Text, Platform, KeyboardAvoidingView, Keyboard } from "react-native";
+import { View, TextInput, TouchableOpacity, Text, Platform, KeyboardAvoidingView, Keyboard, ActivityIndicator } from "react-native";
 import tw from "twrnc";
 import { useState, useEffect, useRef } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -16,7 +16,7 @@ const ChatInput = ({
     onSendMessage
 }: ChatInputProps) => {
     const [inputText, setInputText] = useState("");
-    const { transcribeUserSpeech } = useAiTranscript();
+    const { transcribeUserSpeech, isTranscribing } = useAiTranscript();
     const insets = useSafeAreaInsets();
     const audioUriTimestampRef = useRef<number | null>(null);
     const { 
@@ -106,26 +106,32 @@ const ChatInput = ({
                         editable={!isRecording}
                         // returnKeyType="send"
                         enablesReturnKeyAutomatically={true}
+                        testID="ai-chat-input"
                     />
                 </View>
                 {isRecording ? renderRecordingInterface() : (
                     <View style={tw`flex-row justify-end px-4 gap-x-2`}>
-                        <TouchableOpacity onPress={handleMicPress}>
-                            <MaterialCommunityIcons 
-                                name={"microphone-outline"} 
-                                size={32}
-                                style={tw`text-white`}
-                            />
-                        </TouchableOpacity>
+                        {isTranscribing ? (
+                            <ActivityIndicator size={32} color="white" />
+                        ) : (
+                            <TouchableOpacity onPress={handleMicPress}>
+                                <MaterialCommunityIcons 
+                                    name={"microphone-outline"} 
+                                    size={32}
+                                    style={tw`text-white`}
+                                />
+                            </TouchableOpacity>
+                        )}
                         <TouchableOpacity
                             onPress={handleSend}
                             disabled={!isInputActive}
                             style={tw.style(!isInputActive && "opacity-50")}
+                            testID="ai-chat-send-button"
                         >
                             <MaterialCommunityIcons 
                                 name={isInputActive ? "arrow-up-circle" : "arrow-right-circle"} 
                                 size={32} 
-                                style={tw`text-white`} 
+                                style={tw`text-white`}
                             />
                         </TouchableOpacity>
                     </View>

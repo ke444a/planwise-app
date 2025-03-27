@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { LogBox } from "react-native";
 import { getFunctions, connectFunctionsEmulator } from "@react-native-firebase/functions";
+import { ThemeProvider } from "@/context/ThemeContext";
 
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 // import auth from "@react-native-firebase/auth";
@@ -16,6 +17,11 @@ import { getFunctions, connectFunctionsEmulator } from "@react-native-firebase/f
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
+    // useDeviceContext(tw, {
+    //     observeDeviceColorSchemeChanges: false,
+    //     initialColorScheme: "light"
+    // });
+    // useAppColorScheme(tw);
     // useEffect(() => {
     //     const signOut = async () => {
     //         await auth().signOut();
@@ -40,18 +46,20 @@ export default function RootLayout() {
     
     return (
         <GestureHandlerRootView>
-            <AuthProvider>
-                <AppProvider>
-                    <QueryClientProvider client={queryClient}>
-                        <SafeAreaProvider>
-                            <Stack>
-                                <Stack.Screen name="auth" options={{ headerShown: false }} />
-                                <Stack.Screen name="(app)" options={{ headerShown: false }} />
-                            </Stack>
-                        </SafeAreaProvider>
-                    </QueryClientProvider>
-                </AppProvider>
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <AppProvider>
+                        <QueryClientProvider client={queryClient}>
+                            <SafeAreaProvider>
+                                <Stack>
+                                    <Stack.Screen name="auth" options={{ headerShown: false }} />
+                                    <Stack.Screen name="(app)" options={{ headerShown: false }} />
+                                </Stack>
+                            </SafeAreaProvider>
+                        </QueryClientProvider>
+                    </AppProvider>
+                </AuthProvider>
+            </ThemeProvider>
         </GestureHandlerRootView>
     );
 }

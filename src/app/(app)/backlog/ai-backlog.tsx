@@ -1,14 +1,16 @@
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { View, TouchableOpacity, Text } from "react-native";
-import tw from "twrnc";
+import tw, { useAppColorScheme } from "twrnc";
 import { useState } from "react";
 import { router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useAiBacklog } from "@/hooks/useAiBacklog";
-import { AiCapabilityList, ChatInput } from "@/components/ai-chat";
+import { ChatInput } from "@/components/ai-chat";
 import BacklogChatWindow from "@/components/ai-chat/backlog/BacklogChatWindow";
+import BacklogCapabilityList from "@/components/ai-chat/backlog/BacklogCapabilityList";
 
 const AiBacklogScreen = () => {
+    useAppColorScheme(tw);
     const { messages, addMessage, generateBacklogItems } = useAiBacklog();
     const [isConversationActive, setIsConversationActive] = useState(false);
 
@@ -27,14 +29,14 @@ const AiBacklogScreen = () => {
     return (
         <ScreenWrapper>
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-                <Text style={tw`text-2xl font-semibold mb-1`}>Fill My Backlog</Text>
+                <Text style={tw`text-2xl font-semibold mb-1 text-gray-950 dark:text-white`}>Fill My Backlog</Text>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
+                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500 dark:text-white`} />
                 </TouchableOpacity>
             </View>
             {isConversationActive ? 
                 <BacklogChatWindow messages={messages} /> : 
-                <AiCapabilityList />}
+                <BacklogCapabilityList />}
             <ChatInput onSendMessage={handleSendMessage} />
         </ScreenWrapper>
     );

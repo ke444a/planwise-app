@@ -41,6 +41,7 @@ const GoogleSignInButton = ({ onAuth }: AuthButtonProps) => {
 
     return (
         <ButtonWithIcon
+            testID="google-sign-in-button"
             onPress={onPress}
             icon={<AntDesign name="google" size={24} color="#1f2937" />}
             label="Google Sign-In"

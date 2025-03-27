@@ -5,7 +5,7 @@ export default {
         version: "1.0.0",
         orientation: "portrait",
         icon: "./src/assets/icon.png",
-        userInterfaceStyle: "light",
+        userInterfaceStyle: "automatic",
         newArchEnabled: true,
         scheme: "planwise-app",
         splash: {

@@ -59,7 +59,7 @@ const PriorityActivityScreen: React.FC<PriorityActivityScreenProps> = ({ onNextP
     return (
         <View style={tw`flex-1 justify-between`}>
             <View style={tw`flex-1`}>
-                <Text style={tw`text-4xl font-semibold text-gray-950 mb-3`}>
+                <Text style={tw`text-4xl font-semibold text-gray-950 mb-3 pt-6`}>
                         What is Most Important in Your Day?
                 </Text>
                 <Text style={tw`text-lg text-gray-500 font-medium mb-6`}>
@@ -136,7 +136,7 @@ const PriorityActivityScreen: React.FC<PriorityActivityScreenProps> = ({ onNextP
                 </ScrollView>
             </View>
                 
-            <View style={tw`mt-4`}>
+            <View style={tw`mt-6 mb-12`}>
                 <ButtonWithIcon
                     label="Next"
                     onPress={handleNextPress}

@@ -48,7 +48,7 @@ const DayStructureScreen: React.FC<DayStructureScreenProps> = ({ onNextPress }) 
     return (
         <View style={tw`flex-1 justify-between`}>
             <View>
-                <Text style={tw`text-4xl font-semibold text-gray-950 mb-3`}>
+                <Text style={tw`text-4xl font-semibold text-gray-950 mb-3 pt-6`}>
                         How do You Like to Structure Your Day?
                 </Text>
                 <Text style={tw`text-lg text-gray-500 font-medium mb-8`}>
@@ -80,7 +80,7 @@ const DayStructureScreen: React.FC<DayStructureScreenProps> = ({ onNextPress }) 
                 />
             </View>
                 
-            <View style={tw`mt-4`}>
+            <View style={tw`mt-6 mb-12`}>
                 <ButtonWithIcon
                     label="Next"
                     onPress={handleNextPress}

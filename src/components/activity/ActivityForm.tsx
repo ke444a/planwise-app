@@ -42,7 +42,7 @@ export const ActivityForm = ({
             const newSubtask = createNewSubtask(subtaskInput);
             onActivityDetailsChange({
                 ...activityDetails,
-                subtasks: [...activityDetails.subtasks, newSubtask]
+                subtasks: [...(activityDetails.subtasks || []), newSubtask]
             });
             setSubtaskInput("");
         }
@@ -51,7 +51,7 @@ export const ActivityForm = ({
     const handleSubtaskRemove = (id: string) => {
         onActivityDetailsChange({
             ...activityDetails,
-            subtasks: activityDetails.subtasks.filter(subtask => subtask.id !== id)
+            subtasks: activityDetails.subtasks?.filter(subtask => subtask.id !== id) || []
         });
     };
 
@@ -83,7 +83,7 @@ export const ActivityForm = ({
                 />
 
                 <View style={tw`mb-4`}>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>When?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>When?</Text>
                     <TimeRangePicker
                         initialTime={activityDetails.startTime}
                         durationMinutes={activityDetails.duration}
@@ -108,7 +108,7 @@ export const ActivityForm = ({
                 />
 
                 <View>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>How Urgent?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>How Urgent?</Text>
                     <PriorityPicker
                         selectedPriority={activityDetails.priority}
                         onPriorityChange={(value) => handleDetailsChange({ priority: value })}
@@ -116,7 +116,7 @@ export const ActivityForm = ({
                 </View>
 
                 <View>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>How Much Stamina?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>How Much Stamina?</Text>
                     <StaminaPicker
                         value={activityDetails.staminaCost}
                         onValueChange={(value) => handleDetailsChange({ staminaCost: value })}
@@ -124,9 +124,9 @@ export const ActivityForm = ({
                 </View>
 
                 <View style={tw`mb-8`}>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>Any Subtasks?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4 dark:text-white`}>Any Subtasks?</Text>
                     <SubtasksList
-                        subtasks={activityDetails.subtasks}
+                        subtasks={activityDetails.subtasks || []}
                         subtaskInput={subtaskInput}
                         onSubtaskInputChange={setSubtaskInput}
                         onSubtaskSubmit={handleSubtaskSubmit}

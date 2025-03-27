@@ -17,7 +17,7 @@ interface IActivity {
     priority: ActivityPriority;
     type: ActivityType;
     isCompleted: boolean;
-    subtasks: ISubtask[];
+    subtasks?: ISubtask[];
 }
 
 interface IBacklogDraft {

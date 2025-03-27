@@ -6,9 +6,10 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useAuth } from "@/context/AuthContext";
 import { useDeleteUserMutation } from "@/api/users/deleteUser";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { getAuth, GoogleAuthProvider, reauthenticateWithCredential } from "firebase/auth";
 import { useAppContext } from "@/context/AppContext";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
+import { getApp } from "@react-native-firebase/app";
+import auth, { getAuth, reauthenticateWithCredential } from "@react-native-firebase/auth";
 
 const AdvancedScreen = () => {
     const { signOut } = useAuth();
@@ -47,8 +48,9 @@ const AdvancedScreen = () => {
 
     const deleteAccount = async () => {
         try {
-            const auth = getAuth();
-            const user = auth.currentUser;
+            const app = getApp();
+            const authApp = getAuth(app);
+            const user = authApp.currentUser;
             if (!user) throw new Error("No user signed in");
 
             GoogleSignin.configure({
@@ -58,9 +60,9 @@ const AdvancedScreen = () => {
             const { data } = await GoogleSignin.signIn();
             if (!data?.idToken) throw new Error("Failed to get Google ID token");
 
-            const credential = GoogleAuthProvider.credential(data.idToken);
+            const credential = auth.GoogleAuthProvider.credential(data.idToken);
             await reauthenticateWithCredential(user, credential);
-            await deleteUser(user.uid);
+            await deleteUser();
             await user.delete();
         } catch (error) {
             setError({
@@ -75,18 +77,10 @@ const AdvancedScreen = () => {
     return (
         <ScreenWrapper>
             <View style={tw`px-4 py-6`}>
-                <View style={tw`flex-row justify-between items-center mb-8`}>
-                    <View style={tw`w-1/3`}>
-                        <TouchableOpacity 
-                            onPress={() => router.back()}
-                            style={tw`mr-4`}
-                        >
-                            <Ionicons name="chevron-back" size={24} style={tw`text-gray-950`} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={tw`text-2xl font-semibold`}>Advanced</Text>
-                    <View style={tw`w-1/3`} />
-                </View>
+                <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2 mb-8`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>Advanced</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity 
                     style={tw`flex-row items-center p-3 bg-white border border-gray-200 rounded-xl mb-3`}

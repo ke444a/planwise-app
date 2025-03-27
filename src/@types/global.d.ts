@@ -9,10 +9,8 @@ interface IChatMessage {
     timestamp: number;
 }
 
-interface IActivityGenAI {
-    title: string;
-    estimated_duration: number;
-    subtasks?: string[];
+interface IActivityGenAI extends Omit<IActivity, "subtasks" | "id" | "isCompleted"> {
+    warnings?: string[];
 }
 
 interface IBacklogItemGenAI {

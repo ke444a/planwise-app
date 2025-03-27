@@ -15,6 +15,7 @@ const ErrorModal = (props: Props) => {
             animationType="slide"
             visible={true}
             presentationStyle="fullScreen"
+            testID="error-modal"
         >
             <View
                 style={tw`absolute top-0 w-full h-full px-6 flex items-center justify-center bg-white`}

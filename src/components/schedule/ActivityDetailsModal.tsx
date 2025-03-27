@@ -5,11 +5,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { getActivityDurationLabel } from "@/utils/getActivityDurationLabel";
-import { timeToMinutes } from "@/utils/timeToMinutes";
+import { checkIsCurrentActivity } from "@/utils/checkIsCurrentActivity";
 import ActivityIcon from "../activity/ActivityIcon";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useRouter } from "expo-router";
-import { useUserStore } from "@/libs/userStore";
 import { useTickActivitySubtaskMutation } from "@/api/schedules/tickActivitySubtask";
 import LiftedBottomModal from "@/components/ui/LiftedBottomModal";
 
@@ -24,16 +23,7 @@ interface ActivityDetailsModalProps {
     activityDate: Date;
 }
 
-const getIsCurrentActivity = (startTime: string, endTime: string): boolean => {
-    const now = new Date();
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const currentTotalMinutes = currentHours * 60 + currentMinutes;
-    
-    const startTotalMinutes = timeToMinutes(startTime);
-    const endTotalMinutes = timeToMinutes(endTime);
-    return currentTotalMinutes >= startTotalMinutes && currentTotalMinutes < endTotalMinutes;
-};
+
 
 const ActivityDetailsModal = ({ 
     activity,
@@ -45,13 +35,11 @@ const ActivityDetailsModal = ({
     onMoveToBacklog,
     activityDate
 }: ActivityDetailsModalProps) => {
-    const { user } = useUserStore();
     const router = useRouter();
-    const isCurrentActivity = getIsCurrentActivity(activity.startTime, activity.endTime);
+    const isCurrentActivity = checkIsCurrentActivity(activity.startTime, activity.endTime, activityDate);
     const { mutate: tickSubtask } = useTickActivitySubtaskMutation();
 
     const handleFocusNow = () => {
-        if (!user?.uid) return;
         onClose();
         router.push({
             pathname: "/activity/focus",
@@ -63,7 +51,6 @@ const ActivityDetailsModal = ({
     };
 
     const handleSubtaskPress = (subtaskId: string, isCompleted: boolean) => {
-        if (!user) return;
         tickSubtask({
             date: new Date(),
             activityId: activity.id!,
@@ -126,6 +113,7 @@ const ActivityDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onDelete}
+                            testID="activity-details-modal-delete-button"
                         >
                             <MaterialCommunityIcons name="trash-can-outline" size={20} style={tw`text-gray-950`} />
                             <Text style={tw`text-gray-950 font-medium mt-1`}>Delete</Text>
@@ -133,6 +121,7 @@ const ActivityDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onEdit}
+                            testID="activity-details-modal-edit-button"
                         >
                             <Feather name="edit" size={20} style={tw`text-gray-950`} />
                             <Text style={tw`text-gray-950 font-medium mt-1`}>Edit</Text>
@@ -140,6 +129,7 @@ const ActivityDetailsModal = ({
                         <TouchableOpacity 
                             style={tw`flex-1 py-3 bg-slate-200 rounded-xl items-center justify-center`}
                             onPress={onComplete}
+                            testID="activity-details-modal-complete-button"
                         >
                             {activity.isCompleted ? (
                                 <MaterialIcons name="remove-done" size={20} style={tw`text-gray-950`} />

@@ -1,0 +1,27 @@
+appId: com.planwise.app
+---
+- assertVisible: { id: "home-screen" }
+- tapOn: { id: "ai-planner-button" }
+- assertVisible: { id: "ai-chat-input" }
+- tapOn: { id: "ai-chat-input" }
+- inputText: "Can you just plan my day? Tasks are: work on app design, watch a tutorial, cook something healthy, and maybe call Sarah if there's time"
+- tapOn: { id: "ai-chat-send-button" }
+- assertVisible: { id: "user-chat-box" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- tapOn: { id: "generated-activity-item-0" }
+- assertVisible: { id: "generated-activity-item-add-generated-activity-item-0" }
+- tapOn: { id: "generated-activity-item-add-generated-activity-item-0" }
+- tapOn: { id: "generated-activity-item-1" }
+- assertVisible: { id: "generated-activity-item-remove-generated-activity-item-1" }
+- tapOn: { id: "generated-activity-item-remove-generated-activity-item-1" }
+- tapOn: { id: "ai-planner-close-button" }
+- assertVisible: { id: "home-screen" }
+- assertVisible: { id: "activity-card-0" }
+- tapOn: { id: "activity-card-0" }
+- assertVisible: { id: "activity-details-modal-complete-button" }
+- tapOn: { id: "activity-details-modal-complete-button" }
+- tapOn: { id: "activity-card-0" }
+- assertVisible: { id: "activity-details-modal-delete-button" }
+- tapOn: { id: "activity-details-modal-delete-button" }
+- assertNotVisible: { id: "activity-card-0" }
+

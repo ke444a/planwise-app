@@ -1,0 +1,18 @@
+appId: com.planwise.app
+---
+- launchApp:
+    clearState: true
+    permissions: { all: allow }
+- assertVisible: "http://.*"
+- tapOn: "http://.*"
+- assertVisible: "This is the developer menu.*"
+- tapOn: "Continue"
+- tapOn: { point: "10%,10%" }
+- tapOn: { id: "google-sign-in-button" }
+- tapOn: Continue
+- assertVisible: kechaofficial@gmail.com
+- tapOn: Danyl Kecha kechaofficial@gmail.com
+- assertVisible: Continue
+- tapOn: Continue
+- assertNotVisible: { id: "error-modal" }
+- assertVisible: { id: "home-screen" }

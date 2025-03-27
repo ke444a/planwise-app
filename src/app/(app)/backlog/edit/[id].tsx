@@ -2,10 +2,8 @@ import { View, Text } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState } from "react";
-import { useUserStore } from "@/libs/userStore";
+import { useState, useEffect } from "react";
 import { useGetBacklogItemQuery } from "@/api/backlogs/getBacklogItem";
 import { useUpdateBacklogItemMutation } from "@/api/backlogs/updateBacklogItem";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
@@ -17,18 +15,33 @@ type DraftDetails = Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updat
 
 const EditBacklogItemScreen = () => {
     const { id } = useLocalSearchParams();
-    const { user } = useUserStore();
-    const { data: item, isPending } = useGetBacklogItemQuery(id as string, user?.uid || "");
+    const { data: item, isPending } = useGetBacklogItemQuery(id as string);
     const { mutate: updateBacklogItem } = useUpdateBacklogItemMutation();
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
     const [draftDetails, setDraftDetails] = useState<DraftDetails | null>(null);
+    
+    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
+
+    useEffect(() => {
+        if (item && item.itemType === "activity") {
+            setActivityDetails({
+                title: item.title || "",
+                type: item.type || "misc",
+                startTime: item.startTime || "12:00",
+                endTime: item.endTime || "12:15",
+                duration: item.duration || 15,
+                priority: item.priority || "must_do",
+                staminaCost: item.staminaCost ?? 0,
+                subtasks: item.subtasks || [],
+            });
+        }
+    }, [item]);
 
     const handleClose = () => {
         router.back();
     };
 
     const handleUpdateItem = () => {
-        if (!user?.uid || !id || !item) return;
+        if (!id || !item) return;
 
         if (item.itemType === "activity" && activityDetails?.title.trim()) {
             const updatedItem = {
@@ -37,38 +50,38 @@ const EditBacklogItemScreen = () => {
                 isCompleted: item.isCompleted,
                 itemType: "activity" as const,
             };
-            updateBacklogItem({ item: updatedItem, uid: user.uid });
+            updateBacklogItem(updatedItem);
         } else if (item.itemType === "draft" && draftDetails?.title.trim()) {
             const updatedItem = {
                 id: id as string,
                 ...draftDetails,
                 itemType: "draft" as const,
             };
-            updateBacklogItem({ item: updatedItem, uid: user.uid });
+            updateBacklogItem(updatedItem);
         }
         router.back();
     };
 
-    if (isPending || !item) {
+    if (isPending || !item || !activityDetails) {
         return null;
     }
 
     return (
         <ScreenWrapper>
-            <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-                <Text style={tw`text-2xl font-semibold`}>
-                    {item.itemType === "activity" ? "Edit Activity" : "Edit Item"}
-                </Text>
-                <TouchableOpacity onPress={handleClose}>
-                    <AntDesign name="closecircle" size={24} style={tw`text-gray-500`} />
+            <View style={tw`px-4 py-6`}>
+                <TouchableOpacity onPress={handleClose} style={tw`flex-row items-center gap-x-2`}>
+                    <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />
+                    <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>
+                        {item.itemType === "activity" ? "Edit Activity" : "Edit Item"}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
             {item.itemType === "activity" ? (
                 <BacklogItemActivityForm
-                    initialData={item}
-                    showDatePicker={false}
+                    activityDetails={activityDetails}
                     onActivityDetailsChange={setActivityDetails}
+                    showDatePicker={false}
                     submitButtonLabel="Update"
                     submitButtonIcon={<Ionicons name="checkmark" size={24} style={tw`text-gray-950`} />}
                     onSubmit={handleUpdateItem}

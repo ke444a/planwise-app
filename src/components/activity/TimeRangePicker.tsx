@@ -83,8 +83,8 @@ const TimeRangePicker = ({
         return (
             <View style={tw`h-[${ITEM_HEIGHT}px] justify-center items-center`}>
                 <Text style={[
-                    tw`text-base text-gray-950 px-4`,
-                    isSelected && tw`text-lg font-semibold`,
+                    tw`text-base text-gray-950 px-4 dark:text-white`,
+                    isSelected && tw`text-lg font-semibold text-gray-950`,
                     !isSelected && tw`font-normal`,
                     { opacity }
                 ]}>
@@ -95,13 +95,13 @@ const TimeRangePicker = ({
     };
 
     return (
-        <View style={tw`items-center`}>
+        <View style={tw`items-center`} testID="time-range-picker">
             <View style={[tw`h-[${PICKER_HEIGHT}px] relative`, { width: PICKER_WIDTH }]}>
                 <View style={[
                     tw`absolute -z-10 left-0 right-0 h-[${ITEM_HEIGHT}px]`,
                     { top: PICKER_HEIGHT / 2 - ITEM_HEIGHT / 2 }
                 ]}>
-                    <View style={tw`bg-purple-50 rounded-full w-full h-[50px]`} />
+                    <View style={tw`bg-purple-100 rounded-full w-full h-[50px]`} />
                 </View>
                 
                 <FlatList

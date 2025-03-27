@@ -5,6 +5,7 @@ import { ButtonWithIcon } from "@/components/ui/ButtonWithIcon";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { DurationSection, SubtasksList } from "@/components/activity";
 import { createNewSubtask } from "@/utils/createNewSubtask";
+import { useTheme } from "@/context/ThemeContext";
 
 interface BacklogItemDraftFormProps {
     initialData?: Partial<IBacklogDraft>;
@@ -21,6 +22,7 @@ export const BacklogItemDraftForm = ({
     submitButtonIcon,
     onSubmit,
 }: BacklogItemDraftFormProps) => {
+    const { colorScheme } = useTheme();
     const [draftDetails, setDraftDetails] = useState<Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updatedAt">>({
         title: "",
         duration: 15,
@@ -71,11 +73,12 @@ export const BacklogItemDraftForm = ({
                         <MaterialCommunityIcons name="text-box-outline" size={30} style={tw`text-gray-600`} />
                     </View>
                     <TextInput
-                        style={tw`border-b border-gray-300 py-2 text-xl text-gray-950 flex-1`}
+                        style={tw`border-b border-gray-300 py-2 text-xl text-gray-950 dark:text-white flex-1`}
                         value={draftDetails.title}
                         onChangeText={(text) => setDraftDetails(prev => ({ ...prev, title: text }))}
                         placeholder="What?"
-                        placeholderTextColor="#4b5563"
+                        placeholderTextColor={colorScheme === "dark" ? "rgba(255, 255, 255, 0.5)" : "#4b5563"}
+                        testID="backlog-item-input"
                     />
                 </View>
 
@@ -84,7 +87,7 @@ export const BacklogItemDraftForm = ({
                     onDurationChange={(value) => setDraftDetails(prev => ({ ...prev, duration: value }))}
                 />
                 <View>
-                    <Text style={tw`text-2xl font-semibold text-gray-950 mb-4`}>Any Subtasks?</Text>
+                    <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white mb-4`}>Any Subtasks?</Text>
                     <SubtasksList
                         subtasks={draftDetails.subtasks}
                         subtaskInput={subtaskInput}
@@ -103,6 +106,7 @@ export const BacklogItemDraftForm = ({
                     fullWidth
                     icon={submitButtonIcon}
                     disabled={!draftDetails.title.trim()}
+                    testID="backlog-item-create-button"
                 />
             </View>
         </>

@@ -84,7 +84,7 @@ export const GeneratedBacklogItem = ({
             </TouchableWithoutFeedback>
 
             <Animated.View style={[tw`overflow-hidden`, optionsStyle]}>
-                <View style={tw`flex-row justify-between p-2 bg-purple-200 rounded-b-xl`}>
+                <View style={tw`flex-row justify-between p-2 bg-purple-200 dark:bg-purple-300 rounded-b-xl`}>
                     <TouchableOpacity 
                         onPress={onAdd}
                         style={tw`flex-1 bg-white rounded-lg py-3 mx-1 items-center flex-row justify-center`}

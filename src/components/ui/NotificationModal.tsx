@@ -8,7 +8,7 @@ interface NotificationModalProps {
     message?: string;
 }
 
-const DEFAULT_MESSAGE = "You're pushing it! Your stamina is maxed out. It's time to focus on the most important things. You can add more activities to your backlog.";
+const DEFAULT_MESSAGE = "Your stamina is maxed out! It's time to set priorities and focus on the most important things.";
 
 export const NotificationModal = ({ 
     isVisible, 
@@ -30,17 +30,17 @@ export const NotificationModal = ({
                 <View style={tw`bg-white rounded-2xl p-6 m-4 w-80 items-center shadow-lg`}>
                     <Ionicons 
                         name="warning"
-                        size={48} 
-                        style={tw`text-orange-500 mb-4`}
+                        size={72} 
+                        style={tw`text-red-400 mb-2`}
                     />
-                    <Text style={tw`text-center text-base text-gray-700 mb-6`}>
+                    <Text style={tw`text-center text-lg text-gray-950 mb-6`}>
                         {message}
                     </Text>
                     <TouchableOpacity
                         onPress={onClose}
-                        style={tw`bg-gray-100 rounded-full px-6 py-3`}
+                        style={tw`bg-gray-100 rounded-lg px-6 py-3`}
                     >
-                        <Text style={tw`text-gray-700 font-medium`}>Got it</Text>
+                        <Text style={tw`text-gray-950 font-medium text-center text-base`}>OK</Text>
                     </TouchableOpacity>
                 </View>
             </TouchableOpacity>

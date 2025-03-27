@@ -1,11 +1,11 @@
-import { useAppContext } from "@/context/AppContext";
 import { getApp } from "@react-native-firebase/app";
 import { getVertexAI, getGenerativeModel, Schema } from "@react-native-firebase/vertexai";
 import { useCallback, useState } from "react";
+import { useAppContext } from "@/context/AppContext";
 
 export const useAiBacklog = () => {
-    const [messages, setMessages] = useState<IChatMessage[]>([]);
     const { setError } = useAppContext();
+    const [messages, setMessages] = useState<IChatMessage[]>([]);
 
     const addMessage = useCallback((msg: IChatMessage) => {
         setMessages(prev => {
@@ -49,15 +49,13 @@ export const useAiBacklog = () => {
             const { response } = await chat.sendMessage([userInput]);
             addMessage({ role: "model", content: response.text(), timestamp });
         } catch (error) {
-            console.log(error);
             setError({
-                message: "Failed to generate backlog items",
+                message: "Oops, something went wrong. Please try again.",
                 code: "ai-chat-failed",
                 error
             });
-            return "";
         }
-    }, [addMessage, setError, messages]);
+    }, [addMessage, messages, setError]);
 
     return {
         messages,
