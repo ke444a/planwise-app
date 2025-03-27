@@ -28,7 +28,8 @@ export const useAiChat = (date: Date) => {
     const genereteScheduleViaCloudFunction = useCallback(async (userInput: string, timestamp: number) => {
         try {
             setIsGeneratingSchedule(true);
-            const functions = getFunctions();
+            const app = getApp();
+            const functions = getFunctions(app, "europe-west1");
             const generateSchedule = httpsCallable(functions, "generateSchedule");
             const { data } = await generateSchedule({ 
                 userInput,
@@ -138,9 +139,9 @@ export const useAiChat = (date: Date) => {
                 }
             });
             const { response } = await chat.sendMessage([userInput]);
-            // const parsedResponse = JSON.parse(response.text()) as IActivityGenAI[];
-            // const validatedSchedule = await validateOverlappingActivities(parsedResponse);
-            addMessage({ role: "model", content: response.text(), timestamp });
+            const parsedResponse = JSON.parse(response.text()) as IActivityGenAI[];
+            const validatedSchedule = await validateOverlappingActivities(parsedResponse);
+            addMessage({ role: "model", content: JSON.stringify(validatedSchedule), timestamp });
         } catch (error) {
             setError({
                 message: "Oops, something went wrong. Please try again.",

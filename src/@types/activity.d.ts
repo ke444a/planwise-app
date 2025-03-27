@@ -19,6 +19,7 @@ interface IActivity {
     isCompleted: boolean;
     subtasks?: ISubtask[];
 }
+type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
 interface IBacklogDraft {
     id?: string;

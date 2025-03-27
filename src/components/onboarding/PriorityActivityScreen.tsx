@@ -111,27 +111,11 @@ const PriorityActivityScreen: React.FC<PriorityActivityScreenProps> = ({ onNextP
                     />
 
                     <ActivityOption 
-                        title="Collaborative work"
-                        description="Time for teamwork and cooperation"
-                        icon={<Ionicons name="people-outline" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("collaborative_work")}
-                        onToggle={() => toggleActivity("collaborative_work")}
-                    />
-
-                    <ActivityOption 
                         title="Recreation"
                         description="Make time for rest and hobbies"
                         icon={<MaterialCommunityIcons name="meditation" size={28} style={tw`text-gray-950`} />}
                         selected={selectedActivities.includes("recreation")}
                         onToggle={() => toggleActivity("recreation")}
-                    />
-
-                    <ActivityOption 
-                        title="Miscellaneous"
-                        description="Other important activities"
-                        icon={<Feather name="more-horizontal" size={28} style={tw`text-gray-950`} />}
-                        selected={selectedActivities.includes("misc")}
-                        onToggle={() => toggleActivity("misc")}
                     />
                 </ScrollView>
             </View>

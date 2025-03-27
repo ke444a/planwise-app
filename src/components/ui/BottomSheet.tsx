@@ -25,6 +25,10 @@ interface Props {
     children: React.ReactNode;
 }
 
+/**
+ * Generic modal component that triggers a sheet appearing from the bottom of the screen.
+ * The sheet can be closed by dragging it down or by pressing the outside of the sheet.
+ */
 const BottomSheet = ({ visible, onClose, children }: Props) => {
     const translateY = useSharedValue(SCREEN_HEIGHT);
 

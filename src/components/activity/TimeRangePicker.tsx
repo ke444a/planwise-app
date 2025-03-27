@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import { View, Text, FlatList } from "react-native";
 import tw from "twrnc";
 import { addMinutesToTime } from "@/utils/addMinutesToTime";
@@ -9,6 +9,7 @@ interface TimeRangePickerProps {
     durationMinutes: number;
 }
 
+// Layout constants
 const ITEM_HEIGHT = 50;
 const VISIBLE_ITEMS = 5;
 const PICKER_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
@@ -28,25 +29,26 @@ const generateTimeSlots = () => {
     return slots;
 };
 
-const TIME_SLOTS = generateTimeSlots();
-
+/**
+ * Picker that allows the user to select a start time of activity.
+ * User scrolls through the list of time slots and selects the start time.
+ * The end time is calculated based on the duration passed as a prop.
+ */
 const TimeRangePicker = ({ 
     onTimeSelected, 
     initialTime,
     durationMinutes
 }: TimeRangePickerProps) => {
     const [selectedTime, setSelectedTime] = useState(initialTime);
+    const timeSlots = useMemo(() => generateTimeSlots(), []);
     const flatListRef = useRef<FlatList>(null);
-    const initialIndex = TIME_SLOTS.indexOf(initialTime);
-
-    // Calculate end time based on selected time and duration
+    const initialIndex = timeSlots.indexOf(initialTime);
     const endTime = addMinutesToTime(selectedTime, durationMinutes);
 
-    // Update selectedTime when initialTime changes
     useEffect(() => {
-        if (initialTime && TIME_SLOTS.includes(initialTime)) {
+        if (initialTime && timeSlots.includes(initialTime)) {
             setSelectedTime(initialTime);
-            const index = TIME_SLOTS.indexOf(initialTime);
+            const index = timeSlots.indexOf(initialTime);
             flatListRef.current?.scrollToOffset({
                 offset: index * ITEM_HEIGHT,
                 animated: true
@@ -54,7 +56,6 @@ const TimeRangePicker = ({
         }
     }, [initialTime]);
 
-    // Initial scroll setup - only if we have a valid initial time
     useEffect(() => {
         if (initialIndex !== -1) {
             setTimeout(() => {
@@ -64,7 +65,7 @@ const TimeRangePicker = ({
                 });
             }, 100);
         }
-    }, []); // Run only once on mount
+    }, []);
 
     const getItemLayout = (_: any, index: number) => ({
         length: ITEM_HEIGHT,
@@ -74,7 +75,7 @@ const TimeRangePicker = ({
 
     const renderItem = ({ item, index }: { item: string; index: number }) => {
         const isSelected = item === selectedTime;
-        const selectedIndex = TIME_SLOTS.indexOf(selectedTime);
+        const selectedIndex = timeSlots.indexOf(selectedTime);
         const relativePosition = Math.abs(index - selectedIndex);
         
         let opacity = 1;
@@ -106,7 +107,7 @@ const TimeRangePicker = ({
                 
                 <FlatList
                     ref={flatListRef}
-                    data={TIME_SLOTS}
+                    data={timeSlots}
                     renderItem={renderItem}
                     keyExtractor={(item) => item}
                     showsVerticalScrollIndicator={false}
@@ -118,8 +119,8 @@ const TimeRangePicker = ({
                     onMomentumScrollEnd={(event) => {
                         const offsetY = event.nativeEvent.contentOffset.y;
                         const index = Math.round((offsetY) / ITEM_HEIGHT);
-                        if (index >= 0 && index < TIME_SLOTS.length) {
-                            const time = TIME_SLOTS[index];
+                        if (index >= 0 && index < timeSlots.length) {
+                            const time = timeSlots[index];
                             setSelectedTime(time);
                             onTimeSelected?.({ start: time, end: addMinutesToTime(time, durationMinutes) });
                         }

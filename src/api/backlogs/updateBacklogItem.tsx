@@ -19,7 +19,6 @@ const updateBacklogItem = async (item: IBacklogItem, uid: string) => {
             staminaCost: item.staminaCost,
         }),
     };
-
     await updateDoc(backlogItemRef, updateData);
     return item;
 };
@@ -45,7 +44,6 @@ export const useUpdateBacklogItemMutation = () => {
                 }
                 return [item];
             });
-
             return { previousItems, queryKey };
         },
         onError: (_err, _, context) => {

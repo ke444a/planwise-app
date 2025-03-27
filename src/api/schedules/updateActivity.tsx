@@ -2,22 +2,13 @@ import { useAuth } from "@/context/AuthContext";
 import { getFirestore, doc, collection, query, getDocs, orderBy, setDoc, deleteDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { checkTimeOverlap } from "@/utils/timeOverlap";
+import { ScheduleOverlapError } from "./addActivityToSchedule";
 
 interface UpdateActivityParams {
     activity: IActivity;
     originalDate: Date;
     selectedDate: Date;
     originalActivity: IActivity;
-}
-
-export class ScheduleOverlapError extends Error {
-    overlappingActivity: IActivity;
-    
-    constructor(activity: IActivity) {
-        super(`Activity overlaps with "${activity.title}" (${activity.startTime}-${activity.endTime})`);
-        this.name = "ScheduleOverlapError";
-        this.overlappingActivity = activity;
-    }
 }
 
 const updateActivity = async (activity: IActivity, originalDate: Date, selectedDate: Date, uid: string, originalActivity: IActivity) => {
@@ -66,20 +57,6 @@ const updateActivity = async (activity: IActivity, originalDate: Date, selectedD
         subtasks: activity.subtasks || [],
         isCompleted: activity.isCompleted,
     });
-
-
-    // await updateDoc(activityDocRef, {
-    //     title: activity.title,
-    //     type: activity.type,
-    //     startTime: activity.startTime,
-    //     endTime: activity.endTime,
-    //     duration: activity.duration,
-    //     priority: activity.priority,
-    //     staminaCost: activity.staminaCost,
-    //     subtasks: activity.subtasks || [],
-    //     isCompleted: activity.isCompleted,
-    // });
-    //
     return activity;
 };
 

@@ -2,6 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getFirestore, doc, getDoc } from "@react-native-firebase/firestore";
 import { useQuery } from "@tanstack/react-query";
 
+
 const getActivityFromSchedule = async (activityId: string, date: Date, uid: string): Promise<IActivity | null> => {
     const db = getFirestore();
     const formattedDate = date.toISOString().split("T")[0];

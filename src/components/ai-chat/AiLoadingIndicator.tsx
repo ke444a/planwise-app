@@ -10,15 +10,13 @@ import Animated, {
 } from "react-native-reanimated";
 
 const AiLoadingIndicator = ({ message }: { message?: string }) => {
-    // New base sequence for faster animation (total: 1200ms)
     const baseSequence = withSequence(
-        withTiming(1, { duration: 300 }),   // fade in
-        withTiming(1, { duration: 300 }),   // stay visible
-        withTiming(0, { duration: 300 }),   // fade out
-        withTiming(0, { duration: 300 })    // stay hidden
+        withTiming(1, { duration: 300 }),
+        withTiming(1, { duration: 300 }),
+        withTiming(0, { duration: 300 }),
+        withTiming(0, { duration: 300 })
     );
 
-    // Dot 1 starts immediately
     const dot1Animation = useAnimatedStyle(() => ({
         opacity: withRepeat(
             withDelay(0, baseSequence),
@@ -27,7 +25,6 @@ const AiLoadingIndicator = ({ message }: { message?: string }) => {
         ),
     }));
 
-    // Dot 2 starts 300ms later
     const dot2Animation = useAnimatedStyle(() => ({
         opacity: withRepeat(
             withDelay(300, baseSequence),
@@ -36,7 +33,6 @@ const AiLoadingIndicator = ({ message }: { message?: string }) => {
         ),
     }));
 
-    // Dot 3 starts 600ms later
     const dot3Animation = useAnimatedStyle(() => ({
         opacity: withRepeat(
             withDelay(600, baseSequence),
@@ -45,7 +41,6 @@ const AiLoadingIndicator = ({ message }: { message?: string }) => {
         ),
     }));
 
-    // Optional: speed up the overall fading effect as well
     const fadingAnimation = useAnimatedStyle(() => ({
         opacity: withRepeat(
             withSequence(

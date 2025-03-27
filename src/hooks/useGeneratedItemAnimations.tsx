@@ -12,8 +12,6 @@ export const useGeneratedItemAnimations = (status: string) => {
     const [showOptions, setShowOptions] = useState(false);
     const animation = useSharedValue(0);
     const pressAnimation = useSharedValue(1);
-
-    // Add new shared value for status transitions
     const statusTransition = useSharedValue(status === "idle" ? 1 : 0);
 
     const handlePressIn = useCallback(() => {
@@ -40,7 +38,6 @@ export const useGeneratedItemAnimations = (status: string) => {
         }
     }, [animation, showOptions, status]);
 
-    // Update pressStyle to have more subtle opacity
     const pressStyle = useAnimatedStyle(() => {
         return {
             transform: [
@@ -50,7 +47,7 @@ export const useGeneratedItemAnimations = (status: string) => {
             opacity: interpolate(
                 statusTransition.value,
                 [0, 1],
-                [0.9, 1]  // Changed from [0.8, 1] to be more subtle
+                [0.9, 1]
             ),
         };
     }, [pressAnimation]);
@@ -73,25 +70,23 @@ export const useGeneratedItemAnimations = (status: string) => {
         };
     }, [animation]);
 
-    // Update contentStyle for more subtle transitions
     const contentStyle = useAnimatedStyle(() => {
         return {
             opacity: interpolate(
                 statusTransition.value,
                 [0, 1],
-                [0.85, 1]  // Changed from [0.6, 1] to be more subtle
+                [0.85, 1]
             ),
             transform: [{
                 scale: interpolate(
                     statusTransition.value,
                     [0, 1],
-                    [0.99, 1]  // Changed from [0.98, 1] to be more subtle
+                    [0.99, 1]
                 )
             }]
         };
     });
 
-    // Update status effect to handle transitions
     useEffect(() => {
         statusTransition.value = withTiming(
             status === "idle" ? 1 : 0,

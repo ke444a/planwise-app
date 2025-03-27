@@ -7,35 +7,13 @@ import { AuthProvider } from "@/context/AuthContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { LogBox } from "react-native";
-import { getFunctions, connectFunctionsEmulator } from "@react-native-firebase/functions";
 import { ThemeProvider } from "@/context/ThemeContext";
-
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-// import auth from "@react-native-firebase/auth";
-// import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-    // useDeviceContext(tw, {
-    //     observeDeviceColorSchemeChanges: false,
-    //     initialColorScheme: "light"
-    // });
-    // useAppColorScheme(tw);
-    // useEffect(() => {
-    //     const signOut = async () => {
-    //         await auth().signOut();
-    //         await AsyncStorage.clear();
-    //     };
-
-    //     signOut();
-    // }, []);
-    if (__DEV__) {
-        const functions = getFunctions();
-        connectFunctionsEmulator(functions, "localhost", 5001);
-    }
-
     useEffect(() => {
+        // Ignore this warning because iOS apps support nested scroll views
         const logMessage = "VirtualizedLists should never be nested inside plain ScrollViews with the same orientation";
         LogBox.ignoreLogs([logMessage]);
 

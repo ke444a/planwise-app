@@ -3,27 +3,21 @@ import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState, useEffect } from "react";
-import { useGetBacklogItemQuery } from "@/api/backlogs/getBacklogItem";
+import { useState } from "react";
 import { useUpdateBacklogItemMutation } from "@/api/backlogs/updateBacklogItem";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { BacklogItemActivityForm } from "@/components/backlog";
 import { BacklogItemDraftForm } from "@/components/backlog/BacklogItemDraftForm";
 
-type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 type DraftDetails = Omit<IBacklogDraft, "id" | "itemType" | "createdAt" | "updatedAt">;
 
 const EditBacklogItemScreen = () => {
-    const { id } = useLocalSearchParams();
-    const { data: item, isPending } = useGetBacklogItemQuery(id as string);
+    const { id, backlogItem: backlogItemParam } = useLocalSearchParams();
+    const item = JSON.parse(backlogItemParam as string) as IBacklogItem;
     const { mutate: updateBacklogItem } = useUpdateBacklogItemMutation();
-    const [draftDetails, setDraftDetails] = useState<DraftDetails | null>(null);
-    
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
-
-    useEffect(() => {
-        if (item && item.itemType === "activity") {
-            setActivityDetails({
+    const [activityDetails, setActivityDetails] = useState<Omit<IActivity, "id" | "isCompleted">>(() => {
+        if (item.itemType === "activity") {
+            return {
                 title: item.title || "",
                 type: item.type || "misc",
                 startTime: item.startTime || "12:00",
@@ -32,9 +26,35 @@ const EditBacklogItemScreen = () => {
                 priority: item.priority || "must_do",
                 staminaCost: item.staminaCost ?? 0,
                 subtasks: item.subtasks || [],
-            });
+            };
         }
-    }, [item]);
+        return {
+            title: "",
+            type: "misc",
+            startTime: "12:00",
+            endTime: "12:15",
+            duration: 15,
+            priority: "must_do",
+            staminaCost: 0,
+            subtasks: [],
+        };
+    });
+    const [draftDetails, setDraftDetails] = useState<DraftDetails>(() => {
+        if (item.itemType === "draft") {
+            return {
+                title: item.title || "",
+                duration: item.duration || 15,
+                subtasks: item.subtasks || [],
+                isCompleted: item.isCompleted || false,
+            };
+        }
+        return {
+            title: "",
+            duration: 15,
+            subtasks: [],
+            isCompleted: false,
+        };
+    });
 
     const handleClose = () => {
         router.back();
@@ -61,10 +81,6 @@ const EditBacklogItemScreen = () => {
         }
         router.back();
     };
-
-    if (isPending || !item || !activityDetails) {
-        return null;
-    }
 
     return (
         <ScreenWrapper>

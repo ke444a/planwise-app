@@ -10,6 +10,13 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { checkTimeOverlap } from "@/utils/timeOverlap";
 
+
+/*
+    This is a special error that is used to handle schedule overlap.
+    If activity overlaps with another activity, we're throwing this error.
+    Our code is prepared to handle this error and will show a notification to the user.
+*/
+
 export class ScheduleOverlapError extends Error {
     overlappingActivity: IActivity;
     
@@ -19,6 +26,7 @@ export class ScheduleOverlapError extends Error {
         this.overlappingActivity = activity;
     }
 }
+
 
 const addActivityToSchedule = async (activity: IActivity, date: Date, uid: string) => {
     const db = getFirestore();

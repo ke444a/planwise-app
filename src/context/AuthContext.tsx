@@ -1,5 +1,12 @@
 import { useUserStore } from "@/libs/userStore";
-import auth, { FirebaseAuthTypes } from "@react-native-firebase/auth";
+import { getApp } from "@react-native-firebase/app";
+import _auth, { 
+    FirebaseAuthTypes, 
+    signOut as _signOut, 
+    signInWithCredential, 
+    onAuthStateChanged as _onAuthStateChanged, 
+    getAuth
+} from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useContext, useEffect, useState, createContext, ReactNode, useCallback } from "react";
 
@@ -31,6 +38,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const app = getApp();
+    const auth = getAuth(app);
     const { setUser: setUserZustandStore } = useUserStore();
     const [authUser, setAuthUser] = useState<IAuthUser | null>(null);
     const [token, setToken] = useState("");
@@ -50,8 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
                 idToken = await user.getIdToken();
             } catch (_error) {
-                // Silently fail if the token is not available
-                // console.log("Error getting ID token", error);
             }
             setToken(idToken);
             setUserZustandStore({
@@ -69,12 +76,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, [setUserZustandStore]);
 
     useEffect(() => {
-        const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+        const subscriber = _onAuthStateChanged(auth, onAuthStateChanged);
         return subscriber;
-    }, [onAuthStateChanged]);
+    }, [onAuthStateChanged, auth]);
 
     const signOut = async () => {
-        return await auth().signOut();
+        return await _signOut(auth);
     };
 
     const signInWithGoogle = async () => {
@@ -83,8 +90,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!data?.idToken) {
             throw new Error("Google Sign-In failed - no identify token returned");
         }
-        const googleCredential = auth.GoogleAuthProvider.credential(data.idToken);
-        return await auth().signInWithCredential(googleCredential);
+        const googleCredential = _auth.GoogleAuthProvider.credential(data.idToken);
+        return await signInWithCredential(auth, googleCredential);
     };
 
     const value = {

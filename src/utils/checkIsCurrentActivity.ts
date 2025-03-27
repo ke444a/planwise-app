@@ -2,8 +2,6 @@ import { timeToMinutes } from "./timeToMinutes";
 
 export const checkIsCurrentActivity = (startTime: string, endTime: string, activityDate: Date): boolean => {
     const now = new Date();
-
-    // Check if the activity date is today
     const isToday = now.toDateString() === activityDate.toDateString();
     if (!isToday) return false;
 

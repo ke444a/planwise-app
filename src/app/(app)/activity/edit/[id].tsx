@@ -3,49 +3,41 @@ import { router, useLocalSearchParams } from "expo-router";
 import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState, useEffect } from "react";
-import { useGetActivityFromScheduleQuery } from "@/api/schedules/getActivityFromSchedule";
-import { useUpdateActivityMutation, ScheduleOverlapError } from "@/api/schedules/updateActivity";
+import { useState } from "react";
+import { useUpdateActivityMutation } from "@/api/schedules/updateActivity";
+import { ScheduleOverlapError } from "@/api/schedules/addActivityToSchedule";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
 import { ActivityForm } from "@/components/activity/ActivityForm";
 import { NotificationModal } from "@/components/ui/NotificationModal";
 import { useAppContext } from "@/context/AppContext"; 
 
-type ActivityDetails = Omit<IActivity, "isCompleted" | "id">;
 
 const EditActivityScreen = () => {
     const { setError } = useAppContext();
-    const { id, date, currentStamina, maxStamina } = useLocalSearchParams();
+    const { id, date, currentStamina, maxStamina, activityDetails: activityDetailsParam } = useLocalSearchParams();
     const currentStaminaNumber = Number(currentStamina);
     const maxStaminaNumber = Number(maxStamina);
     const [selectedDate, setSelectedDate] = useState(new Date(date as string));
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
+    const activity = JSON.parse(activityDetailsParam as string) as IActivity;
+    const [activityDetails, setActivityDetails] = useState<ActivityDetails>(() => {
+        const { id: _id, isCompleted: _isCompleted, ...details } = activity;
+        return {
+            ...details,
+            subtasks: activity.subtasks || []
+        };
+    });
     const [isStaminaModalVisible, setIsStaminaModalVisible] = useState(false);
     const [isOverlapModalVisible, setIsOverlapModalVisible] = useState(false);
     const [overlapActivity, setOverlapActivity] = useState<IActivity | null>(null);
 
-    const { data: activity, isPending } = useGetActivityFromScheduleQuery(
-        id as string,
-        new Date(date as string)
-    );
     const { mutate: updateActivity } = useUpdateActivityMutation();
-
-    useEffect(() => {
-        if (activity) {
-            const { id: _id, isCompleted: _isCompleted, ...details } = activity;
-            setActivityDetails({
-                ...details,
-                subtasks: activity.subtasks || []
-            });
-        }
-    }, [activity]);
 
     const handleClose = () => {
         router.back();
     };
 
     const handleUpdateActivity = () => {
-        if (!activityDetails?.title.trim() || !id || !activity) return;
+        if (!activityDetails?.title.trim() || !id) return;
 
         const updatedActivity: IActivity = {
             id: id as string,
@@ -92,10 +84,6 @@ const EditActivityScreen = () => {
             }
         });
     };
-
-    if (isPending || !activityDetails) {
-        return null;
-    }
 
     return (
         <ScreenWrapper>

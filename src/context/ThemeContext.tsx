@@ -13,7 +13,6 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export const ThemeProvider = (props: PropsWithChildren) => {
-    // Get initial theme from storage
     const getInitialTheme = async (): Promise<ColorScheme> => {
         try {
             const storedTheme = await AsyncStorage.getItem("colorScheme");
@@ -23,25 +22,21 @@ export const ThemeProvider = (props: PropsWithChildren) => {
         }
     };
 
-    // Initialize device context
     useDeviceContext(tw, {
         observeDeviceColorSchemeChanges: false,
-        initialColorScheme: "light" // Will be updated after AsyncStorage check
+        initialColorScheme: "light"
     });
   
     const [colorScheme, toggleColorScheme, setColorScheme] = useAppColorScheme(tw);
   
-    // Load theme from storage on mount
     useEffect(() => {
         getInitialTheme().then(theme => {
             setColorScheme(theme as RnColorScheme);
         });
     }, []);
   
-    // Update storage when theme changes
     useEffect(() => {
         if (colorScheme) {
-            // Make sure we're storing a string, not an object
             AsyncStorage.setItem("colorScheme", String(colorScheme));
         }
     }, [colorScheme]);

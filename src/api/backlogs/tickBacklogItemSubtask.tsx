@@ -14,23 +14,18 @@ const tickBacklogItemSubtask = async (
 ) => {
     const db = getFirestore();
     const itemDocRef = doc(db, "backlog", uid, "items", itemId);
-
-    // Get the current item data
     const itemDoc = await itemDocRef.get();
     if (!itemDoc.exists) {
         throw new Error("Backlog item not found");
     }
     const itemData = itemDoc.data();
 
-    // Update the subtask
     const updatedSubtasks = itemData?.subtasks.map((subtask: ISubtask) => {
         if (subtask.id === subtaskId) {
             return { ...subtask, isCompleted: isCompleted };
         }
         return subtask;
     });
-
-    // Update the item in Firestore
     await updateDoc(itemDocRef, {
         subtasks: updatedSubtasks
     });
@@ -77,16 +72,12 @@ export const useTickBacklogItemSubtaskMutation = () => {
                     return item;
                 });
             });
-
-            // Return a context object with the snapshotted value
             return { previousItems };
         },
         onError: (_error, _, context) => {
-            // If the mutation fails, roll back to the previous value
             queryClient.setQueryData<IBacklogItem[]>(["backlog", authUser.uid], context?.previousItems);
         },
         onSettled: (_data, _error) => {
-            // Always refetch after error or success
             queryClient.invalidateQueries({ queryKey: ["backlog", authUser.uid] });
         },
     });

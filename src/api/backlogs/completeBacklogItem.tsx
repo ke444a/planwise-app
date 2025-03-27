@@ -1,6 +1,8 @@
 import { doc, getFirestore, updateDoc } from "@react-native-firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
+
+
 const completeBacklogItem = async (itemId: string, uid: string, isCompleted: boolean) => {
     const db = getFirestore();
     const itemDocRef = doc(db, "backlog", uid, "items", itemId);

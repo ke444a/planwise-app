@@ -13,6 +13,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { LinearGradient } from "expo-linear-gradient";
 
+
 const FocusScreen = () => {
     const { activityId, activityDate } = useLocalSearchParams<{
         activityId: string;
