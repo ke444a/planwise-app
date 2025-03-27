@@ -29,7 +29,6 @@ export default {
             }
         },
         web: {
-            favicon: "./src/assets/favicon.png",
             bundler: "metro"
         },
         plugins: [

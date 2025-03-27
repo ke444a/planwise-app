@@ -175,8 +175,8 @@ const PreferencesScreen = () => {
         {
             icon: <MaterialIcons name="task" size={22} style={tw`text-gray-600`} />,
             label: "Priorities",
-            value: priorityActivities.length > 2 ? 
-                priorityActivities.slice(0, 2).join(", ") + "..." :
+            value: priorityActivities.length > 1 ? 
+                priorityActivities.slice(0, 1).join(", ") + "..." :
                 (priorityActivities.length > 0 ? priorityActivities.join(", ") : "..."),
             onPress: () => setPriorityPickerVisible(true)
         },
