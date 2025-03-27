@@ -4,7 +4,7 @@ import tw from "twrnc";
 import { TouchableOpacity } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useGetActivityFromScheduleQuery } from "@/api/schedules/getActivityFromSchedule";
 import { useUpdateActivityMutation } from "@/api/schedules/updateActivity";
 import ScreenWrapper from "@/components/ui/ScreenWrapper";
@@ -18,7 +18,16 @@ const EditActivityScreen = () => {
     const currentStaminaNumber = Number(currentStamina);
     const maxStaminaNumber = Number(maxStamina);
     const [selectedDate, setSelectedDate] = useState(new Date(date as string));
-    const [activityDetails, setActivityDetails] = useState<ActivityDetails | null>(null);
+    const [activityDetails, setActivityDetails] = useState<ActivityDetails>({
+        title: "",
+        type: "misc",
+        startTime: "12:00",
+        endTime: "12:15",
+        duration: 15,
+        priority: "must_do",
+        staminaCost: 0,
+        subtasks: [],
+    });
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const { data: activity, isLoading } = useGetActivityFromScheduleQuery(
@@ -27,12 +36,20 @@ const EditActivityScreen = () => {
     );
     const { mutate: updateActivity } = useUpdateActivityMutation();
 
+    useEffect(() => {
+        if (activity) {
+            const { id: _id, isCompleted: _isCompleted, ...details } = activity;
+            console.log("details", details);
+            setActivityDetails(details);
+        }
+    }, [activity]);
+
     const handleClose = () => {
         router.back();
     };
 
     const handleUpdateActivity = () => {
-        if (!activityDetails?.title.trim() || !id) return;
+        if (!activityDetails.title.trim() || !id) return;
 
         const updatedActivity: IActivity = {
             id: id as string,
@@ -52,7 +69,7 @@ const EditActivityScreen = () => {
         }
 
         updateActivity({ 
-            activity: updatedActivity, 
+            activity: updatedActivity,
             date: selectedDate, 
         });
         router.back();
@@ -72,7 +89,7 @@ const EditActivityScreen = () => {
             </View>
 
             <ActivityForm
-                initialData={activity}
+                activityDetails={activityDetails}
                 onActivityDetailsChange={setActivityDetails}
                 submitButtonLabel="Update"
                 submitButtonIcon={<Ionicons name="checkmark" size={24} style={tw`text-gray-950`} />}
