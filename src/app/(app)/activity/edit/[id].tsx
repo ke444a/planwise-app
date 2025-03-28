@@ -86,7 +86,7 @@ const EditActivityScreen = () => {
     };
 
     return (
-        <ScreenWrapper>
+        <ScreenWrapper testID="edit-activity-screen">
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                 <TouchableOpacity onPress={handleClose} style={tw`flex-row items-center gap-x-2`}>
                     <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-neutral-100`} />

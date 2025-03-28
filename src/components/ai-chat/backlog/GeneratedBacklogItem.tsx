@@ -11,13 +11,15 @@ interface GeneratedBacklogItemProps {
     status: "idle" | "added" | "removed";
     onAdd: () => void;
     onRemove: () => void;
+    testID?: string;
 }
 
 export const GeneratedBacklogItem = ({ 
     item, 
     status,
     onAdd,
-    onRemove 
+    onRemove,
+    testID
 }: GeneratedBacklogItemProps) => {
     const { 
         showOptions,
@@ -30,7 +32,7 @@ export const GeneratedBacklogItem = ({
     } = useGeneratedItemAnimations(status);
 
     return (
-        <View>
+        <View testID={testID}>
             <TouchableWithoutFeedback 
                 onPress={handleToggleOptions}
                 onPressIn={handlePressIn}

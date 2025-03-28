@@ -143,6 +143,7 @@ export const ActivityForm = ({
                     fullWidth
                     icon={submitButtonIcon}
                     disabled={!activityDetails.title.trim()}
+                    testID="create-activity-button"
                 />
             </View>
 

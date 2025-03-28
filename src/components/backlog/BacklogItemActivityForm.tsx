@@ -141,6 +141,7 @@ export const BacklogItemActivityForm = ({
 
             <View style={tw`px-4 mt-6 mb-12`}>
                 <ButtonWithIcon
+                    testID="backlog-item-activity-form-submit-button"
                     label={submitButtonLabel}
                     onPress={onSubmit}
                     iconPosition="left"

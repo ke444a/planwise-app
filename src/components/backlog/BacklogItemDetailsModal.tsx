@@ -133,6 +133,7 @@ const BacklogItemDetailsModal = ({
                     <TouchableOpacity 
                         style={tw`flex-row items-center justify-center py-3 bg-purple-200 rounded-xl`}
                         onPress={onAddToSchedule}
+                        testID="backlog-item-details-modal-add-to-schedule-button"
                     >
                         <MaterialCommunityIcons name="calendar-plus" size={20} style={tw`text-gray-950 mr-2`} />
                         <Text style={tw`text-gray-950 font-medium`}>Add to Schedule</Text>

@@ -71,7 +71,7 @@ const BacklogScreen = () => {
     return (
         <ScreenWrapper testID="backlog-screen">
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
-                <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`}>
+                <TouchableOpacity onPress={() => router.back()} style={tw`flex-row items-center gap-x-2`} testID="backlog-back-button">
                     <Ionicons name="chevron-back" size={24} style={tw`text-gray-600 dark:text-white`} />
                     <Text style={tw`text-2xl font-semibold text-gray-950 dark:text-white`}>My Backlog</Text>
                 </TouchableOpacity>
@@ -105,6 +105,7 @@ const BacklogScreen = () => {
                     styles.floatingButton
                 ]}
                 onPress={() => router.push("/backlog/ai-backlog")}
+                testID="ai-chat-backlog-button"
             >
                 <MaterialCommunityIcons name="robot" size={35} style={tw`text-white`} />
             </TouchableOpacity>

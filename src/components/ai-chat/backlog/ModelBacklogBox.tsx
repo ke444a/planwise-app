@@ -100,6 +100,7 @@ const ModelBacklogBox = ({ items }: Props) => {
                     <TouchableOpacity 
                         onPress={handleSaveAll}
                         style={tw`flex-row items-center`}
+                        testID="save-all-backlog-btn"
                     >
                         <Ionicons name="checkmark-done" size={20} style={tw`text-rose-500 mr-1`} />
                         <Text style={tw`text-rose-500 font-medium`}>Save All</Text>
@@ -113,6 +114,7 @@ const ModelBacklogBox = ({ items }: Props) => {
                         entering={FadeInDown.duration(400).delay(300 + (index * 150))}
                     >
                         <GeneratedBacklogItem 
+                            testID={`generated-backlog-item-${index}`}
                             item={item}
                             status={itemsStatus[index]}
                             onAdd={() => handleAdd(index)}
