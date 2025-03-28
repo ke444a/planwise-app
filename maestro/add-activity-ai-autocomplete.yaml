@@ -1,0 +1,17 @@
+appId: com.planwise.app
+---
+- assertVisible: { id: "home-screen" }
+- tapOn: { id: "create-activity-nav-button" }
+- assertVisible: { id: "add-activity-screen" }
+- tapOn: { id: "activity-name-input" }
+- inputText: "Coding"
+- tapOn: { id: "activity-type-picker" }
+- swipe:
+    from: { id: "time-range-picker" }
+    direction: UP
+    duration: 200
+- tapOn: { id: "ai-suggestion-button" }
+- waitForAnimationToEnd: { timeout: 6000 }
+- assertVisible: { text: ".*Focus Work.*" }
+- tapOn: { id: "create-activity-button" }
+- assertVisible: { text: ".*Coding.*" }

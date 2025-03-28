@@ -1,0 +1,29 @@
+appId: com.planwise.app
+---
+- runFlow:
+    when:
+      notVisible: '.*groceries.*'
+    file: add-backlog-item.yaml
+- tapOn: ".*groceries.*"
+- tapOn: { id: "backlog-item-details-modal-add-to-schedule-button" }
+- assertVisible: { id: "add-to-schedule-screen" }
+- tapOn: { id: "activity-type-picker" }
+- assertVisible: { text: ".*Food.*" }
+- tapOn: { text: ".*Food.*" }
+- swipe:
+    from: { id: "time-range-picker" }
+    direction: UP
+    duration: 400
+- swipe:
+    start: 95%, 80%
+    end: 95%, 50%
+- tapOn: { text: "30m" }
+- tapOn: { id: "priority-option-2" }
+- swipe:
+    start: 95%, 50%
+    end: 95%, 20%
+- tapOn: { id: "stamina-option-2" }
+- tapOn: { id: "backlog-item-activity-form-submit-button" }
+- tapOn: { id: "backlog-back-button" }
+- assertVisible: { id: "home-screen" }
+- assertVisible: { text: ".*groceries.*" }
