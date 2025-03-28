@@ -1,0 +1,14 @@
+appId: com.planwise.app
+---
+- runFlow:
+    when:
+      notVisible: '.*groceries.*'
+    file: add-backlog-item.yaml
+- tapOn: ".*groceries.*"
+- assertVisible: { id: "backlog-item-details-modal-complete-button" }
+- tapOn: { id: "backlog-item-details-modal-complete-button" }
+- assertVisible: { id: "backlog-item-checkmark" }
+- tapOn: ".*groceries.*"
+- assertVisible: { id: "backlog-item-details-modal-delete-button" }
+- tapOn: { id: "backlog-item-details-modal-delete-button" }
+- assertNotVisible: ".*groceries.*"

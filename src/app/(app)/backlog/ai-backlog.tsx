@@ -30,7 +30,7 @@ const AiBacklogScreen = () => {
         <ScreenWrapper>
             <View style={tw`flex-row justify-between items-center px-4 py-6`}>
                 <Text style={tw`text-2xl font-semibold mb-1 text-gray-950 dark:text-white`}>Fill My Backlog</Text>
-                <TouchableOpacity onPress={() => router.back()}>
+                <TouchableOpacity onPress={() => router.back()} testID="ai-backlog-close-button">
                     <AntDesign name="closecircle" size={24} style={tw`text-gray-500 dark:text-white`} />
                 </TouchableOpacity>
             </View>

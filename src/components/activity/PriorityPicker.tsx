@@ -13,7 +13,7 @@ export const PriorityPicker = ({
 }: PriorityPickerProps) => {
     return (
         <View style={tw`flex-col gap-2`}>
-            {PRIORITY_OPTIONS.map((option) => (
+            {PRIORITY_OPTIONS.map((option, index) => (
                 <TouchableOpacity
                     key={option.value}
                     style={[
@@ -21,6 +21,7 @@ export const PriorityPicker = ({
                         selectedPriority === option.value ? tw`bg-purple-100` : tw`bg-slate-200`,
                     ]}
                     onPress={() => onPriorityChange(option.value)}
+                    testID={`priority-option-${index}`}
                 >
                     <Text style={tw`text-lg mr-2`}>{option.emoji}</Text>
                     <Text style={tw`text-base font-medium text-gray-900`}>

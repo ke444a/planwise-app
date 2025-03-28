@@ -1,0 +1,21 @@
+appId: com.planwise.app
+---
+- runFlow:
+    when:
+      notVisible: { id: "activity-card-0" }
+    file: add-activity.yaml
+- tapOn: { id: "activity-card-0" }
+- assertVisible: { id: "activity-details-modal-edit-button" }
+- tapOn: { id: "activity-details-modal-edit-button" }
+- assertVisible: { id: "edit-activity-screen" }
+- tapOn: { id: "activity-name-input" }
+- eraseText: 100
+- inputText: "Go for a walk"
+- tapOn: { id: "activity-type-picker" }
+- swipe:
+    from: { id: "time-range-picker" }
+    direction: UP
+    duration: 200
+- tapOn: { id: "create-activity-button" }
+- assertVisible: { id: "home-screen" }
+- assertVisible: { text: ".*Go for a walk.*" }

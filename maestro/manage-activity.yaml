@@ -1,0 +1,13 @@
+appId: com.planwise.app
+---
+- runFlow:
+    when:
+      notVisible: ".*Read a book.*"
+    file: add-activity.yaml
+- tapOn: ".*Read a book.*"
+- assertVisible: { id: "activity-details-modal-complete-button" }
+- tapOn: { id: "activity-details-modal-complete-button" }
+- tapOn: ".*Read a book.*"
+- assertVisible: { id: "activity-details-modal-delete-button" }
+- tapOn: { id: "activity-details-modal-delete-button" }
+- assertNotVisible: { id: "activity-card-0" }

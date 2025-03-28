@@ -47,6 +47,7 @@ export const AiSuggestionButton = ({
             onPress={handleAiSuggest}
             disabled={isLoading}
             style={tw`${!title ? "opacity-50" : ""}`}
+            testID="ai-suggestion-button"
         >
             {isLoading ? (
                 <ActivityIndicator color="#C084FC" size="small" />

@@ -1,0 +1,15 @@
+appId: com.planwise.app
+---
+- assertVisible: { id: "home-screen" }
+- tapOn: { id: "backlog-button-nav" }
+- assertVisible: { id: "backlog-screen" }
+- tapOn: { id: "ai-chat-backlog-button" }
+- tapOn: { id: "ai-chat-input" }
+- inputText: "I need to follow up on my emails: send an email to John, send an email to Jane, send an email to Jim. I also need to go to the grocery shop today."
+- tapOn: { id: "ai-chat-send-button" }
+- assertVisible: { id: "user-chat-box" }
+- waitForAnimationToEnd: { timeout: 5000 }
+- tapOn: { id: "save-all-backlog-btn" }
+- tapOn: { id: "ai-backlog-close-button" }
+- assertVisible: { id: "backlog-screen" }
+- assertVisible: { text: ".*email.*" }

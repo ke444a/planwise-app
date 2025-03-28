@@ -186,10 +186,10 @@ const ScheduleButtonsPanel = ({ currentStamina, maxStamina, currentDate }: Sched
 
     return (
         <View style={tw`flex-row ml-4`}>
-            <TouchableOpacity style={tw`mr-4`} onPress={handleCreateActivityPress} testID="create-activity-button">
+            <TouchableOpacity style={tw`mr-4`} onPress={handleCreateActivityPress} testID="create-activity-nav-button">
                 <AntDesign name="pluscircle" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
-            <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress} testID="backlog-button">
+            <TouchableOpacity style={tw`mr-4`} onPress={handleBacklogPress} testID="backlog-button-nav">
                 <FontAwesome name="inbox" size={24} style={tw`text-gray-950`} />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleProfilePress}>
