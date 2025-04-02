@@ -21,10 +21,12 @@ By leveraging AI, Planwise prevents overload, prioritises tasks intelligently, a
   <tr>
     <td><img src="./readme/create-schedule.gif" width="300"/></td>
     <td><img src="./readme/view-schedule.gif" width="300"/></td>
-    <td><img src="./readme/add-activity-ai.gif" width="300"/></td>
   </tr>
   <tr>
+    <td><img src="./readme/add-activity-ai.gif" width="300"/></td>
     <td><img src="./readme/focus-activity.gif" width="300"/></td>
+  </tr>
+  <tr>
     <td><img src="./readme/add-to-schedule.gif" width="300"/></td>
     <td><img src="./readme/add-backlog-items-ai.gif" width="300"/></td>
   </tr>
@@ -37,11 +39,12 @@ By leveraging AI, Planwise prevents overload, prioritises tasks intelligently, a
 
 <table>
   <tr>
-    <td><img src="./readme/auth.png" width="300"/></td>
     <td><img src="./readme/onboarding.gif" width="300"/></td>
     <td><img src="./readme/profile-preferences.gif" width="300"/></td>
   </tr>
 </table>
+<img src="./readme/auth.png" width="300"/>
+
 
 ## Technologies
 - [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
@@ -55,5 +58,4 @@ By leveraging AI, Planwise prevents overload, prioritises tasks intelligently, a
 -   LinkedIn: [Danyl Kecha](https://www.linkedin.com/in/danylkecha/)
 -   Mail: danyl.kecha.uk@gmail.com
 -   GitHub: [ke444a](https://github.com/ke444a)
--   Twitter: [@ke444a](https://twitter.com/ke444a)
 -   Hashnode: [blog.danylkecha.com](https://blog.danylkecha.com)
