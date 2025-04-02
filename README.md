@@ -5,47 +5,50 @@ Planwise is an AI-powered scheduler app designed to help users plan their day ef
 By leveraging AI, Planwise prevents overload, prioritises tasks intelligently, and adapts schedules based on individual productivity patterns and workload capacity. Unlike traditional calendars that merely record events, Planwise functions as a proactive personal productivity assistant, helping users focus on what truly matters while avoiding burnout.
 
 ## Table of Contents
--   [Features](#features)
+-   [Key Features](#key-features)
+-   [Additional Features](#additional-features)
 -   [Technologies](#technologies)
 -   [Contact](#contact)
 
 ## Key Features
+- **Speak your plans to the AI — get a personalized schedule instantly**
+- **Add tasks manually, or let AI auto-fill the details for you**
+- **Stay in flow with a focused task timer**
+- **Create and manage a backlog of tasks (AI can help with that too)**
+- **Seamlessly move tasks between your backlog and schedule**
 
-#### Schedule Management
-1. Describe your plans to AI and let it generate a schedule for you.
-2. Add tasks to your schedule manually.
-AI can even auto-complete your task details to save you time!
-3. Focus on current task and get locked in with a timer
-
-#### Tasks Backlog
-1. Add tasks to your backlog
-AI again can auto-complete your task details to save you time!
-
-2. Move tasks between backlog and schedule
-Add task from backlog to the schedule if it's time to do it. Or instead, move task from the schedule to the backlog if you deprioritise it.
-3. Quickly fill your backlog with AI
+<table>
+  <tr>
+    <td><img src="./readme/create-schedule.gif" width="300"/></td>
+    <td><img src="./readme/view-schedule.gif" width="300"/></td>
+    <td><img src="./readme/add-activity-ai.gif" width="300"/></td>
+  </tr>
+  <tr>
+    <td><img src="./readme/focus-activity.gif" width="300"/></td>
+    <td><img src="./readme/add-to-schedule.gif" width="300"/></td>
+    <td><img src="./readme/add-backlog-items-ai.gif" width="300"/></td>
+  </tr>
+</table>
 
 ## Additional Features
+- **Fast, passwordless login via Google**
+- **Effortless onboarding — tell the app your preferences so AI can personalize your experience**
+- **View and update your profile and scheduling preferences anytime**
 
-#### Authentication with Google Sign-In
-
-#### Onboarding
-Tell the app about your prefences to allow AI to tailor your schedule to your needs.
-
-#### Profile
-View your profile information.
-Change your preferences.
-Change the color theme.
-
-#### E2E Testing with Maestro
-
+<table>
+  <tr>
+    <td><img src="./readme/auth.png" width="300"/></td>
+    <td><img src="./readme/onboarding.gif" width="300"/></td>
+    <td><img src="./readme/profile-preferences.gif" width="300"/></td>
+  </tr>
+</table>
 
 ## Technologies
-- React Native
-- Expo
-- Firebase (Authentication, Firestore, Cloud Functions)
-- TailwindCSS (TWRNC)
-- Maestro (E2E Testing)
+- [![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactnative.dev/)
+- [![Expo](https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
+- [![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)](https://firebase.google.com/)
+- [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+- [![Maestro](https://img.shields.io/badge/Maestro-20232A?style=for-the-badge&logo=maestro&logoColor=61DAFB)](https://www.maestro.dev/)
 
 ## Contact
 
